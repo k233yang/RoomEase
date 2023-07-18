@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:roomease/ChatScreen.dart';
+import 'package:roomease/colors/ColorConstants.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -64,7 +65,7 @@ class _HomeState extends State {
           ),
         ],
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Color(0xFFCDB9F6),
+        backgroundColor: ColorConstants.lightPurple,
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
       ),
@@ -80,7 +81,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Home'),
-          backgroundColor: Color(0xFFCDB9F6),
+          backgroundColor: ColorConstants.lightPurple,
         ),
         body: Column(
           children: [HomeCards(updateIndex)],
