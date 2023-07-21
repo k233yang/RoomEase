@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentUser.dart';
+import 'package:roomease/DatabaseManager.dart';
+import 'Message.dart';
+import 'User.dart';
 import 'colors/ColorConstants.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 
@@ -47,7 +51,9 @@ class _ChatScreen extends State<ChatScreen> {
         focusNode: textFieldFocusNode,
         controller: _controller,
         onSubmitted: (String value) async {
-          messageList.add(Message(value, true, DateTime.now()));
+          DatabaseManager.addMessage("messageRoomId",
+              Message(value, CurrentUser.user, DateTime.now()));
+          messageList.add(Message(value, CurrentUser.user, DateTime.now()));
           _controller.clear();
           textFieldFocusNode.requestFocus();
           setState(() {});
@@ -73,7 +79,7 @@ class _ChatScreen extends State<ChatScreen> {
 
   Widget chatMessage(Message message) {
     MainAxisAlignment alignment;
-    if (message.isSender) {
+    if (message.sender.userId == CurrentUser.user.userId) {
       alignment = MainAxisAlignment.end;
     } else {
       alignment = MainAxisAlignment.start;
@@ -82,7 +88,7 @@ class _ChatScreen extends State<ChatScreen> {
       mainAxisAlignment: alignment,
       children: [
         BubbleSpecialThree(
-          isSender: message.isSender,
+          isSender: message.sender.userId == CurrentUser.user.userId,
           text: message.text,
           color: ColorConstants.lightPurple,
           textStyle: TextStyle(color: Colors.white, fontSize: 16),
@@ -90,12 +96,4 @@ class _ChatScreen extends State<ChatScreen> {
       ],
     );
   }
-}
-
-class Message {
-  String text;
-  bool isSender;
-  DateTime timestamp;
-
-  Message(this.text, this.isSender, this.timestamp);
 }

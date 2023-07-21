@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/LoginScreen.dart';
 import 'package:roomease/colors/ColorConstants.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 

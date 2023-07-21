@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentUser.dart';
+import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/HomeScreen.dart';
+import 'package:roomease/MessageRoom.dart';
+
+import 'User.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -64,7 +69,17 @@ class _LoginState extends State<Login> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // Navigate the user to the Home page
+                        CurrentUser.setCurrentUser(User(
+                          "kenny",
+                          "userid1", //TODO: generate userid
+                        ));
+                        DatabaseManager.addUser(
+                            CurrentUser.user); //TODO: check if exists
+                        DatabaseManager.addMessageRoom(MessageRoom(
+                            "messageRoomId", [], <User>[
+                          CurrentUser.user,
+                          User("chatgpt", "useridchatgpt")
+                        ]));
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => Home()),

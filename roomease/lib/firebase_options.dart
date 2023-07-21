@@ -44,40 +44,42 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAvtEw_uqEOqGl2SQQCGMLmdR2wBvnvdA8',
-    appId: '1:549754704175:web:73966b9bc408c89773d1da',
-    messagingSenderId: '549754704175',
-    projectId: 'roomease-74d55',
-    authDomain: 'roomease-74d55.firebaseapp.com',
-    storageBucket: 'roomease-74d55.appspot.com',
-    measurementId: 'G-2W7SYHQPK8',
-  );
+      apiKey: 'AIzaSyAvtEw_uqEOqGl2SQQCGMLmdR2wBvnvdA8',
+      appId: '1:549754704175:web:73966b9bc408c89773d1da',
+      messagingSenderId: '549754704175',
+      projectId: 'roomease-74d55',
+      authDomain: 'roomease-74d55.firebaseapp.com',
+      storageBucket: 'roomease-74d55.appspot.com',
+      measurementId: 'G-2W7SYHQPK8',
+      databaseURL: 'https://roomease-74d55-default-rtdb.firebaseio.com');
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyApVs_6DF19yTxWYI4LOJrcL7SoaRX3qts',
-    appId: '1:549754704175:android:f2d02cce66be595373d1da',
-    messagingSenderId: '549754704175',
-    projectId: 'roomease-74d55',
-    storageBucket: 'roomease-74d55.appspot.com',
-  );
+      apiKey: 'AIzaSyApVs_6DF19yTxWYI4LOJrcL7SoaRX3qts',
+      appId: '1:549754704175:android:f2d02cce66be595373d1da',
+      messagingSenderId: '549754704175',
+      projectId: 'roomease-74d55',
+      storageBucket: 'roomease-74d55.appspot.com',
+      databaseURL: 'https://roomease-74d55-default-rtdb.firebaseio.com');
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCqBGxL0ASWeKQiKlBXK_9OwBnk9oNiYlw',
-    appId: '1:549754704175:ios:b2f1f8ed569c710f73d1da',
-    messagingSenderId: '549754704175',
-    projectId: 'roomease-74d55',
-    storageBucket: 'roomease-74d55.appspot.com',
-    iosClientId: '549754704175-8h1auhrapdq4lbfmmaf84mnhqv50834o.apps.googleusercontent.com',
-    iosBundleId: 'com.example.roomease',
-  );
+      apiKey: 'AIzaSyCqBGxL0ASWeKQiKlBXK_9OwBnk9oNiYlw',
+      appId: '1:549754704175:ios:b2f1f8ed569c710f73d1da',
+      messagingSenderId: '549754704175',
+      projectId: 'roomease-74d55',
+      storageBucket: 'roomease-74d55.appspot.com',
+      iosClientId:
+          '549754704175-8h1auhrapdq4lbfmmaf84mnhqv50834o.apps.googleusercontent.com',
+      iosBundleId: 'com.example.roomease',
+      databaseURL: 'https://roomease-74d55-default-rtdb.firebaseio.com');
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCqBGxL0ASWeKQiKlBXK_9OwBnk9oNiYlw',
-    appId: '1:549754704175:ios:2bda3b7da08f4d3273d1da',
-    messagingSenderId: '549754704175',
-    projectId: 'roomease-74d55',
-    storageBucket: 'roomease-74d55.appspot.com',
-    iosClientId: '549754704175-fu6ni70qfp2m93fd6opodn75a044bo11.apps.googleusercontent.com',
-    iosBundleId: 'com.example.roomease.RunnerTests',
-  );
+      apiKey: 'AIzaSyCqBGxL0ASWeKQiKlBXK_9OwBnk9oNiYlw',
+      appId: '1:549754704175:ios:2bda3b7da08f4d3273d1da',
+      messagingSenderId: '549754704175',
+      projectId: 'roomease-74d55',
+      storageBucket: 'roomease-74d55.appspot.com',
+      iosClientId:
+          '549754704175-fu6ni70qfp2m93fd6opodn75a044bo11.apps.googleusercontent.com',
+      iosBundleId: 'com.example.roomease.RunnerTests',
+      databaseURL: 'https://roomease-74d55-default-rtdb.firebaseio.com');
 }
