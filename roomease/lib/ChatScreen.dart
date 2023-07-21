@@ -53,6 +53,8 @@ class _ChatScreen extends State<ChatScreen> {
         onSubmitted: (String value) async {
           DatabaseManager.addMessage("messageRoomId",
               Message(value, CurrentUser.user, DateTime.now()));
+          //TODO: instead of local messagelist, pull list from DB and extract name to figure out
+          //which side to display message on
           messageList.add(Message(value, CurrentUser.user, DateTime.now()));
           _controller.clear();
           textFieldFocusNode.requestFocus();
