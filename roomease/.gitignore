@@ -9,8 +9,6 @@
 .history
 .svn/
 migrate_working_dir/
-ios/Runner.xcodeproj/project.pbxproj
-ios/Runner/Base.lproj/Main.storyboard
 pubspec.lock
 windows/flutter/generated_plugin_registrant.cc
 windows/flutter/generated_plugins.cmake
