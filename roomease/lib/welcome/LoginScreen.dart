@@ -4,7 +4,7 @@ import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/MessageRoom.dart';
 
-import 'User.dart';
+import '../User.dart';
 
 class Login extends StatefulWidget {
   @override
