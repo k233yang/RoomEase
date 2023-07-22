@@ -12,14 +12,14 @@ migrate_working_dir/
 pubspec.lock
 windows/flutter/generated_plugin_registrant.cc
 windows/flutter/generated_plugins.cmake
-ios/Flutter/Debug.xcconfig
-ios/Flutter/Release.xcconfig
-ios/Runner.xcodeproj/project.pbxproj
-ios/Runner/Base.lproj/Main.storyboard
-macos/Flutter/Flutter-Debug.xcconfig
-macos/Flutter/Flutter-Release.xcconfig
-macos/Flutter/GeneratedPluginRegistrant.swift
-macos/Runner.xcodeproj/project.pbxproj
+/ios/Flutter/Debug.xcconfig
+/ios/Flutter/Release.xcconfig
+/ios/Runner.xcodeproj/project.pbxproj
+/ios/Runner/Base.lproj/Main.storyboard
+/macos/Flutter/Flutter-Debug.xcconfig
+/macos/Flutter/Flutter-Release.xcconfig
+/macos/Flutter/GeneratedPluginRegistrant.swift
+/macos/Runner.xcodeproj/project.pbxproj
 
 # IntelliJ related
 *.iml
