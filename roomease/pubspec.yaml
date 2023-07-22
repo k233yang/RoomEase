@@ -1,12 +1,12 @@
 name: roomease
 description: A new Flutter project.
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 0.0.1+1
 
 environment:
-  sdk: '>=2.19.4 <4.0.0'
+  sdk: ">=2.19.4 <4.0.0"
 
 dependencies:
   flutter:
@@ -16,6 +16,7 @@ dependencies:
   chat_bubbles: ^1.4.1
   firebase_database: ^10.2.4
   firebase_core: ^2.15.0
+  http: ^0.13.3
 
 dev_dependencies:
   flutter_test:
