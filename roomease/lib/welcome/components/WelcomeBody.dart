@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 import 'package:roomease/welcome/LoginScreen.dart';
+import 'package:roomease/welcome/RegisterScreen.dart';
 
 class WelcomeBody extends StatelessWidget {
   @override
@@ -22,7 +23,10 @@ class WelcomeBody extends StatelessWidget {
                 }),
             WelcomeScreenButton(
                 buttonText: "Register",
-                onButtonPress: () {/*TODO: make register screen */})
+                onButtonPress: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Register()));
+                })
           ],
         ));
   }

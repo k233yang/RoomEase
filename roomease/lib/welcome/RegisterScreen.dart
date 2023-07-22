@@ -6,17 +6,18 @@ import 'package:roomease/MessageRoom.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../User.dart' as RUser;
 
-class Login extends StatefulWidget {
+class Register extends StatefulWidget {
   @override
   State createState() {
-    return _LoginState();
+    return _RegisterState();
   }
 }
 
-class _LoginState extends State<Login> {
+class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
 
   @override
@@ -65,39 +66,66 @@ class _LoginState extends State<Login> {
               ),
               Padding(
                 padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Confirm password"),
+                  validator: (value) {
+                    if (value == null ||
+                        value.isEmpty ||
+                        value.compareTo(passwordController.text) != 0) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
                 child: Center(
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         try {
-                          final user = await _auth.signInWithEmailAndPassword(
-                              email: emailController.text,
-                              password: passwordController.text);
-                          if (user != null) {
+                          final newUser =
+                              await _auth.createUserWithEmailAndPassword(
+                                  email: emailController.text,
+                                  password: passwordController.text);
+                          if (newUser != null) {
                             CurrentUser.setCurrentUser(RUser.User(
                               "kenny",
-                              "userid1", //TODO: get user id
+                              newUser.user!.uid,
                             ));
+                            DatabaseManager.addUser(
+                                CurrentUser.user); //TODO: check if exists
+                            DatabaseManager.addMessageRoom(MessageRoom(
+                                "messageRoomId", [], <RUser.User>[
+                              CurrentUser.user,
+                              RUser.User("chatgpt", "useridchatgpt")
+                            ]));
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => Home()),
                             );
                           }
                         } on FirebaseAuthException catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('Email or password is incorrect')),
-                          );
+                          Widget errorText = Text('Something went wrong');
+                          if (e.code == 'email-already-in-use') {
+                            errorText = Text(
+                                'The account already exists for that email.');
+                          } else if (e.code == 'weak-password') {
+                            errorText =
+                                Text('The password provided is too weak.');
+                          }
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(content: errorText));
                         } catch (e) {
                           print(e);
                         }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Email or password is incorrect')),
-                        );
                       }
                     },
                     child: const Text('Submit'),

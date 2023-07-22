@@ -16,6 +16,8 @@ dependencies:
   chat_bubbles: ^1.4.1
   firebase_database: ^10.2.4
   firebase_core: ^2.15.0
+  firebase_auth: ^4.7.1
+  firebase_analytics: ^10.4.4
 
 dev_dependencies:
   flutter_test:
