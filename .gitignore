@@ -2,4 +2,5 @@
 .vscode/
 .DS_Store
 roomease/ios/Podfile.lock
+roomease/pubspec.lock
 flutter/
