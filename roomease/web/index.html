@@ -40,6 +40,22 @@
   <script src="flutter.js" defer></script>
 </head>
 <body>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: 'AIzaSyAvtEw_uqEOqGl2SQQCGMLmdR2wBvnvdA8',
+      appId: '1:549754704175:web:73966b9bc408c89773d1da',
+      messagingSenderId: '549754704175',
+      projectId: 'roomease-74d55',
+      authDomain: 'roomease-74d55.firebaseapp.com',
+      databaseURL: 'https://roomease-74d55-default-rtdb.firebaseio.com',
+      storageBucket: 'roomease-74d55.appspot.com',
+      measurementId: 'G-2W7SYHQPK8',
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
   <script>
     window.addEventListener('load', function(ev) {
       // Download main.dart.js

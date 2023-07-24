@@ -17,7 +17,6 @@ dependencies:
   firebase_database: ^10.2.4
   firebase_core: ^2.15.0
   firebase_auth: ^4.7.1
-  firebase_analytics: ^10.4.4
   http: ^0.13.3
 
 dev_dependencies:
