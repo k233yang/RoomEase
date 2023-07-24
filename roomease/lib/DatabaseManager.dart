@@ -29,20 +29,28 @@ class DatabaseManager {
   static void addMessage(String messageRoomId, Message message) async {
     DatabaseReference messagesRef =
         _databaseInstance.ref("messageRooms/$messageRoomId/messages");
-    String messageToAdd = "${message.sender.name}: ${message.text}";
 
-    TransactionResult result =
-        await messagesRef.runTransaction((Object? messages) {
-      if (messages == null) {
-        // No messages yet
-        return Transaction.success(<String>[messageToAdd]);
-      }
-
-      List<String> _messages = List<String>.from(messages as List);
-      _messages.add(messageToAdd);
-      // Return the new data.
-      return Transaction.success(_messages);
+    final newKey = messagesRef.push().key;
+    DatabaseReference messageRef =
+        _databaseInstance.ref("messageRooms/$messageRoomId/messages/$newKey");
+    messageRef.set({
+      'senderName': message.sender.name,
+      'senderId': message.sender.userId,
+      'timestamp': message.timestamp.toString(),
+      'text': message.text
     });
+    // TransactionResult result =
+    //     await messagesRef.runTransaction((Object? messages) {
+    //   if (messages == null) {
+    //     // No messages yet
+    //     return Transaction.success(<String>[messageToAdd]);
+    //   }
+
+    //   List<String> _messages = List<String>.from(messages as List);
+    //   _messages.add(messageToAdd);
+    //   // Return the new data.
+    //   return Transaction.success(_messages);
+    // });
   }
 
   static StreamBuilder messagesStreamBuilder(String messageRoomId) {
@@ -56,14 +64,39 @@ class DatabaseManager {
             var snapshotValue =
                 (snapshot.data! as DatabaseEvent).snapshot.value;
             if (snapshotValue == null) {
-              print("snapshot null");
               return buildListMessage(<Message>[]);
             }
-            List<dynamic> messages = snapshotValue as List<dynamic>;
-            for (String m in messages) {
-              //TODO: change to retrieve a message object
-              messageList.add(Message(m, CurrentUser.user, DateTime.now()));
+            Map<dynamic, dynamic> messages =
+                snapshotValue as Map<dynamic, dynamic>;
+            for (MapEntry<dynamic, dynamic> e in messages.entries) {
+              Map<dynamic, dynamic> messageJson = e.value;
+              String? text = "";
+              String? senderName = "";
+              String? senderId = "";
+              String? timestamp = "";
+              if (messageJson['text'] != null) {
+                text = messageJson['text'];
+              }
+              if (messageJson['senderName'] != null) {
+                senderName = messageJson['senderName'];
+              }
+              if (messageJson['senderId'] != null) {
+                senderId = messageJson['senderId'];
+              }
+              if (messageJson['timestamp'] != null) {
+                timestamp = messageJson['timestamp'];
+              }
+
+              messageList.add(Message(text!, User(senderName!, senderId!),
+                  DateTime.parse(timestamp!)));
             }
+
+            messageList.sort((a, b) {
+              return a.timestamp
+                  .toString()
+                  .toLowerCase()
+                  .compareTo(b.timestamp.toString().toLowerCase());
+            });
             return buildListMessage(messageList);
           } else {
             return buildListMessage(<Message>[]);
