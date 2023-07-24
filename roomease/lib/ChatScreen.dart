@@ -41,7 +41,7 @@ class _ChatScreen extends State<ChatScreen> {
         body: Container(
             color: ColorConstants.white,
             child: Column(children: [
-              buildListMessage(messageList),
+              DatabaseManager.messagesStreamBuilder("messageRoomId"),
               Center(child: chatTextField()),
             ])));
   }
@@ -51,6 +51,7 @@ class _ChatScreen extends State<ChatScreen> {
         focusNode: textFieldFocusNode,
         controller: _controller,
         onSubmitted: (String value) async {
+          //TODO: add a message object with message Id
           DatabaseManager.addMessage("messageRoomId",
               Message(value, CurrentUser.user, DateTime.now()));
           //TODO: instead of local messagelist, pull list from DB and extract name to figure out
@@ -70,32 +71,32 @@ class _ChatScreen extends State<ChatScreen> {
             hintText: 'What would you like to ask Roomeo today?'),
         cursorColor: ColorConstants.lightPurple);
   }
+}
 
-  Widget buildListMessage(List<Message> messages) {
-    return Flexible(
-        child: ListView.builder(
-      itemCount: messages.length,
-      itemBuilder: (context, index) => chatMessage(messages[index]),
-    ));
-  }
+Widget buildListMessage(List<Message> messages) {
+  return Flexible(
+      child: ListView.builder(
+    itemCount: messages.length,
+    itemBuilder: (context, index) => chatMessage(messages[index]),
+  ));
+}
 
-  Widget chatMessage(Message message) {
-    MainAxisAlignment alignment;
-    if (message.sender.userId == CurrentUser.user.userId) {
-      alignment = MainAxisAlignment.end;
-    } else {
-      alignment = MainAxisAlignment.start;
-    }
-    return Row(
-      mainAxisAlignment: alignment,
-      children: [
-        BubbleSpecialThree(
-          isSender: message.sender.userId == CurrentUser.user.userId,
-          text: message.text,
-          color: ColorConstants.lightPurple,
-          textStyle: TextStyle(color: Colors.white, fontSize: 16),
-        )
-      ],
-    );
+Widget chatMessage(Message message) {
+  MainAxisAlignment alignment;
+  if (message.sender.userId == CurrentUser.user.userId) {
+    alignment = MainAxisAlignment.end;
+  } else {
+    alignment = MainAxisAlignment.start;
   }
+  return Row(
+    mainAxisAlignment: alignment,
+    children: [
+      BubbleSpecialThree(
+        isSender: message.sender.userId == CurrentUser.user.userId,
+        text: message.text,
+        color: ColorConstants.lightPurple,
+        textStyle: TextStyle(color: Colors.white, fontSize: 16),
+      )
+    ],
+  );
 }

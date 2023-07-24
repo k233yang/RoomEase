@@ -112,12 +112,16 @@ class _RegisterState extends State<Register> {
                                   email: emailController.text,
                                   password: passwordController.text);
                           if (newUser != null) {
-                            CurrentUser.setCurrentUser(RUser.User(
-                              nameController.text,
+                            CurrentUser.setCurrentUserId(
                               newUser.user!.uid,
-                            ));
+                            );
+                            CurrentUser.setCurrentUserName(
+                              nameController.text,
+                            );
                             DatabaseManager.addUser(
                                 CurrentUser.user); //TODO: check if exists
+                            DatabaseManager.getUserName(newUser.user!.uid);
+                            //TODO: add multiple chat rooms
                             DatabaseManager.addMessageRoom(MessageRoom(
                                 "messageRoomId", [], <RUser.User>[
                               CurrentUser.user,

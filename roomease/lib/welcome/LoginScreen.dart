@@ -75,10 +75,10 @@ class _LoginState extends State<Login> {
                               email: emailController.text,
                               password: passwordController.text);
                           if (user != null) {
-                            CurrentUser.setCurrentUser(RUser.User(
-                              DatabaseManager.getUserName(user.user!.uid),
+                            DatabaseManager.getUserName(user.user!.uid);
+                            CurrentUser.setCurrentUserId(
                               user.user!.uid,
-                            ));
+                            );
                             Navigator.pushNamedAndRemoveUntil(
                                 context, "/home", (_) => false);
                           }

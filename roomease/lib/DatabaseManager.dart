@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/widgets.dart';
+import 'package:roomease/CurrentUser.dart';
+import 'ChatScreen.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
 import 'User.dart';
@@ -43,14 +45,39 @@ class DatabaseManager {
     });
   }
 
-  static String getUserName(String userId) {
+  static StreamBuilder messagesStreamBuilder(String messageRoomId) {
+    DatabaseReference messagesRef =
+        _databaseInstance.ref("messageRooms/$messageRoomId/messages");
+    return StreamBuilder(
+        stream: messagesRef.onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<Message> messageList = [];
+            var snapshotValue =
+                (snapshot.data! as DatabaseEvent).snapshot.value;
+            if (snapshotValue == null) {
+              print("snapshot null");
+              return buildListMessage(<Message>[]);
+            }
+            List<dynamic> messages = snapshotValue as List<dynamic>;
+            for (String m in messages) {
+              //TODO: change to retrieve a message object
+              messageList.add(Message(m, CurrentUser.user, DateTime.now()));
+            }
+            return buildListMessage(messageList);
+          } else {
+            return buildListMessage(<Message>[]);
+          }
+        });
+  }
+
+  static void getUserName(String userId) {
     DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
-    String name = '';
-    usersRef.onValue.listen((DatabaseEvent event) {
-      final data = event.snapshot.value;
-      name = data as String;
+    CurrentUser.userNameSubscription.cancel();
+    CurrentUser.userNameSubscription =
+        usersRef.onValue.listen((DatabaseEvent event) {
+      CurrentUser.setCurrentUserName(event.snapshot.value as String);
     });
-    return name;
   }
 
   static StreamBuilder userNameStreamBuilder(String userId) {
