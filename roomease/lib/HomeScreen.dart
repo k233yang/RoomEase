@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:roomease/ChatScreen.dart';
+import 'package:roomease/CurrentUser.dart';
+import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 
 class Home extends StatefulWidget {
@@ -83,9 +85,7 @@ class HomeScreen extends StatelessWidget {
           title: const Text('Home'),
           backgroundColor: ColorConstants.lightPurple,
         ),
-        body: Column(
-          children: [HomeCards(updateIndex)],
-        ));
+        body: HomeCards(updateIndex));
   }
 }
 
@@ -95,8 +95,15 @@ class HomeCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-        child: Padding(
-            padding: EdgeInsets.only(top: 20), child: ChatCard(updateIndex)));
+        child: Column(
+      children: [
+        Padding(
+            padding: EdgeInsets.only(top: 20),
+            child:
+                DatabaseManager.userNameStreamBuilder(CurrentUser.user.userId)),
+        Padding(padding: EdgeInsets.only(top: 20), child: ChatCard(updateIndex))
+      ],
+    ));
   }
 }
 

@@ -5,6 +5,7 @@ import 'package:roomease/colors/ColorConstants.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:roomease/welcome/WelcomeScreen.dart';
 import 'firebase_options.dart';
+import 'welcome/RegisterScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +29,13 @@ class MyApp extends StatelessWidget {
         colorScheme:
             ColorScheme.fromSeed(seedColor: ColorConstants.lightPurple),
       ),
-      home: WelcomeScreen(),
+      initialRoute: '/welcome',
+      routes: {
+        '/welcome': (_) => WelcomeScreen(),
+        '/login': (_) => Login(),
+        '/register': (_) => Register(),
+        '/home': (_) => Home(),
+      },
     );
   }
 }

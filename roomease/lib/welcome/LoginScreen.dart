@@ -76,13 +76,11 @@ class _LoginState extends State<Login> {
                               password: passwordController.text);
                           if (user != null) {
                             CurrentUser.setCurrentUser(RUser.User(
-                              "kenny",
-                              "userid1", //TODO: get user id
+                              DatabaseManager.getUserName(user.user!.uid),
+                              user.user!.uid,
                             ));
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Home()),
-                            );
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, "/home", (_) => false);
                           }
                         } on FirebaseAuthException catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(

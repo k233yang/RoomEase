@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/widgets.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
 import 'User.dart';
@@ -38,5 +41,29 @@ class DatabaseManager {
       // Return the new data.
       return Transaction.success(_messages);
     });
+  }
+
+  static String getUserName(String userId) {
+    DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
+    String name = '';
+    usersRef.onValue.listen((DatabaseEvent event) {
+      final data = event.snapshot.value;
+      name = data as String;
+    });
+    return name;
+  }
+
+  static StreamBuilder userNameStreamBuilder(String userId) {
+    DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
+    return StreamBuilder(
+        stream: usersRef.onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Text(
+                'Hello ${(snapshot.data! as DatabaseEvent).snapshot.value as String}!');
+          } else {
+            return Text("");
+          }
+        });
   }
 }

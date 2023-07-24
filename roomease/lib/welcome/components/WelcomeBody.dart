@@ -18,14 +18,12 @@ class WelcomeBody extends StatelessWidget {
             WelcomeScreenButton(
                 buttonText: "Login",
                 onButtonPress: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Login()));
+                  Navigator.pushNamed(context, "/login");
                 }),
             WelcomeScreenButton(
                 buttonText: "Register",
                 onButtonPress: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Register()));
+                  Navigator.pushNamed(context, "/register");
                 })
           ],
         ));

@@ -15,6 +15,7 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
@@ -33,6 +34,21 @@ class _RegisterState extends State<Register> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(), labelText: "Name"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    return null;
+                  },
+                ),
+              ),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -97,7 +113,7 @@ class _RegisterState extends State<Register> {
                                   password: passwordController.text);
                           if (newUser != null) {
                             CurrentUser.setCurrentUser(RUser.User(
-                              "kenny",
+                              nameController.text,
                               newUser.user!.uid,
                             ));
                             DatabaseManager.addUser(
@@ -107,10 +123,8 @@ class _RegisterState extends State<Register> {
                               CurrentUser.user,
                               RUser.User("chatgpt", "useridchatgpt")
                             ]));
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Home()),
-                            );
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, "/home", (_) => false);
                           }
                         } on FirebaseAuthException catch (e) {
                           Widget errorText = Text('Something went wrong');
