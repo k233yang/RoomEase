@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
-import 'Message.dart';
-import 'User.dart';
-import 'colors/ColorConstants.dart';
+import '../Message.dart';
+import '../User.dart';
+import '../colors/ColorConstants.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
+import 'package:roomease/Roomeo/ChatGPTAPI.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -50,16 +51,25 @@ class _ChatScreen extends State<ChatScreen> {
     return TextField(
         focusNode: textFieldFocusNode,
         controller: _controller,
-        onSubmitted: (String value) async {
+        onSubmitted: (String message) async {
           //TODO: add a message object with message Id
           DatabaseManager.addMessage("messageRoomId",
-              Message(value, CurrentUser.user, DateTime.now()));
+              Message(message, CurrentUser.user, DateTime.now()));
           //TODO: instead of local messagelist, pull list from DB and extract name to figure out
           //which side to display message on
-          messageList.add(Message(value, CurrentUser.user, DateTime.now()));
+          print(message);
+          messageList.add(Message(message, CurrentUser.user, DateTime.now()));
           _controller.clear();
           textFieldFocusNode.requestFocus();
           setState(() {});
+          Future<String> res = getChatGPTResponse(message);
+          print(message);
+          res
+              .then((message) => DatabaseManager.addMessage(
+                  "messageRoomId",
+                  Message(message, User("chatgpt", "useridchatgpt"),
+                      DateTime.now())))
+              .catchError((onError) => print(onError));
         },
         decoration: InputDecoration(
             filled: true,

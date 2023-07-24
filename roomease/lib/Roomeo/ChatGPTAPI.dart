@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../secret.dart' show apiKey;
+import 'package:roomease/DatabaseManager.dart';
+import 'package:roomease/Message.dart';
+import 'package:roomease/Roomeo/ChatScreen.dart';
 
 const apiURL = "https://api.openai.com/v1/chat/completions";
 // https://platform.openai.com/docs/api-reference/chat/create
@@ -25,7 +28,7 @@ Future<String> getChatGPTResponse(String message) async {
 
   if (res.statusCode == 200) {
     final decodedRes = jsonDecode(res.body);
-    final int lastResponseIndex = decodedRes["choices"].length;
+    final int lastResponseIndex = decodedRes["choices"].length - 1;
     final chatGPTRes =
         decodedRes["choices"][lastResponseIndex]["message"]["content"];
     return chatGPTRes;
