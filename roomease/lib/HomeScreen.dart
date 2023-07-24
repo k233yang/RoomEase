@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:roomease/ChatScreen.dart';
+import 'package:roomease/Roomeo/ChatScreen.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/colors/ColorConstants.dart';
