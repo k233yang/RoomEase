@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/colors/ColorConstants.dart';
-import 'package:roomease/welcome/LoginScreen.dart';
-import 'package:roomease/welcome/RegisterScreen.dart';
 
-class WelcomeBody extends StatelessWidget {
+class CreateJoinHouseholdScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size; // total height and width of screen
@@ -18,27 +16,32 @@ class WelcomeBody extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Welcome To RoomEase"),
-                WelcomeScreenButton(
-                    buttonText: "Login",
+                Center(
+                  child: Text(
+                    "Are you creating a new household or joining an existing household?",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                CreateJoinHouseholdButton(
+                    buttonText: "Create Household",
                     onButtonPress: () {
-                      Navigator.pushNamed(context, "/login");
+                      Navigator.pushNamed(context, "/createHousehold");
                     }),
-                WelcomeScreenButton(
-                    buttonText: "Register",
+                CreateJoinHouseholdButton(
+                    buttonText: "Join Household",
                     onButtonPress: () {
-                      Navigator.pushNamed(context, "/register");
+                      Navigator.pushNamed(context, "/joinHousehold");
                     })
               ],
             )));
   }
 }
 
-class WelcomeScreenButton extends StatelessWidget {
+class CreateJoinHouseholdButton extends StatelessWidget {
   final String buttonText;
   final VoidCallback onButtonPress;
 
-  WelcomeScreenButton(
+  CreateJoinHouseholdButton(
       {Key? key, required this.buttonText, required this.onButtonPress})
       : super(key: key);
 

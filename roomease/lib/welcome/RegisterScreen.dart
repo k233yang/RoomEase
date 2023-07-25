@@ -118,17 +118,8 @@ class _RegisterState extends State<Register> {
                             CurrentUser.setCurrentUserName(
                               nameController.text,
                             );
-                            DatabaseManager.addUser(
-                                CurrentUser.user); //TODO: check if exists
-                            DatabaseManager.getUserName(newUser.user!.uid);
-                            //TODO: add multiple chat rooms
-                            DatabaseManager.addMessageRoom(MessageRoom(
-                                "messageRoomId", [], <RUser.User>[
-                              CurrentUser.user,
-                              RUser.User("chatgpt", "useridchatgpt")
-                            ]));
                             Navigator.pushNamedAndRemoveUntil(
-                                context, "/home", (_) => false);
+                                context, "/createJoinHousehold", (_) => false);
                           }
                         } on FirebaseAuthException catch (e) {
                           Widget errorText = Text('Something went wrong');
@@ -138,6 +129,9 @@ class _RegisterState extends State<Register> {
                           } else if (e.code == 'weak-password') {
                             errorText =
                                 Text('The password provided is too weak.');
+                          } else if (e.code == 'invalid-email') {
+                            errorText =
+                                Text('Please enter a valid email address.');
                           }
                           ScaffoldMessenger.of(context)
                               .showSnackBar(SnackBar(content: errorText));

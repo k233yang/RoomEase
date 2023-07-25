@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/HomeScreen.dart';
+import 'package:roomease/welcome/CreateHousehold.dart';
+import 'package:roomease/welcome/CreateJoinHouseholdScreen.dart';
+import 'package:roomease/welcome/JoinHousehold.dart';
 import 'package:roomease/welcome/LoginScreen.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -35,6 +38,9 @@ class MyApp extends StatelessWidget {
         '/login': (_) => Login(),
         '/register': (_) => Register(),
         '/home': (_) => Home(),
+        '/createJoinHousehold': (_) => CreateJoinHouseholdScreen(),
+        '/createHousehold': (_) => CreateHousehold(),
+        '/joinHousehold': (_) => JoinHousehold(),
       },
     );
   }

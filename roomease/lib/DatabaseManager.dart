@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/widgets.dart';
@@ -104,6 +105,56 @@ class DatabaseManager {
         });
   }
 
+  static void addHousehold(User user, String name) async {
+    Random _rnd = Random();
+    String householdCode = DatabaseManager.getRandomString(6, _rnd);
+
+    bool householdExists = await checkHouseholdExists(householdCode);
+
+    while (householdExists) {
+      _rnd = Random();
+      householdCode = DatabaseManager.getRandomString(6, _rnd);
+      householdExists = await checkHouseholdExists(householdCode);
+    }
+
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdCode");
+    householdRef.set({
+      "users": <String>[user.userId],
+      "name": name
+    });
+  }
+
+  static void joinHousehold(User user, String householdCode) async {
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdCode/users");
+
+    TransactionResult result =
+        await householdRef.runTransaction((Object? users) {
+      if (users == null) {
+        // No household
+        print("null");
+        return Transaction.abort();
+      }
+
+      List<String> _users = List<String>.from(users as List);
+      _users.add(user.userId);
+      // Return the new data.
+      return Transaction.success(_users);
+    });
+  }
+
+  static Future<bool> checkHouseholdExists(String householdCode) async {
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdCode");
+    DatabaseEvent event = await householdRef.once();
+    if (event.snapshot.value == null) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   static void getUserName(String userId) {
     DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
     CurrentUser.userNameSubscription.cancel();
@@ -125,5 +176,12 @@ class DatabaseManager {
             return Text("");
           }
         });
+  }
+
+  static const _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  static String getRandomString(int length, Random _rnd) {
+    return String.fromCharCodes(Iterable.generate(
+        length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
   }
 }
