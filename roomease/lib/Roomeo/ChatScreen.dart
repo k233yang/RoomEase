@@ -57,13 +57,11 @@ class _ChatScreen extends State<ChatScreen> {
               Message(message, CurrentUser.user, DateTime.now()));
           //TODO: instead of local messagelist, pull list from DB and extract name to figure out
           //which side to display message on
-          print(message);
           messageList.add(Message(message, CurrentUser.user, DateTime.now()));
           _controller.clear();
           textFieldFocusNode.requestFocus();
           setState(() {});
           Future<String> res = getChatGPTResponse(message);
-          print(message);
           res
               .then((message) => DatabaseManager.addMessage(
                   "messageRoomId",

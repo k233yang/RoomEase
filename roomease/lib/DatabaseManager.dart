@@ -126,4 +126,39 @@ class DatabaseManager {
           }
         });
   }
+
+  static Future<List<Map<String, String>>> getMessages(
+      String messageRoomID) async {
+    DatabaseReference messageRef = _databaseInstance
+        .reference()
+        .child("messageRooms/$messageRoomID/messages");
+    List<Map<String, String>> messages = [];
+    List<dynamic> content = [];
+    DatabaseEvent event = await messageRef.once(DatabaseEventType.value);
+    Object? valuesObj = event.snapshot.value;
+    if (valuesObj != null) {
+      Map<dynamic, dynamic> messageData = valuesObj as Map<dynamic, dynamic>;
+      messageData.forEach((key, value) {
+        content.add(value);
+      });
+      content.sort((a, b) {
+        DateTime timeStampA = DateTime.parse(a['timestamp']);
+        DateTime timeStampB = DateTime.parse(b['timestamp']);
+        return timeStampA.compareTo(timeStampB);
+      });
+      //print(content);
+      for (int i = 0; i < content.length; i++) {
+        if (content[i]['senderName'] == 'chatgpt') {
+          messages.add({"role": "assistant", "content": content[i]['text']});
+        } else {
+          messages.add({"role": "user", "content": content[i]['text']});
+        }
+      }
+      print("messages are:");
+      print(messages);
+      return messages;
+    } else {
+      return [];
+    }
+  }
 }

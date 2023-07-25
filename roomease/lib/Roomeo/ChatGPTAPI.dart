@@ -14,13 +14,30 @@ Future<String> getChatGPTResponse(String message) async {
     "Authorization": "Bearer $apiKey"
   };
 
+  List<Map<String, String>> requestDataMessage = [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant named \"Roomeo\""
+    }
+  ];
+
+  List<Map<String, String>> allMessages =
+      await DatabaseManager.getMessages("messageRoomId");
+
+  if (allMessages != []) {
+    requestDataMessage.addAll(allMessages);
+  }
+
+  requestDataMessage.add({"role": "user", "content": message});
+
   final Map<String, dynamic> requestData = {
     "model": "gpt-3.5-turbo",
-    "messages": [
-      {"role": "system", "content": "You are a helpful assistant"},
-      {"role": "user", "content": message} //TODO: use actual user messages
-      //TODO: keep track of the current conversation. Assistant role represents chatGPT
-    ]
+    "messages": requestDataMessage
+    // "messages": [
+    //   {"role": "system", "content": "You are a helpful assistant"},
+    //   {"role": "user", "content": message} //TODO: use actual user messages
+    //   //TODO: keep track of the current conversation. Assistant role represents chatGPT
+    // ]
   };
 
   final res = await http.post(Uri.parse(apiURL),
