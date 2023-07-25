@@ -133,8 +133,7 @@ class DatabaseManager {
         await householdRef.runTransaction((Object? users) {
       if (users == null) {
         // No household
-        print("null");
-        return Transaction.abort();
+        return Transaction.success(users);
       }
 
       List<String> _users = List<String>.from(users as List);
