@@ -57,13 +57,14 @@ class _JoinHousehold extends State<JoinHousehold> {
                             await DatabaseManager.checkHouseholdExists(
                                 householdCodeController.text);
                         if (householdExists) {
-                          DatabaseManager.addUser(CurrentUser.user);
+                          DatabaseManager.addUser(CurrentUser.getCurrentUser());
                           DatabaseManager.joinHousehold(
-                              CurrentUser.user, householdCodeController.text);
+                              CurrentUser.getCurrentUser(),
+                              householdCodeController.text);
                           //TODO: add multiple chat rooms
                           DatabaseManager.addMessageRoom(MessageRoom(
                               "messageRoomId", [], <RUser.User>[
-                            CurrentUser.user,
+                            CurrentUser.getCurrentUser(),
                             RUser.User("chatgpt", "useridchatgpt")
                           ]));
                           Navigator.pushNamedAndRemoveUntil(

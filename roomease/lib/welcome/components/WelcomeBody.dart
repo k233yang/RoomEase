@@ -1,12 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 import 'package:roomease/welcome/LoginScreen.dart';
 import 'package:roomease/welcome/RegisterScreen.dart';
 
+import '../../CurrentUser.dart';
+import '../../DatabaseManager.dart';
+
 class WelcomeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size; // total height and width of screen
+    final _auth = FirebaseAuth.instance;
 
     return Scaffold(
         appBar: AppBar(
@@ -28,6 +33,25 @@ class WelcomeBody extends StatelessWidget {
                     buttonText: "Register",
                     onButtonPress: () {
                       Navigator.pushNamed(context, "/register");
+                    }),
+                WelcomeScreenButton(
+                    buttonText: "Debug Login",
+                    onButtonPress: () async {
+                      final user = await _auth.signInWithEmailAndPassword(
+                          email: "testing@testing.com", password: "testing123");
+                      if (user != null) {
+                        DatabaseManager.getUserName(user.user!.uid);
+                        CurrentUser.setCurrentUserId(
+                          user.user!.uid,
+                        );
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, "/home", (_) => false);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Email or password is incorrect')),
+                        );
+                      }
                     })
               ],
             )));

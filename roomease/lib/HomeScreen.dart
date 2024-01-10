@@ -99,8 +99,8 @@ class HomeCards extends StatelessWidget {
       children: [
         Padding(
             padding: EdgeInsets.only(top: 20),
-            child:
-                DatabaseManager.userNameStreamBuilder(CurrentUser.user.userId)),
+            child: DatabaseManager.userNameStreamBuilder(
+                CurrentUser.getCurrentUserId())),
         Padding(padding: EdgeInsets.only(top: 20), child: ChatCard(updateIndex))
       ],
     ));

@@ -54,10 +54,11 @@ class _ChatScreen extends State<ChatScreen> {
         onSubmitted: (String message) async {
           //TODO: add a message object with message Id
           DatabaseManager.addMessage("messageRoomId",
-              Message(message, CurrentUser.user, DateTime.now()));
+              Message(message, CurrentUser.getCurrentUser(), DateTime.now()));
           //TODO: instead of local messagelist, pull list from DB and extract name to figure out
           //which side to display message on
-          messageList.add(Message(message, CurrentUser.user, DateTime.now()));
+          messageList.add(
+              Message(message, CurrentUser.getCurrentUser(), DateTime.now()));
           _controller.clear();
           textFieldFocusNode.requestFocus();
           setState(() {});
@@ -91,7 +92,7 @@ Widget buildListMessage(List<Message> messages) {
 
 Widget chatMessage(Message message) {
   MainAxisAlignment alignment;
-  if (message.sender.userId == CurrentUser.user.userId) {
+  if (message.sender.userId == CurrentUser.getCurrentUserId()) {
     alignment = MainAxisAlignment.end;
   } else {
     alignment = MainAxisAlignment.start;
@@ -100,7 +101,7 @@ Widget chatMessage(Message message) {
     mainAxisAlignment: alignment,
     children: [
       BubbleSpecialThree(
-        isSender: message.sender.userId == CurrentUser.user.userId,
+        isSender: message.sender.userId == CurrentUser.getCurrentUserId(),
         text: message.text,
         color: ColorConstants.lightPurple,
         textStyle: TextStyle(color: Colors.white, fontSize: 16),

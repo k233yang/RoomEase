@@ -53,14 +53,16 @@ class _CreateHousehold extends State<CreateHousehold> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        DatabaseManager.addUser(CurrentUser.user);
-                        DatabaseManager.getUserName(CurrentUser.user.userId);
+                        DatabaseManager.addUser(CurrentUser.getCurrentUser());
+                        DatabaseManager.getUserName(
+                            CurrentUser.getCurrentUserId());
                         DatabaseManager.addHousehold(
-                            CurrentUser.user, householdNameController.text);
+                            CurrentUser.getCurrentUser(),
+                            householdNameController.text);
                         //TODO: add multiple chat rooms
                         DatabaseManager.addMessageRoom(MessageRoom(
                             "messageRoomId", [], <User>[
-                          CurrentUser.user,
+                          CurrentUser.getCurrentUser(),
                           User("chatgpt", "useridchatgpt")
                         ]));
                         Navigator.pushNamedAndRemoveUntil(

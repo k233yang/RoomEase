@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/HomeScreen.dart';
+import 'package:roomease/SharedPreferencesUtility.dart';
 import 'package:roomease/welcome/CreateHousehold.dart';
 import 'package:roomease/welcome/CreateJoinHouseholdScreen.dart';
 import 'package:roomease/welcome/JoinHousehold.dart';
@@ -16,6 +17,7 @@ void main() async {
     name: 'RoomEase',
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await SharedPreferencesUtility.init();
   runApp(MyApp());
 }
 
