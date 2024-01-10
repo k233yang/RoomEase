@@ -19,6 +19,7 @@ dependencies:
   firebase_auth: ^4.7.1
   http: ^0.13.3
   shared_preferences: ^2.2.2
+  flutter_launcher_icons: ^0.9.0
 
 dev_dependencies:
   flutter_test:
@@ -30,3 +31,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+
+flutter_icons:
+  image_path: "icon/RoomEaseIcon.png" 
+  android: true
+  ios: true
