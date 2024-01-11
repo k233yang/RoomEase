@@ -5,6 +5,8 @@ import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 
+import 'chores/ChoreScreen.dart';
+
 class Home extends StatefulWidget {
   @override
   State createState() {
@@ -21,7 +23,7 @@ class _HomeState extends State {
       HomeScreen(updateIndex),
       ChatScreen(),
       ChatScreen(),
-      ChatScreen(),
+      ChoreScreen(),
       ChatScreen()
     ];
     super.initState();
