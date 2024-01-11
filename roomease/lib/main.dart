@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
+import 'package:roomease/chores/AddChoreScreen.dart';
 import 'package:roomease/welcome/CreateHousehold.dart';
 import 'package:roomease/welcome/CreateJoinHouseholdScreen.dart';
 import 'package:roomease/welcome/JoinHousehold.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         '/createJoinHousehold': (_) => CreateJoinHouseholdScreen(),
         '/createHousehold': (_) => CreateHousehold(),
         '/joinHousehold': (_) => JoinHousehold(),
+        '/addChore': (_) => AddChoreScreen(),
       },
     );
   }

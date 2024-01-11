@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '../colors/ColorConstants.dart';
 
 class ChoreScreen extends StatefulWidget {
@@ -20,7 +19,33 @@ class _ChoreScreen extends State<ChoreScreen> {
       ),
       body: Container(
           color: ColorConstants.white,
-          child: Column(children: [
+          child: Column(
+            children: [
+              CreateAddChoreButton(
+                onButtonPress: () {
+                  Navigator.pushNamed(context, "/addChore");
+                }
+              ),
           ])));
+  }
+}
+
+class CreateAddChoreButton extends StatelessWidget {
+  final VoidCallback onButtonPress;
+
+  CreateAddChoreButton(
+    {Key? key, required this.onButtonPress})
+    : super(key: key);
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: FloatingActionButton(
+          foregroundColor: ColorConstants.white,
+          backgroundColor: ColorConstants.darkPurple,
+          shape: CircleBorder(),
+          onPressed: onButtonPress,
+          child: const Icon(Icons.add))
+    );
   }
 }
