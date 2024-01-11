@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:roomease/chores/ChoreItem.dart';
+
 import '../colors/ColorConstants.dart';
 
 class ChoreScreen extends StatefulWidget {
@@ -14,13 +16,14 @@ class _ChoreScreen extends State<ChoreScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-        title: const Text('Chore Board'),
+        title: const Text('Chores'),
         backgroundColor: ColorConstants.lightPurple,
       ),
       body: Container(
           color: ColorConstants.white,
           child: Column(
             children: [
+              Center(child: ChoreItem()),
               CreateAddChoreButton(
                 onButtonPress: () {
                   Navigator.pushNamed(context, "/addChore");
