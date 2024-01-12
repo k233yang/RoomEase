@@ -6,6 +6,7 @@ import '../User.dart';
 import '../colors/ColorConstants.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:roomease/Roomeo/ChatGPTAPI.dart';
+import 'package:roomease/Roomeo/EmbedVector.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -69,6 +70,8 @@ class _ChatScreen extends State<ChatScreen> {
                   Message(message, User("chatgpt", "useridchatgpt"),
                       DateTime.now())))
               .catchError((onError) => print(onError));
+          // Future<List<double>> vectorRes = getVectorEmbeddingArray(message);
+          // vectorRes.then((list) => {print(list)});
         },
         decoration: InputDecoration(
             filled: true,

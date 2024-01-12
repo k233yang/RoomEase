@@ -210,8 +210,8 @@ class DatabaseManager {
           messages.add({"role": "user", "content": content[i]['text']});
         }
       }
-      print("messages are:");
-      print(messages);
+      // print("messages are:");
+      // print(messages);
       return messages;
     } else {
       return [];

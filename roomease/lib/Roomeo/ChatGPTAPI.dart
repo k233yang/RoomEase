@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../secret.dart' show apiKey;
+import '../secret.dart' show OpenAIApiKey;
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Message.dart';
 import 'package:roomease/Roomeo/ChatScreen.dart';
@@ -11,7 +11,7 @@ const apiURL = "https://api.openai.com/v1/chat/completions";
 Future<String> getChatGPTResponse(String message) async {
   final Map<String, String> requestHeaders = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer $apiKey"
+    "Authorization": "Bearer $OpenAIApiKey"
   };
 
   List<Map<String, String>> requestDataMessage = [
