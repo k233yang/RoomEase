@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:roomease/chores/ChoreItem.dart';
 
@@ -20,16 +19,20 @@ class _ChoreScreen extends State<ChoreScreen> {
         backgroundColor: ColorConstants.lightPurple,
       ),
       body: Container(
-          color: ColorConstants.white,
-          child: Column(
-            children: [
-              Center(child: ChoreItem()),
-              CreateAddChoreButton(
-                onButtonPress: () {
-                  Navigator.pushNamed(context, "/addChore");
-                }
-              ),
-          ])));
+        color: ColorConstants.white,
+        child: Column(
+          children: [
+            Center(child: ChoreItem()),
+          ]
+        )
+      ),
+      floatingActionButton:  CreateAddChoreButton(
+        onButtonPress: () {
+          Navigator.pushNamed(context, "/addChore");
+        }
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
   }
 }
 
@@ -42,13 +45,12 @@ class CreateAddChoreButton extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: FloatingActionButton(
-          foregroundColor: ColorConstants.white,
-          backgroundColor: ColorConstants.darkPurple,
-          shape: CircleBorder(),
-          onPressed: onButtonPress,
-          child: const Icon(Icons.add))
+    return FloatingActionButton(
+      foregroundColor: ColorConstants.white,
+      backgroundColor: ColorConstants.darkPurple,
+      shape: CircleBorder(),
+      onPressed: onButtonPress,
+      child: const Icon(Icons.add)
     );
   }
 }

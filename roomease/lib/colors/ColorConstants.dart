@@ -13,6 +13,7 @@ Color hexToColor(String hex) {
 
 class ColorConstants {
   static Color lightGray = hexToColor('#D3D3D3');
+  static Color lighterGray = hexToColor('#ECECEC');
   static Color lightPurple = hexToColor('#CDB9F6');
   static Color darkPurple = hexToColor('#513194');
   static Color white = hexToColor('#FFFFFF');
