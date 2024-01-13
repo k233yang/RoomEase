@@ -27,11 +27,15 @@ class DatabaseManager {
     messageRoomsRef.set({"users": userIds, "messages": <String>[]});
   }
 
-  static void addMessage(String messageRoomId, Message message) async {
+  static Future<String> addMessage(
+      String messageRoomId, Message message) async {
     DatabaseReference messagesRef =
         _databaseInstance.ref("messageRooms/$messageRoomId/messages");
 
     final newKey = messagesRef.push().key;
+    if (newKey == null) {
+      throw Exception('New key is null');
+    }
     DatabaseReference messageRef =
         _databaseInstance.ref("messageRooms/$messageRoomId/messages/$newKey");
     messageRef.set({
@@ -40,6 +44,8 @@ class DatabaseManager {
       'timestamp': message.timestamp.toString(),
       'text': message.text
     });
+
+    return newKey;
     // TransactionResult result =
     //     await messagesRef.runTransaction((Object? messages) {
     //   if (messages == null) {

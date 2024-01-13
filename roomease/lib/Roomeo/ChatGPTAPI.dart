@@ -8,6 +8,8 @@ import 'package:roomease/Roomeo/ChatScreen.dart';
 const apiURL = "https://api.openai.com/v1/chat/completions";
 // https://platform.openai.com/docs/api-reference/chat/create
 
+/*gets chatGPT's response by: Adding the provided message to firebase, querying the firebase
+and pushing all results to a list, and sending the list to chatGPT for a response*/
 Future<String> getChatGPTResponse(String message) async {
   final Map<String, String> requestHeaders = {
     "Content-Type": "application/json",
@@ -33,11 +35,6 @@ Future<String> getChatGPTResponse(String message) async {
   final Map<String, dynamic> requestData = {
     "model": "gpt-3.5-turbo",
     "messages": requestDataMessage
-    // "messages": [
-    //   {"role": "system", "content": "You are a helpful assistant"},
-    //   {"role": "user", "content": message} //TODO: use actual user messages
-    //   //TODO: keep track of the current conversation. Assistant role represents chatGPT
-    // ]
   };
 
   final res = await http.post(Uri.parse(apiURL),
