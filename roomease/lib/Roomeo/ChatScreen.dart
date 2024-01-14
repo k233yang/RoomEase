@@ -114,7 +114,8 @@ class _ChatScreen extends State<ChatScreen> {
             print('Failed to get chatGPT vector for input message: $message.');
             print(': $e');
           }
-          // TODO: put user message vector and chatbot's vector to vector DB:
+
+          // put user message vector to vector DB
           try {
             if (userResVector != null && userMessageKey != null) {
               UpsertResponse userUpsertResponse = await insertVector(
@@ -130,6 +131,8 @@ class _ChatScreen extends State<ChatScreen> {
           } catch (e) {
             print(e);
           }
+          //TODO: query the vDB -> firebase for most relevant convos, and feed that info to chatGPT as context
+          //TODO: put chatbot's vector to vector DB:
           // userResVector.then((vector) => {
           //   insertVector(vector, "messageroomid" /*TODO: pinecone starter plan only supports 1 index. Need to upgrade plan, and replace roomID with actual room ID */
           //   , );
