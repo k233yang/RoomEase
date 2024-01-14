@@ -32,4 +32,8 @@ class SharedPreferencesUtility {
   static int getInt(String key) {
     return sharedPrefs.getInt(key) ?? -1;
   }
+
+  static void clear() async {
+    await sharedPrefs.clear();
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/HomeScreen.dart';
@@ -59,12 +60,18 @@ class _CreateHousehold extends State<CreateHousehold> {
                         DatabaseManager.addHousehold(
                             CurrentUser.getCurrentUser(),
                             householdNameController.text);
+                        CurrentHousehold.setCurrentHouseholdName(
+                            householdNameController.text);
                         //TODO: add multiple chat rooms
-                        DatabaseManager.addMessageRoom(MessageRoom(
-                            "messageRoomId", [], <User>[
+                        DatabaseManager.addMessageRoom(
+                            MessageRoom("messageRoomId", [], <User>[
                           CurrentUser.getCurrentUser(),
-                          User("chatgpt", "useridchatgpt")
+                          User("chatgpt", "useridchatgpt",
+                              CurrentHousehold.getCurrentHouseholdId())
                         ]));
+                        DatabaseManager.addHouseholdToUser(
+                            CurrentUser.getCurrentUser().userId,
+                            CurrentHousehold.getCurrentHouseholdId());
                         Navigator.pushNamedAndRemoveUntil(
                             context, "/home", (_) => false);
                       }

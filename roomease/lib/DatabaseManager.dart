@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/widgets.dart';
+import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
@@ -94,7 +95,10 @@ class DatabaseManager {
                 timestamp = messageJson['timestamp'];
               }
 
-              messageList.add(Message(text!, User(senderName!, senderId!),
+              messageList.add(Message(
+                  text!,
+                  User(senderName!, senderId!,
+                      CurrentHousehold.getCurrentHouseholdId()),
                   DateTime.parse(timestamp!)));
             }
 
@@ -129,6 +133,7 @@ class DatabaseManager {
       "users": <String>[user.userId],
       "name": name
     });
+    CurrentHousehold.setCurrentHouseholdId(householdCode);
   }
 
   static void joinHousehold(User user, String householdCode) async {
@@ -158,6 +163,30 @@ class DatabaseManager {
     } else {
       return true;
     }
+  }
+
+  static void updateHouseholdName(String householdId) {
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdId/name");
+
+    householdRef.onValue.listen((DatabaseEvent event) {
+      CurrentHousehold.setCurrentHouseholdName(event.snapshot.value as String);
+    });
+  }
+
+  // Used when logging in so we can keep track of which household the user belongs to.
+  // Otherwise if we login with same user, we can't find the household unless we
+  // iterate through all households to find the one the user is a part of
+  static void addHouseholdToUser(String userId, String householdId) {
+    DatabaseReference usersRef = _databaseInstance.ref("users/$userId");
+    usersRef.set({"householdId": householdId});
+  }
+
+  static Future<String?> getUsersHousehold(String userId) async {
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/householdId");
+    DatabaseEvent event = await usersRef.once();
+    return event.snapshot.value as String;
   }
 
   static void getUserName(String userId) {

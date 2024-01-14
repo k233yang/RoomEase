@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/MessageRoom.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:roomease/SharedPreferencesUtility.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../User.dart' as RUser;
 
 class Login extends StatefulWidget {
@@ -79,8 +82,24 @@ class _LoginState extends State<Login> {
                             CurrentUser.setCurrentUserId(
                               user.user!.uid,
                             );
-                            Navigator.pushNamedAndRemoveUntil(
-                                context, "/home", (_) => false);
+                            // Checking if user is part of a household yet
+                            String? householdId =
+                                await DatabaseManager.getUsersHousehold(
+                                    user.user!.uid);
+                            if (householdId != null) {
+                              // Part of household, go to home screen
+                              CurrentHousehold.setCurrentHouseholdId(
+                                  householdId);
+                              DatabaseManager.updateHouseholdName(householdId);
+                              SharedPreferencesUtility.setValue(
+                                  "isLoggedIn", true);
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context, "/home", (_) => false);
+                            } else {
+                              // Not part of household, go to create/join household screen
+                              Navigator.pushNamedAndRemoveUntil(context,
+                                  "/createJoinHousehold", (_) => false);
+                            }
                           }
                         } on FirebaseAuthException catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(

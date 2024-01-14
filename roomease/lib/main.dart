@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'package:roomease/chores/AddChoreScreen.dart';
+import 'package:roomease/profile/ProfileScreen.dart';
 import 'package:roomease/welcome/CreateHousehold.dart';
 import 'package:roomease/welcome/CreateJoinHouseholdScreen.dart';
 import 'package:roomease/welcome/JoinHousehold.dart';
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
         colorScheme:
             ColorScheme.fromSeed(seedColor: ColorConstants.lightPurple),
       ),
-      initialRoute: '/welcome',
+      initialRoute: initialScreen(),
       routes: {
         '/welcome': (_) => WelcomeScreen(),
         '/login': (_) => Login(),
@@ -45,7 +46,16 @@ class MyApp extends StatelessWidget {
         '/createHousehold': (_) => CreateHousehold(),
         '/joinHousehold': (_) => JoinHousehold(),
         '/addChore': (_) => AddChoreScreen(),
+        '/profile': (_) => Profile(),
       },
     );
+  }
+
+  String initialScreen() {
+    if (SharedPreferencesUtility.getBool("isLoggedIn")) {
+      return '/home';
+    } else {
+      return '/welcome';
+    }
   }
 }

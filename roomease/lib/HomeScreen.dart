@@ -4,6 +4,7 @@ import 'package:roomease/Roomeo/ChatScreen.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/colors/ColorConstants.dart';
+import 'package:roomease/profile/ProfileScreen.dart';
 
 import 'chores/ChoreScreen.dart';
 
@@ -24,7 +25,7 @@ class _HomeState extends State {
       ChatScreen(),
       ChatScreen(),
       ChoreScreen(),
-      ChatScreen()
+      Profile()
     ];
     super.initState();
   }

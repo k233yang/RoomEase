@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
+import 'package:roomease/SharedPreferencesUtility.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 import 'package:roomease/welcome/LoginScreen.dart';
 import 'package:roomease/welcome/RegisterScreen.dart';
@@ -44,6 +46,9 @@ class WelcomeBody extends StatelessWidget {
                         CurrentUser.setCurrentUserId(
                           user.user!.uid,
                         );
+                        CurrentHousehold.setCurrentHouseholdId("kIDMQ5");
+                        DatabaseManager.updateHouseholdName("kIDMQ5");
+                        SharedPreferencesUtility.setValue("isLoggedIn", true);
                         Navigator.pushNamedAndRemoveUntil(
                             context, "/home", (_) => false);
                       } else {

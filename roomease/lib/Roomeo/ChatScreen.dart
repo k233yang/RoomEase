@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
@@ -78,7 +79,10 @@ class _ChatScreen extends State<ChatScreen> {
             try {
               gptMessageKey = await DatabaseManager.addMessage(
                   "messageRoomId",
-                  Message(gptMessage, User("chatgpt", "useridchatgpt"),
+                  Message(
+                      gptMessage,
+                      User("chatgpt", "useridchatgpt",
+                          CurrentHousehold.getCurrentHouseholdId()),
                       DateTime.now())); // add chatGPT message to DB
             } catch (e) {
               print('Failed to add chatGPT message: $e');

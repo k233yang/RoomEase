@@ -10,7 +10,8 @@ class CurrentUser {
   static User getCurrentUser() {
     String userId = SharedPreferencesUtility.getString("userId");
     String userName = SharedPreferencesUtility.getString("userName");
-    return User(userName, userId);
+    String householdId = SharedPreferencesUtility.getString("householdId");
+    return User(userName, userId, householdId);
   }
 
   static String getCurrentUserId() {
