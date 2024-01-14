@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pinecone/pinecone.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
@@ -9,6 +10,7 @@ import '../colors/ColorConstants.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:roomease/Roomeo/ChatGPTAPI.dart';
 import 'package:roomease/Roomeo/EmbedVector.dart';
+import '../Errors.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -105,13 +107,29 @@ class _ChatScreen extends State<ChatScreen> {
             if (gptMessage != null) {
               chatGPTResVector = await getVectorEmbeddingArray(gptMessage);
               print(chatGPTResVector);
+            } else {
+              throw NullObjectError('Null gptMessage!');
             }
           } catch (e) {
             print('Failed to get chatGPT vector for input message: $message.');
             print(': $e');
           }
           // TODO: put user message vector and chatbot's vector to vector DB:
-
+          try {
+            if (userResVector != null && userMessageKey != null) {
+              UpsertResponse userUpsertResponse = await insertVector(
+                  userResVector, "messageroomid", userMessageKey);
+            } else {
+              if (userResVector == null) {
+                throw NullObjectError('Null user response vector!');
+              }
+              if (userMessageKey == null) {
+                throw NullObjectError('Null user message key!');
+              }
+            }
+          } catch (e) {
+            print(e);
+          }
           // userResVector.then((vector) => {
           //   insertVector(vector, "messageroomid" /*TODO: pinecone starter plan only supports 1 index. Need to upgrade plan, and replace roomID with actual room ID */
           //   , );

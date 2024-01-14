@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../secret.dart' show PineConeAPIKey;
 import 'package:pinecone/pinecone.dart';
 
-const environment = 'us-central1-gcp-starter';
+const environment = 'gcp-starter';
 final client = PineconeClient(apiKey: PineConeAPIKey);
 
 // create a new index for a room, with name = roomID
@@ -19,10 +19,13 @@ Future<UpsertResponse> insertVector(
     List<double> vector, String roomID, String vectorID) async {
   // get the index of the room
   final Index index = await client.describeIndex(
+    environment: 'gcp-starter',
     indexName: roomID,
   );
   final indexName = index.name;
   final projectID = index.projectId;
+  print('index name: ' + indexName);
+  print('project ID: ' + projectID);
 
   return await client.upsertVectors(
       indexName: indexName,
