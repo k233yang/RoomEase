@@ -57,7 +57,8 @@ class _CreateHousehold extends State<CreateHousehold> {
                         DatabaseManager.addUser(CurrentUser.getCurrentUser());
                         DatabaseManager.getUserName(
                             CurrentUser.getCurrentUserId());
-                        DatabaseManager.addHousehold(
+                        // Add household should add household to CurrentHousehold
+                        await DatabaseManager.addHousehold(
                             CurrentUser.getCurrentUser(),
                             householdNameController.text);
                         CurrentHousehold.setCurrentHouseholdName(

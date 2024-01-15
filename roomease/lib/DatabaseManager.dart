@@ -14,8 +14,9 @@ class DatabaseManager {
   static FirebaseDatabase _databaseInstance = FirebaseDatabase.instance;
 
   static void addUser(User user) {
-    DatabaseReference usersRef = _databaseInstance.ref("users/${user.userId}");
-    usersRef.set({"name": user.name});
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/${user.userId}/name");
+    usersRef.set(user.name);
   }
 
   static void addMessageRoom(MessageRoom messageRoom) {
@@ -115,7 +116,7 @@ class DatabaseManager {
         });
   }
 
-  static void addHousehold(User user, String name) async {
+  static Future<void> addHousehold(User user, String name) async {
     Random _rnd = Random();
     String householdCode = DatabaseManager.getRandomString(6, _rnd);
 
@@ -253,9 +254,10 @@ class DatabaseManager {
     }
   }
 
-  static void addChore( String name, String details, String deadline, int score, User? createdByuser) async { 
+  static void addChore(String name, String details, String deadline, int score,
+      User? createdByuser) async {
     DatabaseReference choresRef = _databaseInstance.ref("chores");
-    
+
     final choreKey = choresRef.push().key;
     if (choreKey == null) {
       throw Exception('Chore key is null');
@@ -270,11 +272,9 @@ class DatabaseManager {
       "score": score,
       "createdByUser": createdByuser,
       "assignedUser": null,
-    })
-    .then((value) { 
+    }).then((value) {
       print("Successfully added chore");
-    })
-    .catchError((value) {
+    }).catchError((value) {
       print('Error adding chore');
       throw Exception('Could not add chore');
     });
