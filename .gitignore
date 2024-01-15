@@ -4,3 +4,13 @@
 roomease/ios/Podfile.lock
 roomease/pubspec.lock
 flutter/
+roomease/pubspec.lock
+roomease/macos/Runner.xcworkspace/contents.xcworkspacedata
+roomease/macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+roomease/macos/Runner.xcodeproj/project.pbxproj
+roomease/macos/Flutter/Flutter-Release.xcconfig
+roomease/macos/Flutter/Flutter-Debug.xcconfig
+roomease/ios/Runner.xcworkspace/contents.xcworkspacedata
+roomease/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+roomease/ios/Runner.xcodeproj/project.pbxproj
+roomease/ios/Flutter/Release.xcconfig

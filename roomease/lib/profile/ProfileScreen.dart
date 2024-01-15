@@ -33,7 +33,12 @@ Widget profileSection() {
     children: [
       Padding(
           padding: EdgeInsets.only(left: 50),
-          child: Image(image: AssetImage('assets/user_profile_icon.png'))),
+          child: Image(
+            image: AssetImage('assets/user_profile_icon.png'),
+            height: 100,
+            width: 100,
+            )
+          ),
       Padding(
           padding: EdgeInsets.only(left: 30, right: 50),
           child: profileDetails())

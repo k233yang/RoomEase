@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../colors/ColorConstants.dart';
+import 'package:roomease/CurrentUser.dart';
+import 'package:roomease/DatabaseManager.dart';
 import 'package:intl/intl.dart';
 
 class AddChoreScreen extends StatefulWidget {
@@ -25,8 +27,8 @@ class _AddChoreScreen extends State<AddChoreScreen> {
         title: const Text('Add a Chore'),
         backgroundColor: ColorConstants.lightPurple,
       ),
-      body: Container(
-        color: ColorConstants.white,
+      body: Form(
+        key: _formKey,
         child: Column(
           children: [
             /*Padding(
@@ -142,13 +144,30 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                     child: Text(val.toString()),
                   );
                 }).toList(),
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please enter a score for the chore';
+                  }
+                  return null;
+                },
               )
             ),
             Padding(
               padding: 
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
               child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) { 
+                      DatabaseManager.addChore(
+                        nameController.text, 
+                        detailsController.text, 
+                        deadlineController.text, 
+                        scoreVote, 
+                        null
+                      );
+                      Navigator.pop(context);
+                    }
+                  },
                   child: const Text('Submit'),
               )
             )

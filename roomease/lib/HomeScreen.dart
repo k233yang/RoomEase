@@ -49,23 +49,43 @@ class _HomeState extends State {
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
-            icon: Image(image: AssetImage('assets/home_icon.png')),
+            icon: Image(
+              image: AssetImage('assets/home_icon.png'),
+              height: 50,
+              width: 50
+            ),
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Image(image: AssetImage('assets/chat_icon.png')),
+            icon: Image(
+              image: AssetImage('assets/chat_icon.png'),
+              height: 50,
+              width: 50
+            ),
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Image(image: AssetImage('assets/schedule_icon.png')),
+            icon: Image(
+              image: AssetImage('assets/schedule_icon.png'),
+              height: 50,
+              width: 50
+            ),
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Image(image: AssetImage('assets/chores_icon.png')),
+            icon: Image(
+              image: AssetImage('assets/chores_icon.png'),
+              height: 50,
+              width: 50
+            ),
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Image(image: AssetImage('assets/profile_icon.png')),
+            icon: Image(
+              image: AssetImage('assets/profile_icon.png'),
+              height: 50,
+              width: 50
+            ),
             label: "",
           ),
         ],

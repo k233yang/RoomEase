@@ -252,4 +252,39 @@ class DatabaseManager {
       return [];
     }
   }
+
+  static void addChore( String name, String details, String deadline, int score, User? createdByuser) async { 
+    Random _rnd = Random();
+    String choreCode = DatabaseManager.getRandomString(6, _rnd);
+
+    bool choreExists = await checkChoreExists(choreCode);
+
+    while (choreExists) {
+      _rnd = Random();
+      choreCode = DatabaseManager.getRandomString(6, _rnd);
+      choreExists = await checkHouseholdExists(choreCode);
+    }
+
+    DatabaseReference choreRef =
+        _databaseInstance.ref("chores/$choreCode");
+    choreRef.set({
+      "name": name,
+      "details": details,
+      "deadline": deadline,
+      "score": score,
+      "createdByUser": createdByuser,
+      "assignedUser": null,
+    });
+  }
+
+  static Future<bool> checkChoreExists(String choreCode) async {
+    DatabaseReference choreRef =
+        _databaseInstance.ref("chores/$choreCode");
+    DatabaseEvent event = await choreRef.once();
+    if (event.snapshot.value == null) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../secret.dart' show OpenAIApiKey;
+import '../secret.dart' show PineConeAPIKey;
 
 const embeddingAPIURL = "https://api.openai.com/v1/embeddings";
 
@@ -8,7 +8,7 @@ const embeddingAPIURL = "https://api.openai.com/v1/embeddings";
 Future<List<double>> getVectorEmbeddingArray(String input) async {
   final Map<String, String> vectorRequestHeaders = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer $OpenAIApiKey"
+    "Authorization": "Bearer $PineConeAPIKey"
   };
 
   final Map<String, String> vectorRequestData = {
