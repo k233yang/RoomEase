@@ -158,14 +158,21 @@ class _AddChoreScreen extends State<AddChoreScreen> {
               child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) { 
-                      DatabaseManager.addChore(
-                        nameController.text, 
-                        detailsController.text, 
-                        deadlineController.text, 
-                        scoreVote, 
-                        null
-                      );
+                      try {
+                        DatabaseManager.addChore(
+                          nameController.text, 
+                          detailsController.text, 
+                          deadlineController.text, 
+                          scoreVote, 
+                          null
+                        );
+                      } catch (e) {
+                        print('Failed to add chore: $e');
+                      }
                       Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('Chore successfully added!')
+                      ));
                     }
                   },
                   child: const Text('Submit'),

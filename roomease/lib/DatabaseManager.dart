@@ -254,19 +254,15 @@ class DatabaseManager {
   }
 
   static void addChore( String name, String details, String deadline, int score, User? createdByuser) async { 
-    Random _rnd = Random();
-    String choreCode = DatabaseManager.getRandomString(6, _rnd);
-
-    bool choreExists = await checkChoreExists(choreCode);
-
-    while (choreExists) {
-      _rnd = Random();
-      choreCode = DatabaseManager.getRandomString(6, _rnd);
-      choreExists = await checkHouseholdExists(choreCode);
+    DatabaseReference choresRef = _databaseInstance.ref("chores");
+    
+    final choreKey = choresRef.push().key;
+    if (choreKey == null) {
+      throw Exception('Chore key is null');
     }
 
-    DatabaseReference choreRef =
-        _databaseInstance.ref("chores/$choreCode");
+    DatabaseReference choreRef = _databaseInstance.ref("chores/$choreKey");
+
     choreRef.set({
       "name": name,
       "details": details,
@@ -274,17 +270,13 @@ class DatabaseManager {
       "score": score,
       "createdByUser": createdByuser,
       "assignedUser": null,
+    })
+    .then((value) { 
+      print("Successfully added chore");
+    })
+    .catchError((value) {
+      print('Error adding chore');
+      throw Exception('Could not add chore');
     });
-  }
-
-  static Future<bool> checkChoreExists(String choreCode) async {
-    DatabaseReference choreRef =
-        _databaseInstance.ref("chores/$choreCode");
-    DatabaseEvent event = await choreRef.once();
-    if (event.snapshot.value == null) {
-      return false;
-    } else {
-      return true;
-    }
   }
 }
