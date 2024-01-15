@@ -180,7 +180,7 @@ class DatabaseManager {
   // iterate through all households to find the one the user is a part of
   static void addHouseholdToUser(String userId, String householdId) {
     DatabaseReference usersRef = _databaseInstance.ref("users/$userId");
-    usersRef.set({"householdId": householdId});
+    usersRef.update({"householdId": householdId});
   }
 
   static Future<String?> getUsersHousehold(String userId) async {
