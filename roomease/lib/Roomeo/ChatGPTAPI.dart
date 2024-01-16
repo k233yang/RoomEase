@@ -26,7 +26,7 @@ Future<String> getChatGPTResponse(String message, List<Message> context) async {
   for (var i = 0; i < context.length; i++) {
     print(context[i].text);
     contextMessages.add({
-      "role": context[i].sender.name == "chatgpt" ? "system" : "user",
+      "role": context[i].senderName == "chatgpt" ? "system" : "user",
       "content": context[i].text
     });
   }

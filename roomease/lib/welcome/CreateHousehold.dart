@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
-import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/MessageRoom.dart';
+import 'package:roomease/Roomeo/RoomeoUser.dart';
 
 import '../User.dart';
 
@@ -64,12 +64,22 @@ class _CreateHousehold extends State<CreateHousehold> {
                         CurrentHousehold.setCurrentHouseholdName(
                             householdNameController.text);
                         //TODO: add multiple chat rooms
-                        DatabaseManager.addMessageRoom(
-                            MessageRoom("messageRoomId", [], <User>[
-                          CurrentUser.getCurrentUser(),
-                          User("chatgpt", "useridchatgpt",
-                              CurrentHousehold.getCurrentHouseholdId())
-                        ]));
+                        DatabaseManager.addMessageRoom(MessageRoom(
+                            CurrentUser.getCurrentUserId() +
+                                RoomeoUser.user.userId,
+                            [],
+                            <User>[
+                              CurrentUser.getCurrentUser(),
+                              RoomeoUser.user
+                            ]));
+                        DatabaseManager.addMessageRoomIdToUser(
+                            CurrentUser.getCurrentUserId(),
+                            CurrentUser.getCurrentUserId() +
+                                RoomeoUser.user.userId);
+                        CurrentUser.setCurrentMessageRoomIds([
+                          CurrentUser.getCurrentUserId() +
+                              RoomeoUser.user.userId
+                        ]);
                         DatabaseManager.addHouseholdToUser(
                             CurrentUser.getCurrentUser().userId,
                             CurrentHousehold.getCurrentHouseholdId());

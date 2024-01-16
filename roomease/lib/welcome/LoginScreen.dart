@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
-import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/MessageRoom.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:roomease/Roomeo/RoomeoUser.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../User.dart' as RUser;
 
 class Login extends StatefulWidget {
@@ -79,9 +78,7 @@ class _LoginState extends State<Login> {
                               password: passwordController.text);
                           if (user != null) {
                             DatabaseManager.getUserName(user.user!.uid);
-                            CurrentUser.setCurrentUserId(
-                              user.user!.uid,
-                            );
+                            CurrentUser.setCurrentUserId(user.user!.uid);
                             // Checking if user is part of a household yet
                             String? householdId =
                                 await DatabaseManager.getUsersHousehold(
@@ -91,6 +88,31 @@ class _LoginState extends State<Login> {
                               CurrentHousehold.setCurrentHouseholdId(
                                   householdId);
                               DatabaseManager.updateHouseholdName(householdId);
+                              List<String>? messageRoomIds =
+                                  await DatabaseManager.getUserMessageRoomIds(
+                                      user.user!.uid);
+                              if (messageRoomIds != null) {
+                                CurrentUser.setCurrentMessageRoomIds(
+                                    messageRoomIds);
+                              } else {
+                                // Add message room for older users that don't have an entry in the DB
+                                DatabaseManager.addMessageRoom(MessageRoom(
+                                    CurrentUser.getCurrentUserId() +
+                                        RoomeoUser.user.userId,
+                                    [],
+                                    <RUser.User>[
+                                      CurrentUser.getCurrentUser(),
+                                      RoomeoUser.user
+                                    ]));
+                                DatabaseManager.addMessageRoomIdToUser(
+                                    user.user!.uid,
+                                    CurrentUser.getCurrentUserId() +
+                                        RoomeoUser.user.userId);
+                                CurrentUser.setCurrentMessageRoomIds([
+                                  CurrentUser.getCurrentUserId() +
+                                      RoomeoUser.user.userId
+                                ]);
+                              }
                               SharedPreferencesUtility.setValue(
                                   "isLoggedIn", true);
                               Navigator.pushNamedAndRemoveUntil(

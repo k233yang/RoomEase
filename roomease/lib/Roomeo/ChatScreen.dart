@@ -4,6 +4,7 @@ import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
+import 'package:roomease/Roomeo/RoomeoUser.dart';
 import '../Message.dart';
 import '../User.dart';
 import '../colors/ColorConstants.dart';
@@ -47,7 +48,8 @@ class _ChatScreen extends State<ChatScreen> {
         body: Container(
             color: ColorConstants.white,
             child: Column(children: [
-              DatabaseManager.messagesStreamBuilder("messageRoomId"),
+              DatabaseManager.messagesStreamBuilder(
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId),
               Center(child: chatTextField()),
             ])));
   }
@@ -60,15 +62,17 @@ class _ChatScreen extends State<ChatScreen> {
           // add the user message to the database, and get the key for this user's message
           String? userMessageKey;
           try {
-            userMessageKey = await DatabaseManager.addMessage("messageRoomId",
-                Message(message, CurrentUser.getCurrentUser(), DateTime.now()));
+            userMessageKey = await DatabaseManager.addMessage(
+                CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                Message(message, CurrentUser.getCurrentUserId(),
+                    CurrentUser.getCurrentUserName(), DateTime.now()));
           } catch (e) {
             print('Failed to add user message: $e');
           }
           //TODO: instead of local messagelist, pull list from DB and extract name to figure out
           //which side to display message on
-          messageList.add(
-              Message(message, CurrentUser.getCurrentUser(), DateTime.now()));
+          messageList.add(Message(message, CurrentUser.getCurrentUserId(),
+              CurrentUser.getCurrentUserName(), DateTime.now()));
           _controller.clear();
           textFieldFocusNode.requestFocus();
           setState(() {});
@@ -86,12 +90,16 @@ class _ChatScreen extends State<ChatScreen> {
           List<Message> contextMessageList = [];
           try {
             if (userResVector != null) {
-              List<String> messageIDList = await fetchTopMessages(userResVector,
-                  "messageroomid"); // contains the firebase ID's for the messages
+              List<String> messageIDList = await fetchTopMessages(
+                  userResVector,
+                  CurrentUser.getCurrentUserId() +
+                      RoomeoUser.user
+                          .userId); // contains the firebase ID's for the messages
               messageIDList.sort((a, b) => a.compareTo(b));
               for (var i = 0; i < messageIDList.length; i++) {
                 Message res = await DatabaseManager.getMessageFromID(
-                    "messageRoomId", messageIDList[i]);
+                    CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                    messageIDList[i]);
                 contextMessageList.add(res);
                 print('message $i: ${res.text}');
               }
@@ -107,7 +115,9 @@ class _ChatScreen extends State<ChatScreen> {
           try {
             if (userResVector != null && userMessageKey != null) {
               UpsertResponse userUpsertResponse = await insertVector(
-                  userResVector, "messageroomid", userMessageKey);
+                  userResVector,
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  userMessageKey);
             } else {
               if (userResVector == null) {
                 throw NullObjectError(
@@ -129,11 +139,11 @@ class _ChatScreen extends State<ChatScreen> {
                 await getChatGPTResponse(message, contextMessageList);
             try {
               chatGPTMessageKey = await DatabaseManager.addMessage(
-                  "messageRoomId",
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
                   Message(
                       chatGPTMessage,
-                      User("chatgpt", "useridchatgpt",
-                          CurrentHousehold.getCurrentHouseholdId()),
+                      RoomeoUser.user.userId,
+                      RoomeoUser.user.name,
                       DateTime.now())); // add chatGPT message to DB
             } catch (e) {
               print('Failed to add chatGPT message to firebase: $e');
@@ -158,7 +168,9 @@ class _ChatScreen extends State<ChatScreen> {
           try {
             if (chatGPTResVector != null && chatGPTMessageKey != null) {
               UpsertResponse userUpsertResponse = await insertVector(
-                  chatGPTResVector, "messageroomid", chatGPTMessageKey);
+                  chatGPTResVector,
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  chatGPTMessageKey);
             } else {
               if (userResVector == null) {
                 throw NullObjectError(
@@ -174,7 +186,7 @@ class _ChatScreen extends State<ChatScreen> {
           }
           //TODO: put chatbot's vector to vector DB:
           // userResVector.then((vector) => {
-          //   insertVector(vector, "messageroomid" /*TODO: pinecone starter plan only supports 1 index. Need to upgrade plan, and replace roomID with actual room ID */
+          //   insertVector(vector, CurrentUser.getCurrentUserId() + RoomeoUser.user.userId /*TODO: pinecone starter plan only supports 1 index. Need to upgrade plan, and replace roomID with actual room ID */
           //   , );
           // });
         },
@@ -200,7 +212,7 @@ Widget buildListMessage(List<Message> messages) {
 
 Widget chatMessage(Message message) {
   MainAxisAlignment alignment;
-  if (message.sender.userId == CurrentUser.getCurrentUserId()) {
+  if (message.senderId == CurrentUser.getCurrentUserId()) {
     alignment = MainAxisAlignment.end;
   } else {
     alignment = MainAxisAlignment.start;
@@ -209,7 +221,7 @@ Widget chatMessage(Message message) {
     mainAxisAlignment: alignment,
     children: [
       BubbleSpecialThree(
-        isSender: message.sender.userId == CurrentUser.getCurrentUserId(),
+        isSender: message.senderId == CurrentUser.getCurrentUserId(),
         text: message.text,
         color: ColorConstants.lightPurple,
         textStyle: TextStyle(color: Colors.white, fontSize: 16),

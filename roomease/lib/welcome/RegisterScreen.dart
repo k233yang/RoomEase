@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/CurrentUser.dart';
-import 'package:roomease/DatabaseManager.dart';
-import 'package:roomease/HomeScreen.dart';
-import 'package:roomease/MessageRoom.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
-import '../User.dart' as RUser;
 
 class Register extends StatefulWidget {
   @override

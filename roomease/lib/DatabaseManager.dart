@@ -16,9 +16,8 @@ class DatabaseManager {
   // ------------------------ USER OPERATIONS ------------------------
 
   static void addUser(User user) {
-    DatabaseReference usersRef =
-        _databaseInstance.ref("users/${user.userId}/name");
-    usersRef.set(user.name);
+    DatabaseReference usersRef = _databaseInstance.ref("users/${user.userId}");
+    usersRef.update({"name": user.name});
   }
 
   // Used when logging in so we can keep track of which household the user belongs to.
@@ -59,6 +58,34 @@ class DatabaseManager {
         });
   }
 
+  static Future<List<String>?> getUserMessageRoomIds(String userId) async {
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/messageRoomIds");
+    DatabaseEvent event = await usersRef.once();
+    return event.snapshot.value as List<String>?;
+  }
+
+  static void addMessageRoomIdToUser(
+      String userId, String messageRoomId) async {
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/messageRoomIds");
+    TransactionResult result =
+        await usersRef.runTransaction((Object? messageRoomIds) {
+      if (messageRoomIds == null) {
+        // No messageRoomIds, make new list
+        List<String> newMessageRoomIds = [messageRoomId];
+        CurrentUser.setCurrentMessageRoomIds(newMessageRoomIds);
+        return Transaction.success(newMessageRoomIds);
+      }
+
+      List<String> _messageRoomIds = List<String>.from(messageRoomIds as List);
+      _messageRoomIds.add(messageRoomId);
+      CurrentUser.setCurrentMessageRoomIds(_messageRoomIds);
+      // Return the new data.
+      return Transaction.success(_messageRoomIds);
+    });
+  }
+
   // ------------------------ END USER OPERATIONS ------------------------
 
   // ------------------------ MESSAGE OPERATIONS ------------------------
@@ -70,7 +97,7 @@ class DatabaseManager {
     }
     DatabaseReference messageRoomsRef =
         _databaseInstance.ref("messageRooms/${messageRoom.messageRoomId}");
-    messageRoomsRef.set({"users": userIds, "messages": <String>[]});
+    messageRoomsRef.update({"users": userIds, "messages": <String>[]});
   }
 
   static Future<String> addMessage(
@@ -84,9 +111,9 @@ class DatabaseManager {
     }
     DatabaseReference messageRef =
         _databaseInstance.ref("messageRooms/$messageRoomId/messages/$newKey");
-    messageRef.set({
-      'senderName': message.sender.name,
-      'senderId': message.sender.userId,
+    messageRef.update({
+      'senderName': message.senderName,
+      'senderId': message.senderId,
       'timestamp': message.timestamp.toString(),
       'text': message.text
     });
@@ -141,10 +168,7 @@ class DatabaseManager {
               }
 
               messageList.add(Message(
-                  text!,
-                  User(senderName!, senderId!,
-                      CurrentHousehold.getCurrentHouseholdId()),
-                  DateTime.parse(timestamp!)));
+                  text!, senderId!, senderName!, DateTime.parse(timestamp!)));
             }
 
             messageList.sort((a, b) {
@@ -205,7 +229,7 @@ class DatabaseManager {
   static Future<Message> getMessageFromID(
       String messageRoomID, String messageID) async {
     DatabaseReference messageRef = _databaseInstance
-        .reference()
+        .ref()
         .child("messageRooms/$messageRoomID/messages/$messageID");
     DatabaseEvent event = await messageRef.once();
     DataSnapshot snapshot = event.snapshot;
@@ -213,9 +237,7 @@ class DatabaseManager {
       Map<String, dynamic> data =
           Map<String, dynamic>.from(snapshot.value as Map);
       if (data.containsKey('text') && data.containsKey('senderName')) {
-        return Message(
-            data['text'],
-            User(data['senderName'], data['senderId'], 'dummy'),
+        return Message(data['text'], data['senderId'], data['senderName'],
             DateTime.parse(data['timestamp']));
       } else {
         return Future.error('no text field in queried message');

@@ -40,14 +40,14 @@ class WelcomeBody extends StatelessWidget {
                     buttonText: "Debug Login",
                     onButtonPress: () async {
                       final user = await _auth.signInWithEmailAndPassword(
-                          email: "testing@testing.com", password: "testing123");
+                          email: "testing@testing.com", password: "123456");
                       if (user != null) {
                         DatabaseManager.getUserName(user.user!.uid);
                         CurrentUser.setCurrentUserId(
                           user.user!.uid,
                         );
-                        CurrentHousehold.setCurrentHouseholdId("kIDMQ5");
-                        DatabaseManager.updateHouseholdName("kIDMQ5");
+                        CurrentHousehold.setCurrentHouseholdId("uYjY33");
+                        DatabaseManager.updateHouseholdName("uYjY33");
                         SharedPreferencesUtility.setValue("isLoggedIn", true);
                         Navigator.pushNamedAndRemoveUntil(
                             context, "/home", (_) => false);

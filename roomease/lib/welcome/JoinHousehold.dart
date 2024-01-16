@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
-import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/MessageRoom.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:roomease/Roomeo/RoomeoUser.dart';
 import '../User.dart' as RUser;
 
 class JoinHousehold extends StatefulWidget {
@@ -63,12 +62,22 @@ class _JoinHousehold extends State<JoinHousehold> {
                               CurrentUser.getCurrentUser(),
                               householdCodeController.text);
                           //TODO: add multiple chat rooms
-                          DatabaseManager.addMessageRoom(
-                              MessageRoom("messageRoomId", [], <RUser.User>[
-                            CurrentUser.getCurrentUser(),
-                            RUser.User("chatgpt", "useridchatgpt",
-                                householdCodeController.text)
-                          ]));
+                          DatabaseManager.addMessageRoom(MessageRoom(
+                              CurrentUser.getCurrentUserId() +
+                                  RoomeoUser.user.userId,
+                              [],
+                              <RUser.User>[
+                                CurrentUser.getCurrentUser(),
+                                RoomeoUser.user
+                              ]));
+                          DatabaseManager.addMessageRoomIdToUser(
+                              CurrentUser.getCurrentUserId(),
+                              CurrentUser.getCurrentUserId() +
+                                  RoomeoUser.user.userId);
+                          CurrentUser.setCurrentMessageRoomIds([
+                            CurrentUser.getCurrentUserId() +
+                                RoomeoUser.user.userId
+                          ]);
                           CurrentHousehold.setCurrentHouseholdId(
                               householdCodeController.text);
                           DatabaseManager.updateHouseholdName(

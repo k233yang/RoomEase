@@ -17,6 +17,9 @@ class SharedPreferencesUtility {
       case int:
         sharedPrefs.setInt(key, value as int);
         break;
+      case List<String>:
+        sharedPrefs.setStringList(key, value as List<String>);
+        break;
       default:
     }
   }
@@ -31,6 +34,10 @@ class SharedPreferencesUtility {
 
   static int getInt(String key) {
     return sharedPrefs.getInt(key) ?? -1;
+  }
+
+  static List<String> getStringList(String key) {
+    return sharedPrefs.getStringList(key) ?? List.empty();
   }
 
   static void clear() async {

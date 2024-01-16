@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:roomease/Roomeo/RoomeoUser.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'User.dart';
 
@@ -11,7 +12,13 @@ class CurrentUser {
     String userId = SharedPreferencesUtility.getString("userId");
     String userName = SharedPreferencesUtility.getString("userName");
     String householdId = SharedPreferencesUtility.getString("householdId");
-    return User(userName, userId, householdId);
+    String userStatus = SharedPreferencesUtility.getString("userStatus");
+    List<String> userStatusList =
+        SharedPreferencesUtility.getStringList("userStatusList");
+    List<String> messageRoomIds =
+        SharedPreferencesUtility.getStringList("messageRoomIds");
+    return User(userName, userId, householdId, userStatus, userStatusList,
+        messageRoomIds);
   }
 
   static String getCurrentUserId() {
@@ -20,6 +27,25 @@ class CurrentUser {
 
   static String getCurrentUserName() {
     return SharedPreferencesUtility.getString("userName");
+  }
+
+  static List<String> getCurrentMessageRoomIds() {
+    return SharedPreferencesUtility.getStringList("messageRoomIds");
+  }
+
+  static String getCurrentRoomeoMessageRoomId() {
+    List<String> messageRoomIds =
+        SharedPreferencesUtility.getStringList("messageRoomIds");
+    for (var id in messageRoomIds) {
+      if (id.contains(RoomeoUser.user.userId)) {
+        return id;
+      }
+    }
+    return "";
+  }
+
+  static void setCurrentMessageRoomIds(List<String> messageRoomIds) {
+    SharedPreferencesUtility.setValue("messageRoomIds", messageRoomIds);
   }
 
   static void setCurrentUserId(String userId) {
