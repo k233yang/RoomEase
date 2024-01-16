@@ -308,8 +308,8 @@ class DatabaseManager {
       "details": details,
       "deadline": deadline,
       "score": score,
-      "createdByUser": createdByUserId,
-      "assignedUser": null,
+      "createdByUserId": createdByUserId,
+      "assignedUserId": null,
     }).then((value) {
       print("Successfully added chore");
     }).catchError((value) {
