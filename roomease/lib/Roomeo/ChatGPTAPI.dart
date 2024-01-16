@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../secret.dart' show PineConeAPIKey;
+import '../secret.dart' show OpenAIApiKey;
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Message.dart';
 import 'package:roomease/Roomeo/ChatScreen.dart';
@@ -8,12 +8,11 @@ import 'package:roomease/Roomeo/ChatScreen.dart';
 const apiURL = "https://api.openai.com/v1/chat/completions";
 // https://platform.openai.com/docs/api-reference/chat/create
 
-/*gets chatGPT's response by: Adding the provided message to firebase, querying the firebase
-and pushing all results to a list, and sending the list to chatGPT for a response*/
-Future<String> getChatGPTResponse(String message) async {
+/*gets chatGPT's response based on provided context*/
+Future<String> getChatGPTResponse(String message, List<Message> context) async {
   final Map<String, String> requestHeaders = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer $PineConeAPIKey"
+    "Authorization": "Bearer $OpenAIApiKey"
   };
 
   List<Map<String, String>> requestDataMessage = [
@@ -23,14 +22,18 @@ Future<String> getChatGPTResponse(String message) async {
     }
   ];
 
-  List<Map<String, String>> allMessages =
-      await DatabaseManager.getMessages("messageRoomId");
-
-  if (allMessages != []) {
-    requestDataMessage.addAll(allMessages);
+  List<Map<String, String>> contextMessages = [];
+  for (var i = 0; i < context.length; i++) {
+    print(context[i].text);
+    contextMessages.add({
+      "role": context[i].sender.name == "chatgpt" ? "system" : "user",
+      "content": context[i].text
+    });
   }
-
+  requestDataMessage.addAll(contextMessages);
   requestDataMessage.add({"role": "user", "content": message});
+
+  print(context.length);
 
   final Map<String, dynamic> requestData = {
     "model": "gpt-3.5-turbo",

@@ -38,9 +38,8 @@ Future<UpsertResponse> insertVector(
 Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
     {int messagesToFetch = 10}) async {
   // get the index of the room
-  final Index index = await client.describeIndex(
-    indexName: roomID,
-  );
+  final Index index =
+      await client.describeIndex(environment: 'gcp-starter', indexName: roomID);
   final indexName = index.name;
   final projectID = index.projectId;
 
@@ -54,6 +53,7 @@ Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
   List<String> res = [];
 
   for (var i = 0; i < vectorMatches.length; i++) {
+    //print(vectorMatches[i].id);
     res.add(vectorMatches[i].id);
   }
 

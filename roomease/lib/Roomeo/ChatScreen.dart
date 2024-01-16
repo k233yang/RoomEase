@@ -73,25 +73,6 @@ class _ChatScreen extends State<ChatScreen> {
           textFieldFocusNode.requestFocus();
           setState(() {});
 
-          // get chatGPT's response to user's message, add response to database as well as get response's message key
-          String? gptMessageKey;
-          String? gptMessage;
-          try {
-            gptMessage = await getChatGPTResponse(message);
-            try {
-              gptMessageKey = await DatabaseManager.addMessage(
-                  "messageRoomId",
-                  Message(
-                      gptMessage,
-                      User("chatgpt", "useridchatgpt",
-                          CurrentHousehold.getCurrentHouseholdId()),
-                      DateTime.now())); // add chatGPT message to DB
-            } catch (e) {
-              print('Failed to add chatGPT message: $e');
-            }
-          } catch (e) {
-            print('failed to get chatGPT response: e');
-          }
           // fetch the user message's generated vector:
           List<double>? userResVector;
           try {
@@ -101,11 +82,70 @@ class _ChatScreen extends State<ChatScreen> {
             print('Failed to get user vector for input message: $message.');
             print(': $e');
           }
+          //Query the vDB, then firebase for most relevant convos, and feed that info to chatGPT as context
+          List<Message> contextMessageList = [];
+          try {
+            if (userResVector != null) {
+              List<String> messageIDList = await fetchTopMessages(userResVector,
+                  "messageroomid"); // contains the firebase ID's for the messages
+              messageIDList.sort((a, b) => a.compareTo(b));
+              for (var i = 0; i < messageIDList.length; i++) {
+                Message res = await DatabaseManager.getMessageFromID(
+                    "messageRoomId", messageIDList[i]);
+                contextMessageList.add(res);
+                print('message $i: ${res.text}');
+              }
+            } else {
+              throw NullObjectError(
+                  'Querying vector DB failed: null user response vector!');
+            }
+          } catch (e) {
+            print(e);
+          }
+          print('Fetched firebase stuff');
+          // put user message vector to vector DB
+          try {
+            if (userResVector != null && userMessageKey != null) {
+              UpsertResponse userUpsertResponse = await insertVector(
+                  userResVector, "messageroomid", userMessageKey);
+            } else {
+              if (userResVector == null) {
+                throw NullObjectError(
+                    'Insertion into vector DB failed: null user response vector!');
+              }
+              if (userMessageKey == null) {
+                throw NullObjectError(
+                    'Insertion into vector DB failed: null user message key!');
+              }
+            }
+          } catch (e) {
+            print(e);
+          }
+          // get chatGPT's response to user's message, add response to firebase as well as get response's message key
+          String? chatGPTMessageKey;
+          String? chatGPTMessage;
+          try {
+            chatGPTMessage =
+                await getChatGPTResponse(message, contextMessageList);
+            try {
+              chatGPTMessageKey = await DatabaseManager.addMessage(
+                  "messageRoomId",
+                  Message(
+                      chatGPTMessage,
+                      User("chatgpt", "useridchatgpt",
+                          CurrentHousehold.getCurrentHouseholdId()),
+                      DateTime.now())); // add chatGPT message to DB
+            } catch (e) {
+              print('Failed to add chatGPT message to firebase: $e');
+            }
+          } catch (e) {
+            print('failed to get chatGPT response: $e');
+          }
           // fetch chatGPT message's generated vector
           List<double>? chatGPTResVector;
           try {
-            if (gptMessage != null) {
-              chatGPTResVector = await getVectorEmbeddingArray(gptMessage);
+            if (chatGPTMessage != null) {
+              chatGPTResVector = await getVectorEmbeddingArray(chatGPTMessage);
               print(chatGPTResVector);
             } else {
               throw NullObjectError('Null gptMessage!');
@@ -114,24 +154,24 @@ class _ChatScreen extends State<ChatScreen> {
             print('Failed to get chatGPT vector for input message: $message.');
             print(': $e');
           }
-
-          // put user message vector to vector DB
+          // put chatGPT vector into DB:
           try {
-            if (userResVector != null && userMessageKey != null) {
+            if (chatGPTResVector != null && chatGPTMessageKey != null) {
               UpsertResponse userUpsertResponse = await insertVector(
-                  userResVector, "messageroomid", userMessageKey);
+                  chatGPTResVector, "messageroomid", chatGPTMessageKey);
             } else {
               if (userResVector == null) {
-                throw NullObjectError('Null user response vector!');
+                throw NullObjectError(
+                    'Insertion into vector DB failed: null chatGPT response vector!');
               }
               if (userMessageKey == null) {
-                throw NullObjectError('Null user message key!');
+                throw NullObjectError(
+                    'Insertion into vector DB failed: null chatGPT message key!');
               }
             }
           } catch (e) {
             print(e);
           }
-          //TODO: query the vDB -> firebase for most relevant convos, and feed that info to chatGPT as context
           //TODO: put chatbot's vector to vector DB:
           // userResVector.then((vector) => {
           //   insertVector(vector, "messageroomid" /*TODO: pinecone starter plan only supports 1 index. Need to upgrade plan, and replace roomID with actual room ID */
