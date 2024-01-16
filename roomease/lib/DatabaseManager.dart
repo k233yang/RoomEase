@@ -314,28 +314,28 @@ class DatabaseManager {
 
   // ------------------------ CHORE OPERATIONS ------------------------
 
-  static void addChore(String name, String details, String deadline, int score,
-      User? createdByuser) async {
-    DatabaseReference choresRef = _databaseInstance.ref("chores");
+  static void addChore(String householdCode, String name, String details, String deadline, int score,
+      String createdByUserId) async {
+    DatabaseReference choresRef = _databaseInstance.ref("households/$householdCode/chores");
 
     final choreKey = choresRef.push().key;
     if (choreKey == null) {
       throw Exception('Chore key is null');
     }
 
-    DatabaseReference choreRef = _databaseInstance.ref("chores/$choreKey");
+    DatabaseReference choreRef = _databaseInstance.ref("households/$householdCode/chores/$choreKey");
 
     choreRef.set({
       "name": name,
       "details": details,
       "deadline": deadline,
       "score": score,
-      "createdByUser": createdByuser,
-      "assignedUser": null,
+      "createdByUserId": createdByUserId,
+      "assignedUserId": null,
     }).then((value) {
       print("Successfully added chore");
     }).catchError((value) {
-      print('Error adding chore');
+      print(value);
       throw Exception('Could not add chore');
     });
   }

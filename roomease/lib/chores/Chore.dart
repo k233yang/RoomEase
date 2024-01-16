@@ -6,8 +6,8 @@ class Chore {
   String details;
   String deadline;
   int score;
-  User? createdByUser;
-  User? assignedUser;
+  String createdByUserId;
+  String? assignedUserId;
 
-  Chore(this.id, this.name, this.details, this.deadline, this.score, this.createdByUser, this.assignedUser);
+  Chore(this.id, this.name, this.details, this.deadline, this.score, this.createdByUserId, this.assignedUserId);
 }
