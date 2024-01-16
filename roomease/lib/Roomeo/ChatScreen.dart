@@ -90,7 +90,7 @@ class _ChatScreen extends State<ChatScreen> {
               print('Failed to add chatGPT message: $e');
             }
           } catch (e) {
-            print('failed to get chatGPT response: e');
+            print('failed to get chatGPT response: $e');
           }
           // fetch the user message's generated vector:
           List<double>? userResVector;

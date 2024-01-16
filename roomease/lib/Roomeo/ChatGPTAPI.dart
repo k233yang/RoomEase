@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../secret.dart' show PineConeAPIKey;
+import '../secret.dart' show OpenAIApiKey;
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Message.dart';
 import 'package:roomease/Roomeo/ChatScreen.dart';
@@ -13,7 +13,7 @@ and pushing all results to a list, and sending the list to chatGPT for a respons
 Future<String> getChatGPTResponse(String message) async {
   final Map<String, String> requestHeaders = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer $PineConeAPIKey"
+    "Authorization": "Bearer $OpenAIApiKey"
   };
 
   List<Map<String, String>> requestDataMessage = [
