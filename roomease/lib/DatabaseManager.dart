@@ -179,15 +179,16 @@ class DatabaseManager {
   // Otherwise if we login with same user, we can't find the household unless we
   // iterate through all households to find the one the user is a part of
   static void addHouseholdToUser(String userId, String householdId) {
-    DatabaseReference usersRef = _databaseInstance.ref("users/$userId");
-    usersRef.set({"householdId": householdId});
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/householdId");
+    usersRef.set(householdId);
   }
 
   static Future<String?> getUsersHousehold(String userId) async {
     DatabaseReference usersRef =
         _databaseInstance.ref("users/$userId/householdId");
     DatabaseEvent event = await usersRef.once();
-    return event.snapshot.value as String;
+    return event.snapshot.value as String?;
   }
 
   static void getUserName(String userId) {
