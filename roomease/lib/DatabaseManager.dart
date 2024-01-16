@@ -187,7 +187,7 @@ class DatabaseManager {
     DatabaseReference usersRef =
         _databaseInstance.ref("users/$userId/householdId");
     DatabaseEvent event = await usersRef.once();
-    return event.snapshot.value as String?;
+    return event.snapshot.value as String;
   }
 
   static void getUserName(String userId) {
@@ -251,6 +251,29 @@ class DatabaseManager {
       return messages;
     } else {
       return [];
+    }
+  }
+
+  static Future<Message> getMessageFromID(
+      String messageRoomID, String messageID) async {
+    DatabaseReference messageRef = _databaseInstance
+        .reference()
+        .child("messageRooms/$messageRoomID/messages/$messageID");
+    DatabaseEvent event = await messageRef.once();
+    DataSnapshot snapshot = event.snapshot;
+    if (snapshot.value != null) {
+      Map<String, dynamic> data =
+          Map<String, dynamic>.from(snapshot.value as Map);
+      if (data.containsKey('text') && data.containsKey('senderName')) {
+        return Message(
+            data['text'],
+            User(data['senderName'], data['senderId'], 'dummy'),
+            DateTime.parse(data['timestamp']));
+      } else {
+        return Future.error('no text field in queried message');
+      }
+    } else {
+      return Future.error('Snapshot value is null');
     }
   }
 
