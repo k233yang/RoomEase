@@ -13,11 +13,55 @@ import 'User.dart';
 class DatabaseManager {
   static FirebaseDatabase _databaseInstance = FirebaseDatabase.instance;
 
+  // ------------------------ USER OPERATIONS ------------------------
+
   static void addUser(User user) {
     DatabaseReference usersRef =
         _databaseInstance.ref("users/${user.userId}/name");
     usersRef.set(user.name);
   }
+
+  // Used when logging in so we can keep track of which household the user belongs to.
+  // Otherwise if we login with same user, we can't find the household unless we
+  // iterate through all households to find the one the user is a part of
+  static void addHouseholdToUser(String userId, String householdId) {
+    DatabaseReference usersRef = _databaseInstance.ref("users/$userId");
+    usersRef.update({"householdId": householdId});
+  }
+
+  static Future<String?> getUsersHousehold(String userId) async {
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/householdId");
+    DatabaseEvent event = await usersRef.once();
+    return event.snapshot.value as String;
+  }
+
+  static void getUserName(String userId) {
+    DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
+    CurrentUser.userNameSubscription.cancel();
+    CurrentUser.userNameSubscription =
+        usersRef.onValue.listen((DatabaseEvent event) {
+      CurrentUser.setCurrentUserName(event.snapshot.value as String);
+    });
+  }
+
+  static StreamBuilder userNameStreamBuilder(String userId) {
+    DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
+    return StreamBuilder(
+        stream: usersRef.onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Text(
+                'Hello ${(snapshot.data! as DatabaseEvent).snapshot.value as String}!');
+          } else {
+            return Text("");
+          }
+        });
+  }
+
+  // ------------------------ END USER OPERATIONS ------------------------
+
+  // ------------------------ MESSAGE OPERATIONS ------------------------
 
   static void addMessageRoom(MessageRoom messageRoom) {
     List<String> userIds = [];
@@ -116,105 +160,9 @@ class DatabaseManager {
         });
   }
 
-  static Future<void> addHousehold(User user, String name) async {
-    Random _rnd = Random();
-    String householdCode = DatabaseManager.getRandomString(6, _rnd);
-
-    bool householdExists = await checkHouseholdExists(householdCode);
-
-    while (householdExists) {
-      _rnd = Random();
-      householdCode = DatabaseManager.getRandomString(6, _rnd);
-      householdExists = await checkHouseholdExists(householdCode);
-    }
-
-    DatabaseReference householdRef =
-        _databaseInstance.ref("households/$householdCode");
-    householdRef.set({
-      "users": <String>[user.userId],
-      "name": name
-    });
-    CurrentHousehold.setCurrentHouseholdId(householdCode);
-  }
-
-  static void joinHousehold(User user, String householdCode) async {
-    DatabaseReference householdRef =
-        _databaseInstance.ref("households/$householdCode/users");
-
-    TransactionResult result =
-        await householdRef.runTransaction((Object? users) {
-      if (users == null) {
-        // No household
-        return Transaction.success(users);
-      }
-
-      List<String> _users = List<String>.from(users as List);
-      _users.add(user.userId);
-      // Return the new data.
-      return Transaction.success(_users);
-    });
-  }
-
-  static Future<bool> checkHouseholdExists(String householdCode) async {
-    DatabaseReference householdRef =
-        _databaseInstance.ref("households/$householdCode");
-    DatabaseEvent event = await householdRef.once();
-    if (event.snapshot.value == null) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  static void updateHouseholdName(String householdId) {
-    DatabaseReference householdRef =
-        _databaseInstance.ref("households/$householdId/name");
-
-    householdRef.onValue.listen((DatabaseEvent event) {
-      CurrentHousehold.setCurrentHouseholdName(event.snapshot.value as String);
-    });
-  }
-
-  // Used when logging in so we can keep track of which household the user belongs to.
-  // Otherwise if we login with same user, we can't find the household unless we
-  // iterate through all households to find the one the user is a part of
-  static void addHouseholdToUser(String userId, String householdId) {
-    DatabaseReference usersRef = _databaseInstance.ref("users/$userId");
-    usersRef.update({"householdId": householdId});
-  }
-
-  static Future<String?> getUsersHousehold(String userId) async {
-    DatabaseReference usersRef =
-        _databaseInstance.ref("users/$userId/householdId");
-    DatabaseEvent event = await usersRef.once();
-    return event.snapshot.value as String;
-  }
-
-  static void getUserName(String userId) {
-    DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
-    CurrentUser.userNameSubscription.cancel();
-    CurrentUser.userNameSubscription =
-        usersRef.onValue.listen((DatabaseEvent event) {
-      CurrentUser.setCurrentUserName(event.snapshot.value as String);
-    });
-  }
-
-  static StreamBuilder userNameStreamBuilder(String userId) {
-    DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
-    return StreamBuilder(
-        stream: usersRef.onValue,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Text(
-                'Hello ${(snapshot.data! as DatabaseEvent).snapshot.value as String}!');
-          } else {
-            return Text("");
-          }
-        });
-  }
-
   static const _chars =
       'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+
   static String getRandomString(int length, Random _rnd) {
     return String.fromCharCodes(Iterable.generate(
         length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
@@ -277,6 +225,73 @@ class DatabaseManager {
     }
   }
 
+  // ------------------------ END MESSAGE OPERATIONS ------------------------
+
+  // ------------------------ HOUSEHOLD OPERATIONS ------------------------
+
+  static Future<void> addHousehold(User user, String name) async {
+    Random _rnd = Random();
+    String householdCode = DatabaseManager.getRandomString(6, _rnd);
+
+    bool householdExists = await checkHouseholdExists(householdCode);
+
+    while (householdExists) {
+      _rnd = Random();
+      householdCode = DatabaseManager.getRandomString(6, _rnd);
+      householdExists = await checkHouseholdExists(householdCode);
+    }
+
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdCode");
+    householdRef.set({
+      "users": <String>[user.userId],
+      "name": name
+    });
+    CurrentHousehold.setCurrentHouseholdId(householdCode);
+  }
+
+  static void joinHousehold(User user, String householdCode) async {
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdCode/users");
+
+    TransactionResult result =
+        await householdRef.runTransaction((Object? users) {
+      if (users == null) {
+        // No household
+        return Transaction.success(users);
+      }
+
+      List<String> _users = List<String>.from(users as List);
+      _users.add(user.userId);
+      // Return the new data.
+      return Transaction.success(_users);
+    });
+  }
+
+  static Future<bool> checkHouseholdExists(String householdCode) async {
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdCode");
+    DatabaseEvent event = await householdRef.once();
+    if (event.snapshot.value == null) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  static void updateHouseholdName(String householdId) {
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdId/name");
+
+    householdRef.onValue.listen((DatabaseEvent event) {
+      CurrentHousehold.setCurrentHouseholdName(event.snapshot.value as String);
+    });
+  }
+
+  // ------------------------ END HOUSEHOLD OPERATIONS ------------------------
+
+  // ------------------------ CHORE OPERATIONS ------------------------
+
   static void addChore(String name, String details, String deadline, int score,
       User? createdByuser) async {
     DatabaseReference choresRef = _databaseInstance.ref("chores");
@@ -302,4 +317,6 @@ class DatabaseManager {
       throw Exception('Could not add chore');
     });
   }
+
+  // ------------------------ END CHORE OPERATIONS ------------------------
 }
