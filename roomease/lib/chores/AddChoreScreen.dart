@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
 import '../colors/ColorConstants.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
@@ -160,11 +161,12 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                     if (_formKey.currentState!.validate()) { 
                       try {
                         DatabaseManager.addChore(
+                          CurrentHousehold.getCurrentHouseholdId(),
                           nameController.text, 
                           detailsController.text, 
                           deadlineController.text, 
                           scoreVote, 
-                          null
+                          CurrentUser.getCurrentUserId()
                         );
                       } catch (e) {
                         print('Failed to add chore: $e');
