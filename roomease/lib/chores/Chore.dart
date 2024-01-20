@@ -1,4 +1,5 @@
 import 'package:roomease/User.dart';
+import 'ChoreEnums.dart';
 
 class Chore {
   String id;
@@ -8,6 +9,7 @@ class Chore {
   int score;
   String createdByUserId;
   String? assignedUserId;
+  String status;
 
-  Chore(this.id, this.name, this.details, this.deadline, this.score, this.createdByUserId, this.assignedUserId);
+  Chore(this.id, this.name, this.details, this.deadline, this.score, this.createdByUserId, this.assignedUserId, this.status);
 }

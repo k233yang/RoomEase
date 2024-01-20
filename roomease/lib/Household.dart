@@ -5,7 +5,9 @@ class Household {
   String name;
   String id;
   List<User> users;
-  List<Chore> chores;
+  List<Chore> choresToDo;
+  List<Chore> choresInProgress;
+  List<Chore> choresCompleted;
 
-  Household(this.name, this.id, this.users, this.chores);
+  Household(this.name, this.id, this.users, this.choresToDo, this.choresInProgress, this.choresCompleted);
 }

@@ -9,6 +9,7 @@ import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
 import 'User.dart';
+import 'chores/ChoreEnums.dart';
 
 class DatabaseManager {
   static FirebaseDatabase _databaseInstance = FirebaseDatabase.instance;
@@ -316,14 +317,14 @@ class DatabaseManager {
 
   static void addChore(String householdCode, String name, String details, String deadline, int score,
       String createdByUserId) async {
-    DatabaseReference choresRef = _databaseInstance.ref("households/$householdCode/chores");
+    DatabaseReference choresRef = _databaseInstance.ref("households/$householdCode/choresToDo");
 
     final choreKey = choresRef.push().key;
     if (choreKey == null) {
       throw Exception('Chore key is null');
     }
 
-    DatabaseReference choreRef = _databaseInstance.ref("households/$householdCode/chores/$choreKey");
+    DatabaseReference choreRef = _databaseInstance.ref("households/$householdCode/choresToDo/$choreKey");
 
     choreRef.set({
       "name": name,
@@ -332,6 +333,7 @@ class DatabaseManager {
       "score": score,
       "createdByUserId": createdByUserId,
       "assignedUserId": null,
+      "status": "toDo"
     }).then((value) {
       print("Successfully added chore");
     }).catchError((value) {
