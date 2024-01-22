@@ -57,34 +57,7 @@ class _JoinHousehold extends State<JoinHousehold> {
                             await DatabaseManager.checkHouseholdExists(
                                 householdCodeController.text);
                         if (householdExists) {
-                          DatabaseManager.addUser(CurrentUser.getCurrentUser());
-                          DatabaseManager.joinHousehold(
-                              CurrentUser.getCurrentUser(),
-                              householdCodeController.text);
-                          //TODO: add multiple chat rooms
-                          DatabaseManager.addMessageRoom(MessageRoom(
-                              CurrentUser.getCurrentUserId() +
-                                  RoomeoUser.user.userId,
-                              [],
-                              <RUser.User>[
-                                CurrentUser.getCurrentUser(),
-                                RoomeoUser.user
-                              ]));
-                          DatabaseManager.addMessageRoomIdToUser(
-                              CurrentUser.getCurrentUserId(),
-                              CurrentUser.getCurrentUserId() +
-                                  RoomeoUser.user.userId);
-                          CurrentUser.setCurrentMessageRoomIds([
-                            CurrentUser.getCurrentUserId() +
-                                RoomeoUser.user.userId
-                          ]);
-                          CurrentHousehold.setCurrentHouseholdId(
-                              householdCodeController.text);
-                          DatabaseManager.updateHouseholdName(
-                              householdCodeController.text);
-                          DatabaseManager.addHouseholdToUser(
-                              CurrentUser.getCurrentUser().userId,
-                              householdCodeController.text);
+                          updateUserInformation();
                           Navigator.pushNamedAndRemoveUntil(
                               context, "/home", (_) => false);
                         } else {
@@ -102,5 +75,39 @@ class _JoinHousehold extends State<JoinHousehold> {
         ),
       ),
     );
+  }
+
+  void updateUserInformation() async {
+    DatabaseManager.addUser(CurrentUser.getCurrentUser());
+    DatabaseManager.joinHousehold(
+        CurrentUser.getCurrentUser(), householdCodeController.text);
+
+    // Update user message rooms
+    DatabaseManager.addMessageRoom(MessageRoom(
+        CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+        [],
+        <RUser.User>[CurrentUser.getCurrentUser(), RoomeoUser.user]));
+    DatabaseManager.addMessageRoomIdToUser(CurrentUser.getCurrentUserId(),
+        CurrentUser.getCurrentUserId() + RoomeoUser.user.userId);
+    CurrentUser.setCurrentMessageRoomIds(
+        [CurrentUser.getCurrentUserId() + RoomeoUser.user.userId]);
+
+    // Update user household
+    CurrentHousehold.setCurrentHouseholdId(householdCodeController.text);
+    String householdName =
+        await DatabaseManager.getHouseholdName(householdCodeController.text);
+    CurrentHousehold.setCurrentHouseholdName(householdName);
+    DatabaseManager.addHouseholdToUser(
+        CurrentUser.getCurrentUser().userId, householdCodeController.text);
+
+    // Update user status
+    await DatabaseManager.addStatusToUserStatusList(
+        "Home", CurrentUser.getCurrentUserId());
+    await DatabaseManager.addStatusToUserStatusList(
+        "Away", CurrentUser.getCurrentUserId());
+    DatabaseManager.setUserCurrentStatus(
+        "Home", CurrentUser.getCurrentUserId());
+    CurrentUser.setCurrentUserStatusList(["Home", "Away"]);
+    CurrentUser.setCurrentUserStatus("Home");
   }
 }

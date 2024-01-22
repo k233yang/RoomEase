@@ -54,35 +54,7 @@ class _CreateHousehold extends State<CreateHousehold> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        DatabaseManager.addUser(CurrentUser.getCurrentUser());
-                        DatabaseManager.getUserName(
-                            CurrentUser.getCurrentUserId());
-                        // Add household should add household to CurrentHousehold
-                        await DatabaseManager.addHousehold(
-                            CurrentUser.getCurrentUser(),
-                            householdNameController.text);
-                        CurrentHousehold.setCurrentHouseholdName(
-                            householdNameController.text);
-                        //TODO: add multiple chat rooms
-                        DatabaseManager.addMessageRoom(MessageRoom(
-                            CurrentUser.getCurrentUserId() +
-                                RoomeoUser.user.userId,
-                            [],
-                            <User>[
-                              CurrentUser.getCurrentUser(),
-                              RoomeoUser.user
-                            ]));
-                        DatabaseManager.addMessageRoomIdToUser(
-                            CurrentUser.getCurrentUserId(),
-                            CurrentUser.getCurrentUserId() +
-                                RoomeoUser.user.userId);
-                        CurrentUser.setCurrentMessageRoomIds([
-                          CurrentUser.getCurrentUserId() +
-                              RoomeoUser.user.userId
-                        ]);
-                        DatabaseManager.addHouseholdToUser(
-                            CurrentUser.getCurrentUser().userId,
-                            CurrentHousehold.getCurrentHouseholdId());
+                        updateUserInformation();
                         Navigator.pushNamedAndRemoveUntil(
                             context, "/home", (_) => false);
                       }
@@ -96,5 +68,38 @@ class _CreateHousehold extends State<CreateHousehold> {
         ),
       ),
     );
+  }
+
+  void updateUserInformation() async {
+    DatabaseManager.addUser(CurrentUser.getCurrentUser());
+    DatabaseManager.getUserName(CurrentUser.getCurrentUserId());
+
+    // Update user message rooms
+    DatabaseManager.addMessageRoom(MessageRoom(
+        CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+        [],
+        <User>[CurrentUser.getCurrentUser(), RoomeoUser.user]));
+    DatabaseManager.addMessageRoomIdToUser(CurrentUser.getCurrentUserId(),
+        CurrentUser.getCurrentUserId() + RoomeoUser.user.userId);
+    CurrentUser.setCurrentMessageRoomIds(
+        [CurrentUser.getCurrentUserId() + RoomeoUser.user.userId]);
+
+    // Update user household
+    // Add household should add household to CurrentHousehold
+    await DatabaseManager.addHousehold(
+        CurrentUser.getCurrentUser(), householdNameController.text);
+    CurrentHousehold.setCurrentHouseholdName(householdNameController.text);
+    DatabaseManager.addHouseholdToUser(CurrentUser.getCurrentUser().userId,
+        CurrentHousehold.getCurrentHouseholdId());
+
+    // Update user status
+    await DatabaseManager.addStatusToUserStatusList(
+        "Home", CurrentUser.getCurrentUserId());
+    await DatabaseManager.addStatusToUserStatusList(
+        "Away", CurrentUser.getCurrentUserId());
+    DatabaseManager.setUserCurrentStatus(
+        "Home", CurrentUser.getCurrentUserId());
+    CurrentUser.setCurrentUserStatusList(["Home", "Away"]);
+    CurrentUser.setCurrentUserStatus("Home");
   }
 }

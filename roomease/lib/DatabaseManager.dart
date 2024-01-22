@@ -87,6 +87,46 @@ class DatabaseManager {
     });
   }
 
+  static Future<void> addStatusToUserStatusList(
+      String status, String userId) async {
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/userStatusList");
+
+    TransactionResult result =
+        await usersRef.runTransaction((Object? userStatusList) {
+      if (userStatusList == null) {
+        // No status list, make new list
+        List<String> newUserStatusList = [status];
+        CurrentUser.setCurrentMessageRoomIds(newUserStatusList);
+        return Transaction.success(newUserStatusList);
+      }
+
+      List<String> _userStatusList = List<String>.from(userStatusList as List);
+      _userStatusList.add(status);
+      // Return the new data.
+      return Transaction.success(_userStatusList);
+    });
+  }
+
+  static void setUserCurrentStatus(String status, String userId) {
+    DatabaseReference usersRef = _databaseInstance.ref("users/$userId");
+    usersRef.update({"userStatus": status});
+  }
+
+  static Future<String> getUserCurrentStatus(String userId) async {
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/userStatus");
+    DatabaseEvent event = await usersRef.once();
+    return event.snapshot.value as String;
+  }
+
+  static Future<List<String>> getUserStatusList(String userId) async {
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/userStatusList");
+    DatabaseEvent event = await usersRef.once();
+    return event.snapshot.value as List<String>;
+  }
+
   // ------------------------ END USER OPERATIONS ------------------------
 
   // ------------------------ MESSAGE OPERATIONS ------------------------
@@ -311,20 +351,29 @@ class DatabaseManager {
     });
   }
 
+  static Future<String> getHouseholdName(String householdId) async {
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdId/name");
+    DatabaseEvent event = await householdRef.once();
+    return event.snapshot.value as String;
+  }
+
   // ------------------------ END HOUSEHOLD OPERATIONS ------------------------
 
   // ------------------------ CHORE OPERATIONS ------------------------
 
-  static void addChore(String householdCode, String name, String details, String deadline, int score,
-      String createdByUserId) async {
-    DatabaseReference choresRef = _databaseInstance.ref("households/$householdCode/choresToDo");
+  static void addChore(String householdCode, String name, String details,
+      String deadline, int score, String createdByUserId) async {
+    DatabaseReference choresRef =
+        _databaseInstance.ref("households/$householdCode/choresToDo");
 
     final choreKey = choresRef.push().key;
     if (choreKey == null) {
       throw Exception('Chore key is null');
     }
 
-    DatabaseReference choreRef = _databaseInstance.ref("households/$householdCode/choresToDo/$choreKey");
+    DatabaseReference choreRef =
+        _databaseInstance.ref("households/$householdCode/choresToDo/$choreKey");
 
     choreRef.set({
       "name": name,

@@ -77,6 +77,7 @@ class _LoginState extends State<Login> {
                               email: emailController.text,
                               password: passwordController.text);
                           if (user != null) {
+                            //Sets user's name
                             DatabaseManager.getUserName(user.user!.uid);
                             CurrentUser.setCurrentUserId(user.user!.uid);
                             // Checking if user is part of a household yet
@@ -85,34 +86,8 @@ class _LoginState extends State<Login> {
                                     user.user!.uid);
                             if (householdId != null) {
                               // Part of household, go to home screen
-                              CurrentHousehold.setCurrentHouseholdId(
-                                  householdId);
-                              DatabaseManager.updateHouseholdName(householdId);
-                              List<String>? messageRoomIds =
-                                  await DatabaseManager.getUserMessageRoomIds(
-                                      user.user!.uid);
-                              if (messageRoomIds != null) {
-                                CurrentUser.setCurrentMessageRoomIds(
-                                    messageRoomIds);
-                              } else {
-                                // Add message room for older users that don't have an entry in the DB
-                                DatabaseManager.addMessageRoom(MessageRoom(
-                                    CurrentUser.getCurrentUserId() +
-                                        RoomeoUser.user.userId,
-                                    [],
-                                    <RUser.User>[
-                                      CurrentUser.getCurrentUser(),
-                                      RoomeoUser.user
-                                    ]));
-                                DatabaseManager.addMessageRoomIdToUser(
-                                    user.user!.uid,
-                                    CurrentUser.getCurrentUserId() +
-                                        RoomeoUser.user.userId);
-                                CurrentUser.setCurrentMessageRoomIds([
-                                  CurrentUser.getCurrentUserId() +
-                                      RoomeoUser.user.userId
-                                ]);
-                              }
+                              updateUserInformation(
+                                  householdId, user.user!.uid);
                               SharedPreferencesUtility.setValue(
                                   "isLoggedIn", true);
                               Navigator.pushNamedAndRemoveUntil(
@@ -148,5 +123,36 @@ class _LoginState extends State<Login> {
         ),
       ),
     );
+  }
+
+  void updateUserInformation(String householdId, String userId) async {
+    // Update user message rooms
+    List<String>? messageRoomIds =
+        await DatabaseManager.getUserMessageRoomIds(userId);
+    if (messageRoomIds != null) {
+      CurrentUser.setCurrentMessageRoomIds(messageRoomIds);
+    } else {
+      // Add message room for older users that don't have an entry in the DB
+      DatabaseManager.addMessageRoom(MessageRoom(
+          CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+          [],
+          <RUser.User>[CurrentUser.getCurrentUser(), RoomeoUser.user]));
+      DatabaseManager.addMessageRoomIdToUser(
+          userId, CurrentUser.getCurrentUserId() + RoomeoUser.user.userId);
+      CurrentUser.setCurrentMessageRoomIds(
+          [CurrentUser.getCurrentUserId() + RoomeoUser.user.userId]);
+    }
+
+    // Update user household
+    CurrentHousehold.setCurrentHouseholdId(householdId);
+    String householdName = await DatabaseManager.getHouseholdName(householdId);
+    CurrentHousehold.setCurrentHouseholdName(householdName);
+
+    // Update user status
+    String userStatus = await DatabaseManager.getUserCurrentStatus(userId);
+    CurrentUser.setCurrentUserStatus(userStatus);
+    List<String> userStatusList =
+        await DatabaseManager.getUserStatusList(userId);
+    CurrentUser.setCurrentUserStatusList(userStatusList);
   }
 }

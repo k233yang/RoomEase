@@ -44,6 +44,14 @@ class CurrentUser {
     return "";
   }
 
+  static String getCurrentUserStatus() {
+    return SharedPreferencesUtility.getString("userStatus");
+  }
+
+  static List<String> getCurrentUserStatusList() {
+    return SharedPreferencesUtility.getStringList("userStatusList");
+  }
+
   static void setCurrentMessageRoomIds(List<String> messageRoomIds) {
     SharedPreferencesUtility.setValue("messageRoomIds", messageRoomIds);
   }
@@ -54,5 +62,13 @@ class CurrentUser {
 
   static void setCurrentUserName(String userName) {
     SharedPreferencesUtility.setValue("userName", userName);
+  }
+
+  static void setCurrentUserStatusList(List<String> userStatusList) {
+    SharedPreferencesUtility.setValue("userStatusList", userStatusList);
+  }
+
+  static void setCurrentUserStatus(String status) {
+    SharedPreferencesUtility.setValue("userStatus", status);
   }
 }
