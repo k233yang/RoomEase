@@ -114,7 +114,7 @@ class _ChatScreen extends State<ChatScreen> {
           // put user message vector to vector DB
           try {
             if (userResVector != null && userMessageKey != null) {
-              UpsertResponse userUpsertResponse = await insertVector(
+              await insertVector(
                   userResVector,
                   CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
                   userMessageKey);
@@ -167,7 +167,7 @@ class _ChatScreen extends State<ChatScreen> {
           // put chatGPT vector into DB:
           try {
             if (chatGPTResVector != null && chatGPTMessageKey != null) {
-              UpsertResponse userUpsertResponse = await insertVector(
+              await insertVector(
                   chatGPTResVector,
                   CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
                   chatGPTMessageKey);
@@ -184,11 +184,9 @@ class _ChatScreen extends State<ChatScreen> {
           } catch (e) {
             print(e);
           }
-          //TODO: put chatbot's vector to vector DB:
-          // userResVector.then((vector) => {
-          //   insertVector(vector, CurrentUser.getCurrentUserId() + RoomeoUser.user.userId /*TODO: pinecone starter plan only supports 1 index. Need to upgrade plan, and replace roomID with actual room ID */
-          //   , );
-          // });
+          // Testing categorizing message
+          String category = await selectOption(message);
+          print(category);
         },
         decoration: InputDecoration(
             filled: true,
