@@ -42,13 +42,7 @@ class WelcomeBody extends StatelessWidget {
                       final user = await _auth.signInWithEmailAndPassword(
                           email: "testing@testing.com", password: "123456");
                       if (user != null) {
-                        DatabaseManager.getUserName(user.user!.uid);
-                        CurrentUser.setCurrentUserId(
-                          user.user!.uid,
-                        );
-                        CurrentHousehold.setCurrentHouseholdId("uYjY33");
-                        DatabaseManager.updateHouseholdName("uYjY33");
-                        SharedPreferencesUtility.setValue("isLoggedIn", true);
+                        await debugLogin(user);
                         Navigator.pushNamedAndRemoveUntil(
                             context, "/home", (_) => false);
                       } else {
@@ -60,6 +54,22 @@ class WelcomeBody extends StatelessWidget {
                     })
               ],
             )));
+  }
+
+  Future<void> debugLogin(UserCredential user) async {
+    DatabaseManager.getUserName(user.user!.uid);
+    CurrentUser.setCurrentUserId(
+      user.user!.uid,
+    );
+    CurrentHousehold.setCurrentHouseholdId("uYjY33");
+    DatabaseManager.updateHouseholdName("uYjY33");
+    String userStatus =
+        await DatabaseManager.getUserCurrentStatus(user.user!.uid);
+    CurrentUser.setCurrentUserStatus(userStatus);
+    List<String> userStatusList =
+        await DatabaseManager.getUserStatusList(user.user!.uid);
+    CurrentUser.setCurrentUserStatusList(userStatusList);
+    SharedPreferencesUtility.setValue("isLoggedIn", true);
   }
 }
 

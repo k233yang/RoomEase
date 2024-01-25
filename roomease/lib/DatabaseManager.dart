@@ -124,7 +124,12 @@ class DatabaseManager {
     DatabaseReference usersRef =
         _databaseInstance.ref("users/$userId/userStatusList");
     DatabaseEvent event = await usersRef.once();
-    return event.snapshot.value as List<String>;
+    List<String> userStatusList = [];
+    for (DataSnapshot d in event.snapshot.children) {
+      userStatusList.add(d.value as String);
+    }
+
+    return userStatusList;
   }
 
   // ------------------------ END USER OPERATIONS ------------------------
