@@ -10,6 +10,7 @@ import 'Message.dart';
 import 'MessageRoom.dart';
 import 'User.dart';
 import 'chores/ChoreEnums.dart';
+import 'package:roomease/Roomeo/PineconeAPI.dart';
 
 class DatabaseManager {
   static FirebaseDatabase _databaseInstance = FirebaseDatabase.instance;
@@ -144,6 +145,9 @@ class DatabaseManager {
     DatabaseReference messageRoomsRef =
         _databaseInstance.ref("messageRooms/${messageRoom.messageRoomId}");
     messageRoomsRef.update({"users": userIds, "messages": <String>[]});
+    // create a vector DB index for the new message room
+    // each index will represent one messageroom
+    createRoomIndex(messageRoom.messageRoomId);
   }
 
   static Future<String> addMessage(

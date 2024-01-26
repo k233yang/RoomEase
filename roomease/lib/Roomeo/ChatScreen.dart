@@ -69,8 +69,6 @@ class _ChatScreen extends State<ChatScreen> {
           } catch (e) {
             print('Failed to add user message: $e');
           }
-          //TODO: instead of local messagelist, pull list from DB and extract name to figure out
-          //which side to display message on
           messageList.add(Message(message, CurrentUser.getCurrentUserId(),
               CurrentUser.getCurrentUserName(), DateTime.now()));
           _controller.clear();

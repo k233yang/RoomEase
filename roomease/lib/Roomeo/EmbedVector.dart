@@ -16,15 +16,19 @@ Future<List<double>> getVectorEmbeddingArray(String input) async {
     "model": "text-embedding-ada-002"
   };
 
-  final res = await http.post(Uri.parse(embeddingAPIURL),
-      headers: vectorRequestHeaders, body: jsonEncode(vectorRequestData));
-
-  if (res.statusCode == 200) {
-    final decodedRes = jsonDecode(res.body);
-    final vectorEmbedding = decodedRes["data"][0]["embedding"];
-    return List<double>.from(vectorEmbedding);
-  } else {
-    throw Exception(
-        "getVectorEmbeddingArray failed. HTTP status: ${res.statusCode}");
+  try {
+    final res = await http.post(Uri.parse(embeddingAPIURL),
+        headers: vectorRequestHeaders, body: jsonEncode(vectorRequestData));
+    if (res.statusCode == 200) {
+      final decodedRes = jsonDecode(res.body);
+      final vectorEmbedding = decodedRes["data"][0]["embedding"];
+      return List<double>.from(vectorEmbedding);
+    } else {
+      throw Exception(
+          "getVectorEmbeddingArray failed. HTTP status: ${res.statusCode}");
+    }
+  } catch (e) {
+    print('Request failed with error: $e');
+    return Future.error('get vector embedding failed');
   }
 }
