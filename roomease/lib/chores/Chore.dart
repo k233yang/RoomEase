@@ -1,5 +1,5 @@
 import 'package:roomease/User.dart';
-import 'ChoreEnums.dart';
+import 'ChoreStatus.dart';
 
 class Chore {
   String id;
