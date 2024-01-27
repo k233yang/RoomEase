@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
+import 'package:roomease/DatabaseManager.dart';
+import 'package:roomease/chores/ChoreEnums.dart';
 import 'package:roomease/chores/ChoreItem.dart';
 
 import '../colors/ColorConstants.dart';
@@ -11,8 +14,23 @@ class ChoreScreen extends StatefulWidget {
 }
 
 class _ChoreScreen extends State<ChoreScreen> {
+  String householdCode = CurrentHousehold.getCurrentHouseholdId();
   @override
   Widget build(BuildContext context) {
+    // Todo: Starting with getting Todo chores for now, sort later
+    Iterable choreList = DatabaseManager.getChoreList(ChoreEnums.toDo, householdCode) as Iterable;
+
+    String choreTitle = "";
+    String assignedMemberName = "";
+    String choreDescription = "";
+    String choreScore = "";
+    ChoreEnums choreStatus = ChoreEnums.toDo; // Todo: don't hardcode this toDo status
+    for (final child in choreList) {
+      // TODO: **
+      // choreTitle = get name somehow
+    }
+
+
     return Scaffold(
         appBar: AppBar(
         title: const Text('Chores'),
@@ -22,7 +40,7 @@ class _ChoreScreen extends State<ChoreScreen> {
         color: ColorConstants.white,
         child: Column(
           children: [
-            Center(child: ChoreItem()),
+            Center(child: ChoreItem(choreTitle, assignedMemberName, choreDescription, choreScore, choreStatus)),
           ]
         )
       ),

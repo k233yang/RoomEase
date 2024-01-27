@@ -1,18 +1,41 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
+import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/chores/ChoreEnums.dart';
 
 class ChoreItem extends StatefulWidget {
+  final String choreTitle;
+  final String assignedMemberName;
+  final String choreDescription;
+  final String choreScore;
+  final ChoreEnums choreStatus;
+  
+  ChoreItem(this.choreTitle, this.assignedMemberName, this.choreDescription, this.choreScore, this.choreStatus);
+
   @override
   State createState() {
-    return _ChoreState();
+    //TODO: huh to this warning about don't put logic..
+    return _ChoreState(choreTitle, assignedMemberName, choreDescription, choreScore, choreStatus);
   }
 }
 
 class _ChoreState extends State<ChoreItem> {
+  final String choreTitle;
+  final String assignedMemberName;
+  final String choreDescription;
+  final String choreScore;
+  final ChoreEnums choreStatus;
+
+  _ChoreState(this.choreTitle, this.assignedMemberName, this.choreDescription, this.choreScore, this.choreStatus)
+  // TODO: ** How to access choreTitle and etc in this class?
+  
   @override
   Widget build(BuildContext context) {
     // TODO: get the values for the getChoreTile(...) arguments from chore status and chore add/edit page
-    return getChoreTile("Wash Dishes", "Sookeong Cho", "Wash everything in the sink!", "5", ChoreEnums.completed);
+    // String householdCode = CurrentHousehold.getCurrentHouseholdId();
+    // ChoreName, AssignedTo, Description, Score, Status
+    return getChoreTile(this.choreTitle, this.assignedMemberName, "Wash everything in the sink!", "5", ChoreEnums.completed);
   }
 }
 

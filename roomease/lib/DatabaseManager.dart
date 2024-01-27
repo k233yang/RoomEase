@@ -341,6 +341,24 @@ class DatabaseManager {
       throw Exception('Could not add chore');
     });
   }
+  static Future<String?> getChoreList(ChoreEnums status, String householdCode) async {
+    String choreList = "";
+    if (status == ChoreEnums.toDo) {
+      choreList = "choresToDo";
+    } else if (status == ChoreEnums.inProgress) {
+      choreList = "choresInProgress";
+    } else if (status == ChoreEnums.completed) {
+      choreList = "choresCompleted";
+    } else if (status == ChoreEnums.archived) {
+      choreList = "choresArchived";
+    } else {
+      throw Exception("Empty or invalid status requested for chore list.");
+    }
+
+    DatabaseReference choresRef = _databaseInstance.ref("households/$householdCode/$choreList");
+    DatabaseEvent event = await choresRef.once();
+    return event.snapshot.children as String;
+  }
 
   // ------------------------ END CHORE OPERATIONS ------------------------
 }
