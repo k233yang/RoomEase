@@ -9,6 +9,7 @@ import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
 import 'User.dart';
+import 'chores/Chore.dart';
 import 'chores/ChoreStatus.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
 
@@ -398,6 +399,22 @@ class DatabaseManager {
       print(value);
       throw Exception('Could not add chore');
     });
+  }
+
+  static Future<List<Chore>> getChoresFromDB(ChoreStatus status, String householdId) async {
+    final choreListRef = _databaseInstance.ref("households/$householdId/${status.value}");
+    DatabaseEvent event = await choreListRef.once();
+    final choresJson = event.snapshot.children;
+
+    List<Chore> choresList = <Chore>[];
+
+    for (final chore in choresJson) {
+      choresList.add(Chore("", chore.child("name").value.toString(),
+          chore.child("details").value.toString(), chore.child("deadline").value.toString(),
+          int.parse(chore.child("score").value.toString()), chore.child("createdByUserId").value.toString(),
+          chore.child("assignedUserId").value.toString(), chore.child("status").value.toString()));
+    }
+    return choresList;
   }
 
   // ------------------------ END CHORE OPERATIONS ------------------------
