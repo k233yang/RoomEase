@@ -29,10 +29,10 @@ class _ChatScreen extends State<ChatScreen> {
     textFieldFocusNode = FocusNode();
     // Scroll to the bottom when the widget is built
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 100), () {
+      Future.delayed(const Duration(milliseconds: 200), () {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 50),
+          duration: Duration(milliseconds: 100),
           curve: Curves.easeOut,
         );
       });
