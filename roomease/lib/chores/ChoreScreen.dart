@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
+import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/chores/ChoreItem.dart';
 
 import '../colors/ColorConstants.dart';
@@ -12,25 +14,26 @@ class ChoreScreen extends StatefulWidget {
 
 class _ChoreScreen extends State<ChoreScreen> {
   @override
+  void initState() {
+    super.initState();
+    DatabaseManager.updateChorePoints(CurrentHousehold.getCurrentHouseholdId());
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: const Text('Chores'),
         backgroundColor: ColorConstants.lightPurple,
       ),
       body: Container(
-        color: ColorConstants.white,
-        child: Column(
-          children: [
+          color: ColorConstants.white,
+          child: Column(children: [
             Center(child: ChoreItem()),
-          ]
-        )
-      ),
-      floatingActionButton:  CreateAddChoreButton(
-        onButtonPress: () {
-          Navigator.pushNamed(context, "/addChore");
-        }
-      ),
+          ])),
+      floatingActionButton: CreateAddChoreButton(onButtonPress: () {
+        Navigator.pushNamed(context, "/addChore");
+      }),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
@@ -39,18 +42,16 @@ class _ChoreScreen extends State<ChoreScreen> {
 class CreateAddChoreButton extends StatelessWidget {
   final VoidCallback onButtonPress;
 
-  CreateAddChoreButton(
-    {Key? key, required this.onButtonPress})
-    : super(key: key);
-  
+  CreateAddChoreButton({Key? key, required this.onButtonPress})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
-      foregroundColor: ColorConstants.white,
-      backgroundColor: ColorConstants.darkPurple,
-      shape: CircleBorder(),
-      onPressed: onButtonPress,
-      child: const Icon(Icons.add)
-    );
+        foregroundColor: ColorConstants.white,
+        backgroundColor: ColorConstants.darkPurple,
+        shape: CircleBorder(),
+        onPressed: onButtonPress,
+        child: const Icon(Icons.add));
   }
 }
