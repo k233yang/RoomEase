@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/Household.dart';
 import 'package:roomease/chores/ChoreStatus.dart';
+import 'package:roomease/colors/ColorConstants.dart';
 
 import '../DatabaseManager.dart';
 import 'Chore.dart';
@@ -37,7 +38,7 @@ ExpansionTile getChoreTile(ChoreStatus status) {
   }
 
   // Chore firstItem = list[0]; // TODO: Need to find a way to display a tile for ALL items in the list, but working with just the first item for now
-  Chore firstItem = Chore("", "hardcodedSadgeTestSweep", "Sweep da flooor", "2024-01-24 4:08 AM", 3, "EZ5ZkiFsVZMySudqICUIhmskgXw1", null, "toDo");
+  Chore firstItem = Chore("", "Clean Toilet", "can u clean the toilet", "2024-01-24 4:08 AM", 3, "EZ5ZkiFsVZMySudqICUIhmskgXw1", "Kevin", "toDo");
 
   String choreName = firstItem.name;
   String? assignedMemberName = firstItem.assignedUserId;
@@ -46,11 +47,22 @@ ExpansionTile getChoreTile(ChoreStatus status) {
   String? choreDeadline = firstItem.deadline;
 
   return ExpansionTile(
-    title: Container(
-        color: tileColor,
-        child: Text(choreName)
+    title: Text(
+      choreName,
+      style: TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 20
+      ),
     ),
-    subtitle: Text(assignedMemberName ?? ""),
+    backgroundColor: tileColor,
+    collapsedBackgroundColor: tileColor,
+    subtitle: Text(
+      assignedMemberName ?? "Unassigned",
+      style: TextStyle(
+        fontWeight: FontWeight.w500,
+        fontSize: 14
+      ),
+    ),
     trailing: Container(
       width: 60,
       height: 60,
@@ -59,11 +71,45 @@ ExpansionTile getChoreTile(ChoreStatus status) {
         shape: BoxShape.circle,
         color: pointCircleColor,
       ),
-      child: Text(pointValue)
+      child: Align(
+        alignment: Alignment.center,
+        child: Text(
+          pointValue,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: ColorConstants.white
+          )
+        ),
+      )
     ),
     children: <Widget>[
-      Text(choreDetails),
-      Text("Deadline: $choreDeadline")
+      ListTile(
+        visualDensity: VisualDensity.compact,
+        title: Text(
+          "Details",
+          style: TextStyle(
+          fontWeight: FontWeight.w500,
+        )),
+      ),
+      ListTile(
+        visualDensity: VisualDensity.compact,
+        title: Text(
+        choreDetails
+      )),
+      ListTile(
+        visualDensity: VisualDensity.compact,
+        title: Text(
+          "Deadline",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+        ))
+      ),
+      ListTile(
+        visualDensity: VisualDensity.compact,
+        title: Text(
+        choreDeadline
+      )),
     ],
     onExpansionChanged: (bool expanded) {
       // Do nothing for now

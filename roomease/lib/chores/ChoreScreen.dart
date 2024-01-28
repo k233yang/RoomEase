@@ -24,7 +24,14 @@ class _ChoreScreen extends State<ChoreScreen> {
         child: Column(
           children: [ // TODO: Take the list of Chore Items and make that a widget or smth
             //            Or take all chore items and list them
-            Center(child: getChoreTile(ChoreStatus.toDo)),
+            Padding(                      
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 24),
+              child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Center( child: getChoreTile(ChoreStatus.toDo)),
+              )
+            )
           ]
         )
       ),

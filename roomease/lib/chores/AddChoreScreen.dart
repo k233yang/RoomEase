@@ -171,6 +171,10 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                         },
                         child: const Text('Submit'),
                       ))
-                ]))));
+                ]
+              )
+            )
+          )
+        );
   }
 }
