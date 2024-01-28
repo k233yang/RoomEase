@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/widgets.dart';
 import 'package:roomease/CurrentHousehold.dart';
@@ -401,18 +400,25 @@ class DatabaseManager {
     });
   }
 
-  static Future<List<Chore>> getChoresFromDB(ChoreStatus status, String householdId) async {
-    final choreListRef = _databaseInstance.ref("households/$householdId/${status.value}");
+  static Future<List<Chore>> getChoresFromDB(
+      ChoreStatus status, String householdId) async {
+    final choreListRef =
+        _databaseInstance.ref("households/$householdId/${status.value}");
     DatabaseEvent event = await choreListRef.once();
     final choresJson = event.snapshot.children;
 
     List<Chore> choresList = <Chore>[];
 
     for (final chore in choresJson) {
-      choresList.add(Chore("", chore.child("name").value.toString(),
-          chore.child("details").value.toString(), chore.child("deadline").value.toString(),
-          int.parse(chore.child("score").value.toString()), chore.child("createdByUserId").value.toString(),
-          chore.child("assignedUserId").value.toString(), chore.child("status").value.toString()));
+      choresList.add(Chore(
+          "",
+          chore.child("name").value.toString(),
+          chore.child("details").value.toString(),
+          chore.child("deadline").value.toString(),
+          int.parse(chore.child("score").value.toString()),
+          chore.child("createdByUserId").value.toString(),
+          chore.child("assignedUserId").value.toString(),
+          chore.child("status").value.toString()));
     }
     return choresList;
   }

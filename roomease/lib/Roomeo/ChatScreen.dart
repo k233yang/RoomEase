@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Roomeo/RoomeoUser.dart';
@@ -18,12 +19,24 @@ class _ChatScreen extends State<ChatScreen> {
   late TextEditingController _controller;
   final messageList = <Message>[];
   late FocusNode textFieldFocusNode;
+  static late ScrollController scrollController;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    scrollController = ScrollController();
     textFieldFocusNode = FocusNode();
+    // Scroll to the bottom when the widget is built
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 50),
+          curve: Curves.easeOut,
+        );
+      });
+    });
   }
 
   @override
@@ -60,10 +73,28 @@ class _ChatScreen extends State<ChatScreen> {
           _controller.clear();
           textFieldFocusNode.requestFocus();
           setState(() {});
+          // Scroll to the bottom when a new message is added
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            scrollController.animateTo(
+              scrollController.position.maxScrollExtent,
+              duration: Duration(milliseconds: 500),
+              curve: Curves.easeOut,
+            );
+          });
+
+          // add user + Roomeo response to the DB
           await getRoomeoResponse(message, dateTime);
-          // Testing categorizing message
+          // fetch the category of the message
           String category = await selectOption(message);
           print(category);
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            scrollController.animateTo(
+              scrollController.position.maxScrollExtent,
+              duration: Duration(milliseconds: 500),
+              curve: Curves.easeOut,
+            );
+          });
         },
         decoration: InputDecoration(
             filled: true,
@@ -81,6 +112,7 @@ Widget buildListMessage(List<Message> messages) {
   return Flexible(
       child: ListView.builder(
     itemCount: messages.length,
+    controller: _ChatScreen.scrollController,
     itemBuilder: (context, index) => chatMessage(messages[index]),
   ));
 }
