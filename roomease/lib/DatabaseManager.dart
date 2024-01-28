@@ -9,7 +9,7 @@ import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
 import 'User.dart';
-import 'chores/ChoreEnums.dart';
+import 'chores/ChoreStatus.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
 
 class DatabaseManager {
