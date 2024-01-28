@@ -12,14 +12,16 @@ class AddChoreScreen extends StatefulWidget {
   State<AddChoreScreen> createState() => _AddChoreScreen();
 }
 
-const List<int> scoreList = <int>[1, 2, 3, 4, 5];
+const List<int> pointsList = <int>[1, 2, 3, 4, 5];
+const List<int> thresholdList = <int>[1, 2, 3, 4, 5];
 
 class _AddChoreScreen extends State<AddChoreScreen> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
   TextEditingController detailsController = TextEditingController();
   TextEditingController deadlineController = TextEditingController();
-  int scoreVote = scoreList.first;
+  int points = pointsList.first;
+  int threshold = thresholdList.first;
 
   @override
   Widget build(BuildContext context) {
@@ -123,18 +125,18 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 16),
                       child: DropdownButtonFormField(
-                        value: scoreVote,
+                        value: points,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
-                          hintText: "Score",
-                          labelText: "Score",
+                          hintText: "Points",
+                          labelText: "Points",
                         ),
-                        onChanged: (int? scoreValue) {
+                        onChanged: (int? pointsValue) {
                           setState(() {
-                            scoreVote = scoreValue!;
+                            points = pointsValue!;
                           });
                         },
-                        items: scoreList.map((int val) {
+                        items: pointsList.map((int val) {
                           return DropdownMenuItem(
                             value: val,
                             child: Text(val.toString()),
@@ -142,7 +144,35 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                         }).toList(),
                         validator: (value) {
                           if (value == null) {
-                            return 'Please enter a score for the chore';
+                            return 'Please enter the number of points for the chore';
+                          }
+                          return null;
+                        },
+                      )),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 16),
+                      child: DropdownButtonFormField(
+                        value: threshold,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: "Threshold",
+                          labelText: "Threshold",
+                        ),
+                        onChanged: (int? thresholdValue) {
+                          setState(() {
+                            thresholdValue = thresholdValue!;
+                          });
+                        },
+                        items: thresholdList.map((int val) {
+                          return DropdownMenuItem(
+                            value: val,
+                            child: Text(val.toString()),
+                          );
+                        }).toList(),
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please enter a threshold value for the chore';
                           }
                           return null;
                         },
@@ -159,7 +189,8 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                                   nameController.text,
                                   detailsController.text,
                                   deadlineController.text,
-                                  scoreVote,
+                                  points,
+                                  threshold,
                                   CurrentUser.getCurrentUserId());
                             } catch (e) {
                               print('Failed to add chore: $e');
