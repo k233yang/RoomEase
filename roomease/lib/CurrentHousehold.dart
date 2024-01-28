@@ -2,12 +2,19 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'Household.dart';
+import 'chores/Chore.dart';
 
 class CurrentHousehold {
   static Household getCurrentHousehold() {
     String householdId = SharedPreferencesUtility.getString("householdId");
     String householdName = SharedPreferencesUtility.getString("householdName");
-    return Household(householdName, householdId, List.empty(), List.empty(), List.empty(), List.empty(), List.empty());
+
+    // Init with dynamic lists
+    List<Chore> choresToDo = <Chore>[];
+    List<Chore> choresInProgress = <Chore>[];
+    List<Chore> choresCompleted = <Chore>[];
+    List<Chore> choresArchived = <Chore>[];
+    return Household(householdName, householdId, List.empty(), choresToDo, choresInProgress, choresCompleted, choresArchived);
   }
 
   static String getCurrentHouseholdId() {

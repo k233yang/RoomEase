@@ -5,15 +5,18 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/widgets.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
+import 'Household.dart';
 import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
 import 'User.dart';
-import 'chores/ChoreEnums.dart';
+import 'chores/Chore.dart';
+import 'chores/ChoreStatus.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
 
 class DatabaseManager {
   static FirebaseDatabase _databaseInstance = FirebaseDatabase.instance;
+  static Household currentHousehold = CurrentHousehold.getCurrentHousehold();
 
   // ------------------------ USER OPERATIONS ------------------------
 
@@ -398,6 +401,27 @@ class DatabaseManager {
       print(value);
       throw Exception('Could not add chore');
     });
+  }
+
+  static Future<void> getChoreList(ChoreStatus status, String householdId) async {
+    // final choreListRef = _databaseInstance.ref("households/$householdId/${status.value}");
+    final choreListRef = _databaseInstance.ref("households/$householdId/${status.value}");
+
+    DatabaseEvent event = await choreListRef.once();
+    final data = event.snapshot.value;
+
+    print("**PRINTING DATA**");
+    print(data);
+    // {-Noa7DXsw_ge26o9UHbc: {createdByUserId: EZ5ZkiFsVZMySudqICUIhmskgXw1, score: 3, name: TestSweep, details: Sweep da flooor, deadline: 2024-01-24 4:08 AM, status: toDo}, -NoPiOX--y_kDlAwzOAO: {createdByUserId: EZ5ZkiF
+    // sVZMySudqICUIhmskgXw1, score: 4, name: Clean Crumbs, details: Testing yummy, deadline: 2024-01-23 8:59 PM, status: toDo}}
+    print("**DONE PRINTING**");
+
+    // TODO: Need to figure out how to convert the JSON string into the Chore class
+    // TODO: Current issue is that we don't have a way to store/know the autoId of the chores to access the child values
+
+    // Hardcoding for now to set up the rest of the system
+    currentHousehold.addToChoreList(ChoreStatus.toDo, Chore("", "TestSweep", "Sweep da flooor", "2024-01-24 4:08 AM", 3, "EZ5ZkiFsVZMySudqICUIhmskgXw1", null, "toDo"));
+    currentHousehold.addToChoreList(ChoreStatus.toDo, Chore("", "Clean Crumbs", "Testing yummy", "2024-01-23 8:59 PM", 4, "EZ5ZkiFsVZMySudqICUIhmskgXw1", null, "toDo"));
   }
 
   // ------------------------ END CHORE OPERATIONS ------------------------

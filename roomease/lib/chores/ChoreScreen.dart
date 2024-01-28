@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/chores/ChoreItem.dart';
+import 'package:roomease/chores/ChoreStatus.dart';
 
 import '../colors/ColorConstants.dart';
 
@@ -21,8 +22,9 @@ class _ChoreScreen extends State<ChoreScreen> {
       body: Container(
         color: ColorConstants.white,
         child: Column(
-          children: [
-            Center(child: ChoreItem()),
+          children: [ // TODO: Take the list of Chore Items and make that a widget or smth
+            //            Or take all chore items and list them
+            Center(child: getChoreTile(ChoreStatus.toDo)),
           ]
         )
       ),

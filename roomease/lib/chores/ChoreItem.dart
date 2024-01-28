@@ -1,45 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/Household.dart';
 import 'package:roomease/chores/ChoreStatus.dart';
 
-class ChoreItem extends StatefulWidget {
-  @override
-  State createState() {
-    return _ChoreState();
-  }
-}
+import '../DatabaseManager.dart';
+import 'Chore.dart';
 
-class _ChoreState extends State<ChoreItem> {
-  @override
-  Widget build(BuildContext context) {
-    // TODO: get the values for the getChoreTile(...) arguments from chore status and chore add/edit page
-    return getChoreTile("Wash Dishes", "Sookeong Cho", "Wash everything in the sink!", "5", ChoreStatus.completed);
-  }
-}
+ExpansionTile getChoreTile(ChoreStatus status) {
+  Household household = DatabaseManager.currentHousehold;
 
-ChoreStatus getChoreState() {
-  // TODO: Implement getting the actual state of the tile
-  return ChoreStatus.completed;
-}
+  // Ensure household list is not empty
+  DatabaseManager.getChoreList(status, household.id);
 
-ExpansionTile getChoreTile(String choreName, String? assignedMemberName, String? choreDetails, String pointValue, ChoreStatus choreState) {
+  List<Chore> list = <Chore>[];
+
   Color? tileColor;
   Color? pointCircleColor;
-  ChoreStatus choreState = getChoreState();
 
-  if (choreState == ChoreStatus.toDo) {
+  if (status == ChoreStatus.toDo) {
     tileColor = Colors.purple[200];
     pointCircleColor = Colors.purple[800];
-  } else if (choreState == ChoreStatus.inProgress) {
+    print("Household list is being accessed now");
+    list = household.choresToDo;
+  } else if (status == ChoreStatus.inProgress) {
     tileColor = Colors.deepPurple[200];
     pointCircleColor = Colors.deepPurple[800];
-  } else if (choreState == ChoreStatus.completed) {
+    list = household.choresInProgress;
+  } else if (status == ChoreStatus.completed) {
     tileColor = Colors.indigo[200];
     pointCircleColor = Colors.indigo[800];
+    list = household.choresCompleted;
   } else {
     // choreState is ChoreEnums.archived
     tileColor = Colors.blueGrey[200];
     pointCircleColor = Colors.blueGrey[800];
+    list = household.choresArchived;
   }
+
+  // Chore firstItem = list[0]; // TODO: Need to find a way to display a tile for ALL items in the list, but working with just the first item for now
+  Chore firstItem = Chore("", "hardcodedSadgeTestSweep", "Sweep da flooor", "2024-01-24 4:08 AM", 3, "EZ5ZkiFsVZMySudqICUIhmskgXw1", null, "toDo");
+
+  String choreName = firstItem.name;
+  String? assignedMemberName = firstItem.assignedUserId;
+  String? choreDetails = firstItem.details;
+  String pointValue = firstItem.score.toString();
+  String? choreDeadline = firstItem.deadline;
 
   return ExpansionTile(
     title: Container(
@@ -58,9 +62,8 @@ ExpansionTile getChoreTile(String choreName, String? assignedMemberName, String?
       child: Text(pointValue)
     ),
     children: <Widget>[
-      Text(
-        choreDetails ?? "No details to display.",
-      ),
+      Text(choreDetails),
+      Text("Deadline: $choreDeadline")
     ],
     onExpansionChanged: (bool expanded) {
       // Do nothing for now
