@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:firebase_database/firebase_database.dart';
@@ -11,7 +12,9 @@ import 'MessageRoom.dart';
 import 'User.dart';
 import 'chores/Chore.dart';
 import 'chores/ChoreStatus.dart';
+import 'package:roomease/chores/Chore.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
+import 'package:intl/intl.dart';
 
 class DatabaseManager {
   static FirebaseDatabase _databaseInstance = FirebaseDatabase.instance;
@@ -385,11 +388,19 @@ class DatabaseManager {
     DatabaseReference choreRef =
         _databaseInstance.ref("households/$householdCode/choresToDo/$choreKey");
 
+    String current_date =
+        DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now());
+
     choreRef.set({
+      "id": choreKey,
       "name": name,
       "details": details,
       "deadline": deadline,
+      "dateCreated": current_date,
+      "dateLastIncremented": current_date,
       "score": score,
+      "timesIncremented": 0,
+      "daysSinceLastIncremented": 0,
       "createdByUserId": createdByUserId,
       "assignedUserId": null,
       "status": "toDo"
@@ -409,13 +420,54 @@ class DatabaseManager {
     List<Chore> choresList = <Chore>[];
 
     for (final chore in choresJson) {
-      choresList.add(Chore("", chore.child("name").value.toString(),
-          chore.child("details").value.toString(), chore.child("deadline").value.toString(),
-          int.parse(chore.child("score").value.toString()), chore.child("createdByUserId").value.toString(),
-          chore.child("assignedUserId").value.toString(), chore.child("status").value.toString()));
+      choresList.add(
+        Chore(
+          chore.child("id").value.toString(),
+          chore.child("name").value.toString(),
+          chore.child("details").value.toString(),
+          chore.child("deadline").value.toString(),
+          chore.child("dateCreated").value.toString(),
+          chore.child("dateLastIncremented").value.toString(),
+          int.parse(chore.child("score").value.toString()),
+          int.parse(chore.child("timesIncremented").value.toString()),
+          int.parse(chore.child("daysSinceLastIncremented").value.toString()),
+          chore.child("createdByUserId").value.toString(),
+          chore.child("assignedUserId").value.toString(),
+          chore.child("status").value.toString()
+        )
+      );
     }
     return choresList;
   }
 
+
+ static Future<void> updateChoreScores(String householdCode) async {
+    DatabaseReference choresRef =
+        _databaseInstance.ref("households/$householdCode/choresToDo");
+
+    List<Chore> choresToDo = await getChoresFromDB(ChoreStatus.toDo, CurrentHousehold.getCurrentHouseholdId());
+
+    String choreId;
+    DatabaseReference choreRef;
+    int threshold = 3;
+
+    for (var chore in choresToDo) {
+      choreId = chore.id;
+      choreRef = _databaseInstance.ref("households/$householdCode/choresToDo/$choreId");
+      int daysSinceLastIncremented = DateTime.now().difference(DateFormat('yyyy-MM-dd hh:mm:ss a').parse(chore.dateLastIncremented)).inSeconds + chore.daysSinceLastIncremented;
+      choreRef.update({
+        "daysSinceLastIncremented": daysSinceLastIncremented % threshold
+      });
+
+      if (daysSinceLastIncremented > threshold) {
+        int pointsIncrease = (daysSinceLastIncremented / threshold).floor();
+        await choreRef.update({
+          "score": chore.score + pointsIncrease, 
+          "dateLastIncremented": DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
+          "timesIncremented": chore.timesIncremented + pointsIncrease,
+        });
+      }
+    }
+  }
   // ------------------------ END CHORE OPERATIONS ------------------------
 }
