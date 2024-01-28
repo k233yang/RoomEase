@@ -376,7 +376,7 @@ class DatabaseManager {
   // ------------------------ CHORE OPERATIONS ------------------------
 
   static void addChore(String householdCode, String name, String details,
-      String deadline, int score, String createdByUserId) async {
+      String deadline, int points, int threshold, String createdByUserId) async {
     DatabaseReference choresRef =
         _databaseInstance.ref("households/$householdCode/choresToDo");
 
@@ -398,7 +398,8 @@ class DatabaseManager {
       "deadline": deadline,
       "dateCreated": current_date,
       "dateLastIncremented": current_date,
-      "score": score,
+      "points": points,
+      "threshold": threshold,
       "timesIncremented": 0,
       "daysSinceLastIncremented": 0,
       "createdByUserId": createdByUserId,
@@ -428,7 +429,8 @@ class DatabaseManager {
           chore.child("deadline").value.toString(),
           chore.child("dateCreated").value.toString(),
           chore.child("dateLastIncremented").value.toString(),
-          int.parse(chore.child("score").value.toString()),
+          int.parse(chore.child("points").value.toString()),
+          int.parse(chore.child("threshold").value.toString()),
           int.parse(chore.child("timesIncremented").value.toString()),
           int.parse(chore.child("daysSinceLastIncremented").value.toString()),
           chore.child("createdByUserId").value.toString(),
@@ -441,7 +443,7 @@ class DatabaseManager {
   }
 
 
- static Future<void> updateChoreScores(String householdCode) async {
+ static Future<void> updateChorePoints(String householdCode) async {
     DatabaseReference choresRef =
         _databaseInstance.ref("households/$householdCode/choresToDo");
 
@@ -449,20 +451,21 @@ class DatabaseManager {
 
     String choreId;
     DatabaseReference choreRef;
-    int threshold = 3;
+    int daysSinceLastIncremented = 0;
 
     for (var chore in choresToDo) {
       choreId = chore.id;
       choreRef = _databaseInstance.ref("households/$householdCode/choresToDo/$choreId");
-      int daysSinceLastIncremented = DateTime.now().difference(DateFormat('yyyy-MM-dd hh:mm:ss a').parse(chore.dateLastIncremented)).inSeconds + chore.daysSinceLastIncremented;
+      daysSinceLastIncremented = DateTime.now().difference(DateFormat('yyyy-MM-dd hh:mm:ss a').parse(chore.dateLastIncremented)).inDays + chore.daysSinceLastIncremented;
       choreRef.update({
-        "daysSinceLastIncremented": daysSinceLastIncremented % threshold
+        "daysSinceLastIncremented": daysSinceLastIncremented % chore.threshold
       });
 
-      if (daysSinceLastIncremented > threshold) {
-        int pointsIncrease = (daysSinceLastIncremented / threshold).floor();
+      int pointsIncrease = 0;
+      if (daysSinceLastIncremented > chore.threshold) {
+        pointsIncrease = (daysSinceLastIncremented / chore.threshold).floor();
         await choreRef.update({
-          "score": chore.score + pointsIncrease, 
+          "points": chore.points + pointsIncrease, 
           "dateLastIncremented": DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
           "timesIncremented": chore.timesIncremented + pointsIncrease,
         });

@@ -8,7 +8,8 @@ class Chore {
   String deadline;
   String dateCreated;
   String dateLastIncremented;
-  int score;
+  int points;
+  int threshold;
   int timesIncremented;
   int daysSinceLastIncremented;
   String createdByUserId;
@@ -22,7 +23,8 @@ class Chore {
       this.deadline,
       this.dateCreated,
       this.dateLastIncremented,
-      this.score,
+      this.points,
+      this.threshold,
       this.timesIncremented,
       this.daysSinceLastIncremented,
       this.createdByUserId,

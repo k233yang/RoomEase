@@ -16,7 +16,7 @@ class _ChoreScreen extends State<ChoreScreen> {
   @override
   void initState() {
     super.initState();
-    DatabaseManager.updateChoreScores(CurrentHousehold.getCurrentHouseholdId());
+    DatabaseManager.updateChorePoints(CurrentHousehold.getCurrentHouseholdId());
   }
 
   @override
