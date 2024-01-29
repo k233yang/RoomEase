@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:http/http.dart' as http;
 import '../secret.dart' show PineConeAPIKey;
 import 'package:pinecone/pinecone.dart';
