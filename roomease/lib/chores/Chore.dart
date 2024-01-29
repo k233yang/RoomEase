@@ -1,6 +1,3 @@
-import 'package:roomease/User.dart';
-import 'ChoreStatus.dart';
-
 class Chore {
   String id;
   String name;
