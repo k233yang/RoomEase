@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'Household.dart';
 import 'chores/Chore.dart';
@@ -7,8 +8,8 @@ import 'chores/Chore.dart';
 class CurrentHousehold {
   static var householdUserIdsSubscription =
       Stream<DatabaseEvent>.empty().listen((DatabaseEvent event) {});
-
-  static Map<String, List<String>> householdStatusMap = {};
+  static var householdStatusValueListener =
+      ValueNotifier<Map<String, List<String>>>({});
 
   static Household getCurrentHousehold() {
     String householdId = SharedPreferencesUtility.getString("householdId");

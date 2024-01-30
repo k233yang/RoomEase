@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/widgets.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
+import 'package:roomease/HomeScreen.dart';
 import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
@@ -399,14 +400,14 @@ class DatabaseManager {
       for (DataSnapshot d in event.snapshot.children) {
         userIds.add(d.value as String);
       }
-      Map<String, List<String>> userNameStatusMap = {};
+      Map<String, List<String>> userStatusMap = {};
       for (String id in userIds) {
         String name = await DatabaseManager.getUserName(id);
         String status = await DatabaseManager.getUserCurrentStatus(id);
-        userNameStatusMap[id] = [name, status];
+        userStatusMap[id] = [name, status];
       }
 
-      CurrentHousehold.householdStatusMap = userNameStatusMap;
+      CurrentHousehold.householdStatusValueListener.value = userStatusMap;
     });
   }
 

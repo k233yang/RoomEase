@@ -147,7 +147,6 @@ class _LoginState extends State<Login> {
     CurrentHousehold.setCurrentHouseholdId(householdId);
     String householdName = await DatabaseManager.getHouseholdName(householdId);
     CurrentHousehold.setCurrentHouseholdName(householdName);
-    DatabaseManager.householdUserIdSubscription(householdId);
 
     // Update user status
     String userStatus = await DatabaseManager.getUserCurrentStatus(userId);

@@ -62,7 +62,6 @@ class WelcomeBody extends StatelessWidget {
       user.user!.uid,
     );
     CurrentHousehold.setCurrentHouseholdId("uYjY33");
-    DatabaseManager.householdUserIdSubscription("uYjY33");
     DatabaseManager.updateHouseholdName("uYjY33");
     String userStatus =
         await DatabaseManager.getUserCurrentStatus(user.user!.uid);

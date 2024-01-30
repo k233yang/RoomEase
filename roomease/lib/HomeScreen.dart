@@ -28,6 +28,8 @@ class _HomeState extends State {
       ChoreScreen(),
       Profile()
     ];
+    DatabaseManager.householdUserIdSubscription(
+        CurrentHousehold.getCurrentHouseholdId());
     super.initState();
   }
 
@@ -143,17 +145,26 @@ class ChatCard extends StatelessWidget {
 }
 
 Widget statusList() {
-  List<Widget> statusList = CurrentHousehold.householdStatusMap.entries
-      .map((entry) => Row(children: [
-            Text(entry.value[0]),
-            Padding(
-                padding: EdgeInsets.only(left: 50), child: Text(entry.value[1]))
-          ]))
-      .toList();
-  statusList.insert(0, Row(children: [Text("Roommate Statuses")]));
-  return Padding(
-      padding: EdgeInsets.only(left: 50, right: 50, top: 50),
-      child: Column(
-        children: statusList,
-      ));
+  return ValueListenableBuilder(
+      valueListenable: CurrentHousehold.householdStatusValueListener,
+      builder: (context, value, child) {
+        if (value.entries.isNotEmpty) {
+          List<Widget> statusList = value.entries
+              .map((entry) => Row(children: [
+                    Text(entry.value[0]),
+                    Padding(
+                        padding: EdgeInsets.only(left: 50),
+                        child: Text(entry.value[1]))
+                  ]))
+              .toList();
+          statusList.insert(0, Row(children: [Text("Roommate Statuses")]));
+          return Padding(
+              padding: EdgeInsets.only(left: 50, right: 50, top: 50),
+              child: Column(
+                children: statusList,
+              ));
+        } else {
+          return Text("No roommate status data");
+        }
+      });
 }
