@@ -78,7 +78,7 @@ class _LoginState extends State<Login> {
                               password: passwordController.text);
                           if (user != null) {
                             //Sets user's name
-                            DatabaseManager.getUserName(user.user!.uid);
+                            DatabaseManager.getAndStoreUserName(user.user!.uid);
                             CurrentUser.setCurrentUserId(user.user!.uid);
                             // Checking if user is part of a household yet
                             String? householdId =
@@ -147,6 +147,7 @@ class _LoginState extends State<Login> {
     CurrentHousehold.setCurrentHouseholdId(householdId);
     String householdName = await DatabaseManager.getHouseholdName(householdId);
     CurrentHousehold.setCurrentHouseholdName(householdName);
+    DatabaseManager.householdUserIdSubscription(householdId);
 
     // Update user status
     String userStatus = await DatabaseManager.getUserCurrentStatus(userId);

@@ -72,7 +72,7 @@ class _CreateHousehold extends State<CreateHousehold> {
 
   void updateUserInformation() async {
     DatabaseManager.addUser(CurrentUser.getCurrentUser());
-    DatabaseManager.getUserName(CurrentUser.getCurrentUserId());
+    DatabaseManager.getAndStoreUserName(CurrentUser.getCurrentUserId());
 
     // Update user message rooms
     DatabaseManager.addMessageRoom(MessageRoom(

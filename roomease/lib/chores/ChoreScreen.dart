@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/DatabaseManager.dart';
-import 'package:roomease/chores/ChoreItem.dart';
-
 import '../CurrentHousehold.dart';
 import '../Household.dart';
 import '../colors/ColorConstants.dart';
@@ -33,11 +31,11 @@ class _ChoreScreen extends State<ChoreScreen> {
     completedListLoaded = currHousehold.updateChoresList(ChoreStatus.completed);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    DatabaseManager.updateChorePoints(CurrentHousehold.getCurrentHouseholdId());
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   DatabaseManager.updateChorePoints(CurrentHousehold.getCurrentHouseholdId());
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -291,7 +289,7 @@ Widget getChoreTile(Household currHousehold, ChoreStatus status) {
         ),
         child: Align(
           alignment: Alignment.center,
-          child: Text(choreItem.score.toString(),
+          child: Text(choreItem.points.toString(),
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,

@@ -99,6 +99,7 @@ class _JoinHousehold extends State<JoinHousehold> {
     CurrentHousehold.setCurrentHouseholdName(householdName);
     DatabaseManager.addHouseholdToUser(
         CurrentUser.getCurrentUser().userId, householdCodeController.text);
+    DatabaseManager.householdUserIdSubscription(householdCodeController.text);
 
     // Update user status
     await DatabaseManager.addStatusToUserStatusList(
