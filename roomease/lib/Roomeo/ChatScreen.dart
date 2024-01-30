@@ -32,7 +32,7 @@ class _ChatScreen extends State<ChatScreen> {
       Future.delayed(const Duration(milliseconds: 200), () {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 100),
+          duration: Duration(milliseconds: 200),
           curve: Curves.easeOut,
         );
       });

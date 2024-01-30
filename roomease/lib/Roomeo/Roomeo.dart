@@ -145,7 +145,7 @@ Future<String> selectOption(String message) async {
     {
       "role": "user",
       "content":
-          "Given the following user input, determine what category this input falls into. The categories are: 'View/Edit Schedule', 'View/Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized. The user input is: '$message'"
+          "Given the following user input, determine what category this input falls into. The categories are: 'View Schedule', 'Add to Schedule, 'Remove from Schedule', 'Update Schedule', 'View Status', 'Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized or if the input is irrelevant to the previous categories. The user input is: '$message'"
     }
   ];
 
@@ -167,4 +167,84 @@ Future<String> selectOption(String message) async {
     throw Exception(
         "getChatGPTResponse failed. HTTP status: ${res.statusCode}");
   }
+}
+
+Map<String, dynamic> generateGetCommandParameterRequestObject(
+    String category, String message) {
+  String parametersToFindAddendum = "";
+  String parameterJSONFormat = "";
+  switch (category) {
+    case 'Remove from Schedule':
+      parameterJSONFormat = "TaskDescription";
+      parametersToFindAddendum = "1. The description of the task to remove";
+      break;
+    case 'Add to Schedule':
+      DateTime now = DateTime.now();
+      parametersToFindAddendum =
+          "1. The description of the task to be added \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) to help determine this";
+      break;
+    case 'Update Schedule':
+      DateTime now = DateTime.now();
+      parametersToFindAddendum =
+          "1. The description of the old task to be updated \n 2. The description of the new task that will replace the old task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) to help determine this. If the date is not specified, the value of this parameter will be 'None'";
+      break;
+    case 'Set Status':
+      parametersToFindAddendum =
+          "1. The status that the user wants to set to. The valid statuses are: Online, Away, Offline";
+      break;
+    default:
+      return {};
+  }
+  final Map<String, String> requestHeaders = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer $OpenAIApiKey"
+  };
+  List<Map<String, String>> requestDataMessage = [
+    {
+      "role": "system",
+      "content":
+          "You are a virtual assistant meant to find command parameters given a user input for the following type of command: $category. You are to find and list the following parameters: \n $parametersToFindAddendum \n Output the results in a JSON style string, using the keys: \n $parameterJSONFormat \n If you cannot determine the values of all the parameters from the input, use the value 'Missing' for the respective parameter in the output."
+    },
+    {"role": "user", "content": message}
+  ];
+  return {};
+  /*You are a virtual assistant named "Roomeo" meant to find command parameters given a user input for the following type of command: 'Remove from Schedule'. You are to find and list the following parameters: 
+1. The description of the task to remove
+Output the results in a JSON style string, using the keys: 
+1. TaskDescription
+for each of the parameters. If you cannot determine the values of all the parameters from the input, use the value 'Missing' for the respective parameter in the JSON output. Give me only the JSON style string.
+The input is: "Roomeo, remove gardening from my schedule" */
+}
+
+void viewSchedule() {}
+
+void removeTaskFromSchedule(/*scheduleID, taskIDToRemove*/) {}
+
+void addTaskToSchedule(/*scheduleID, taskToAdd*/) {}
+
+void updateSchedule(/*scheduleID, taskToUpdate, newTask*/) {}
+
+void sendMessage(/*userID, message*/) {}
+
+//Future<Map<String, String>> getRemoveScheduleTokens(String message) async {}
+
+void determineCommand(String category, String message) {
+  // determine relevant tokens: e.g. if a user wants to add a task to a schedule,
+  // determine what strings are needed to build a task object from the message
+  // for:
+  // REMOVING A TASK FROM A SCHEDULE:
+
+  //  1. need to determine the ID of what task to remove (hard part)
+  //      (might need to query a vector DB to properly do this) one potential solution
+  //      is to query the top X most relevant task ID's, and have a user select
+  //      which task to remove
+  //  2. remove it from firebase, as well as the vector DB
+  // ADDING A TASK TO A SCHEDULE:
+  //  1. generate a task ID
+  //  2. vectorize the task and put it into the VDB
+  // UPDATING THE SCHEDULE:
+  //  1. determine what task needs updating
+  //      use an approach similar to determining task ID for removal
+  //  2. vectorize the task. modify the vector data for that task in the vdb
+  //  3. modify the task in firebase
 }
