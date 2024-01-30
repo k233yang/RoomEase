@@ -9,7 +9,7 @@ class CurrentHousehold {
   static var householdUserIdsSubscription =
       Stream<DatabaseEvent>.empty().listen((DatabaseEvent event) {});
   static var householdStatusValueListener =
-      ValueNotifier<Map<String, List<String>>>({});
+      ValueNotifier<Map<String, Map<String, String>>>({});
 
   static Household getCurrentHousehold() {
     String householdId = SharedPreferencesUtility.getString("householdId");

@@ -70,11 +70,15 @@ class DatabaseManager {
         });
   }
 
-  static Future<List<String>?> getUserMessageRoomIds(String userId) async {
+  static Future<List<String>> getUserMessageRoomIds(String userId) async {
     DatabaseReference usersRef =
         _databaseInstance.ref("users/$userId/messageRoomIds");
     DatabaseEvent event = await usersRef.once();
-    return event.snapshot.value as List<String>?;
+    List<String> messageRoomIds = [];
+    for (DataSnapshot d in event.snapshot.children) {
+      messageRoomIds.add(d.value as String);
+    }
+    return messageRoomIds;
   }
 
   static void addMessageRoomIdToUser(
@@ -122,6 +126,9 @@ class DatabaseManager {
   static void setUserCurrentStatus(String status, String userId) {
     DatabaseReference usersRef = _databaseInstance.ref("users/$userId");
     usersRef.update({"userStatus": status});
+    DatabaseReference householdRef = _databaseInstance.ref(
+        "households/${CurrentHousehold.getCurrentHouseholdId()}/users/$userId");
+    householdRef.update({"status": status});
   }
 
   static Future<String> getUserCurrentStatus(String userId) async {
@@ -329,26 +336,17 @@ class DatabaseManager {
       "users": <String>[user.userId],
       "name": name
     });
+    DatabaseReference householdUserRef =
+        _databaseInstance.ref("households/$householdCode/users/${user.userId}");
+    householdUserRef.update({"name": user.name, "status": "Home"});
     CurrentHousehold.setCurrentHouseholdId(householdCode);
-    DatabaseManager.householdUserIdSubscription(householdCode);
   }
 
   static void joinHousehold(User user, String householdCode) async {
     DatabaseReference householdRef =
-        _databaseInstance.ref("households/$householdCode/users");
+        _databaseInstance.ref("households/$householdCode/users/${user.userId}");
 
-    TransactionResult result =
-        await householdRef.runTransaction((Object? users) {
-      if (users == null) {
-        // No household
-        return Transaction.success(users);
-      }
-
-      List<String> _users = List<String>.from(users as List);
-      _users.add(user.userId);
-      // Return the new data.
-      return Transaction.success(_users);
-    });
+    householdRef.update({"name": user.name, "status": "Home"});
   }
 
   static Future<bool> checkHouseholdExists(String householdCode) async {
@@ -396,18 +394,20 @@ class DatabaseManager {
     CurrentHousehold.householdUserIdsSubscription.cancel();
     CurrentHousehold.householdUserIdsSubscription =
         householdRef.onValue.listen((DatabaseEvent event) async {
-      List<String> userIds = [];
-      for (DataSnapshot d in event.snapshot.children) {
-        userIds.add(d.value as String);
-      }
-      Map<String, List<String>> userStatusMap = {};
-      for (String id in userIds) {
-        String name = await DatabaseManager.getUserName(id);
-        String status = await DatabaseManager.getUserCurrentStatus(id);
-        userStatusMap[id] = [name, status];
+      Map<String, Map<String, String>> users = {};
+      if (event.snapshot.value != null) {
+        Map<dynamic, dynamic> userMap =
+            event.snapshot.value as Map<dynamic, dynamic>;
+        for (MapEntry<dynamic, dynamic> e in userMap.entries) {
+          String userId = e.key;
+          Map<dynamic, dynamic> userInfo = e.value as Map<dynamic, dynamic>;
+          String name = userInfo['name'];
+          String status = userInfo['status'];
+          users[userId] = {"name": name, "status": status};
+        }
       }
 
-      CurrentHousehold.householdStatusValueListener.value = userStatusMap;
+      CurrentHousehold.householdStatusValueListener.value = users;
     });
   }
 

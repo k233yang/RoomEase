@@ -54,7 +54,7 @@ class _CreateHousehold extends State<CreateHousehold> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        updateUserInformation();
+                        await updateUserInformation();
                         Navigator.pushNamedAndRemoveUntil(
                             context, "/home", (_) => false);
                       }
@@ -70,7 +70,7 @@ class _CreateHousehold extends State<CreateHousehold> {
     );
   }
 
-  void updateUserInformation() async {
+  Future<void> updateUserInformation() async {
     DatabaseManager.addUser(CurrentUser.getCurrentUser());
     DatabaseManager.getAndStoreUserName(CurrentUser.getCurrentUserId());
 

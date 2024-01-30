@@ -149,12 +149,12 @@ Widget statusList() {
       valueListenable: CurrentHousehold.householdStatusValueListener,
       builder: (context, value, child) {
         if (value.entries.isNotEmpty) {
-          List<Widget> statusList = value.entries
+          List<Widget> statusList = value.values
               .map((entry) => Row(children: [
-                    Text(entry.value[0]),
+                    Text(entry["name"]!),
                     Padding(
                         padding: EdgeInsets.only(left: 50),
-                        child: Text(entry.value[1]))
+                        child: Text(entry["status"]!))
                   ]))
               .toList();
           statusList.insert(0, Row(children: [Text("Roommate Statuses")]));

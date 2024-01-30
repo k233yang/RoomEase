@@ -86,7 +86,7 @@ class _LoginState extends State<Login> {
                                     user.user!.uid);
                             if (householdId != null) {
                               // Part of household, go to home screen
-                              updateUserInformation(
+                              await updateUserInformation(
                                   householdId, user.user!.uid);
                               SharedPreferencesUtility.setValue(
                                   "isLoggedIn", true);
@@ -125,7 +125,7 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void updateUserInformation(String householdId, String userId) async {
+  Future<void> updateUserInformation(String householdId, String userId) async {
     // Update user message rooms
     List<String>? messageRoomIds =
         await DatabaseManager.getUserMessageRoomIds(userId);

@@ -57,7 +57,7 @@ class _JoinHousehold extends State<JoinHousehold> {
                             await DatabaseManager.checkHouseholdExists(
                                 householdCodeController.text);
                         if (householdExists) {
-                          updateUserInformation();
+                          await updateUserInformation();
                           Navigator.pushNamedAndRemoveUntil(
                               context, "/home", (_) => false);
                         } else {
@@ -77,7 +77,7 @@ class _JoinHousehold extends State<JoinHousehold> {
     );
   }
 
-  void updateUserInformation() async {
+  Future<void> updateUserInformation() async {
     DatabaseManager.addUser(CurrentUser.getCurrentUser());
     DatabaseManager.joinHousehold(
         CurrentUser.getCurrentUser(), householdCodeController.text);
