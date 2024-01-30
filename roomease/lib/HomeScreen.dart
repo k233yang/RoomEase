@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/Roomeo/ChatScreen.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
@@ -50,42 +51,37 @@ class _HomeState extends State {
         items: [
           BottomNavigationBarItem(
             icon: Image(
-              image: AssetImage('assets/home_icon.png'),
-              height: 50,
-              width: 50
-            ),
+                image: AssetImage('assets/home_icon.png'),
+                height: 50,
+                width: 50),
             label: "",
           ),
           BottomNavigationBarItem(
             icon: Image(
-              image: AssetImage('assets/chat_icon.png'),
-              height: 50,
-              width: 50
-            ),
+                image: AssetImage('assets/chat_icon.png'),
+                height: 50,
+                width: 50),
             label: "",
           ),
           BottomNavigationBarItem(
             icon: Image(
-              image: AssetImage('assets/schedule_icon.png'),
-              height: 50,
-              width: 50
-            ),
+                image: AssetImage('assets/schedule_icon.png'),
+                height: 50,
+                width: 50),
             label: "",
           ),
           BottomNavigationBarItem(
             icon: Image(
-              image: AssetImage('assets/chores_icon.png'),
-              height: 50,
-              width: 50
-            ),
+                image: AssetImage('assets/chores_icon.png'),
+                height: 50,
+                width: 50),
             label: "",
           ),
           BottomNavigationBarItem(
             icon: Image(
-              image: AssetImage('assets/profile_icon.png'),
-              height: 50,
-              width: 50
-            ),
+                image: AssetImage('assets/profile_icon.png'),
+                height: 50,
+                width: 50),
             label: "",
           ),
         ],
@@ -108,7 +104,7 @@ class HomeScreen extends StatelessWidget {
           title: const Text('Home'),
           backgroundColor: ColorConstants.lightPurple,
         ),
-        body: HomeCards(updateIndex));
+        body: Column(children: [HomeCards(updateIndex), statusList()]));
   }
 }
 
@@ -144,4 +140,20 @@ class ChatCard extends StatelessWidget {
                 padding: EdgeInsets.all(32.0),
                 child: Column(children: [Text("Chat with Roomeo")]))));
   }
+}
+
+Widget statusList() {
+  List<Widget> statusList = CurrentHousehold.householdStatusMap.entries
+      .map((entry) => Row(children: [
+            Text(entry.value[0]),
+            Padding(
+                padding: EdgeInsets.only(left: 50), child: Text(entry.value[1]))
+          ]))
+      .toList();
+  statusList.insert(0, Row(children: [Text("Roommate Statuses")]));
+  return Padding(
+      padding: EdgeInsets.only(left: 50, right: 50, top: 50),
+      child: Column(
+        children: statusList,
+      ));
 }

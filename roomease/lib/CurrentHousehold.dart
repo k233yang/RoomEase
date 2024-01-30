@@ -5,6 +5,11 @@ import 'Household.dart';
 import 'chores/Chore.dart';
 
 class CurrentHousehold {
+  static var householdUserIdsSubscription =
+      Stream<DatabaseEvent>.empty().listen((DatabaseEvent event) {});
+
+  static Map<String, List<String>> householdStatusMap = {};
+
   static Household getCurrentHousehold() {
     String householdId = SharedPreferencesUtility.getString("householdId");
     String householdName = SharedPreferencesUtility.getString("householdName");
@@ -13,7 +18,8 @@ class CurrentHousehold {
     List<Chore> choresInProgress = <Chore>[];
     List<Chore> choresCompleted = <Chore>[];
     List<Chore> choresArchived = <Chore>[];
-    return Household(householdName, householdId, List.empty(), choresToDo, choresInProgress, choresCompleted, choresArchived);
+    return Household(householdName, householdId, List.empty(), choresToDo,
+        choresInProgress, choresCompleted, choresArchived);
   }
 
   static String getCurrentHouseholdId() {

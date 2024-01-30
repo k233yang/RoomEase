@@ -57,11 +57,12 @@ class WelcomeBody extends StatelessWidget {
   }
 
   Future<void> debugLogin(UserCredential user) async {
-    DatabaseManager.getUserName(user.user!.uid);
+    DatabaseManager.getAndStoreUserName(user.user!.uid);
     CurrentUser.setCurrentUserId(
       user.user!.uid,
     );
     CurrentHousehold.setCurrentHouseholdId("uYjY33");
+    DatabaseManager.householdUserIdSubscription("uYjY33");
     DatabaseManager.updateHouseholdName("uYjY33");
     String userStatus =
         await DatabaseManager.getUserCurrentStatus(user.user!.uid);

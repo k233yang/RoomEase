@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/DatabaseManager.dart';
-import 'package:roomease/chores/ChoreItem.dart';
-
 import '../CurrentHousehold.dart';
 import '../Household.dart';
 import '../colors/ColorConstants.dart';
@@ -28,15 +26,16 @@ class _ChoreScreen extends State<ChoreScreen> {
     currHousehold = CurrentHousehold.getCurrentHousehold();
 
     toDoListLoaded = currHousehold.updateChoresList(ChoreStatus.toDo);
-    inProgressListLoaded = currHousehold.updateChoresList(ChoreStatus.inProgress);
+    inProgressListLoaded =
+        currHousehold.updateChoresList(ChoreStatus.inProgress);
     completedListLoaded = currHousehold.updateChoresList(ChoreStatus.completed);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    DatabaseManager.updateChorePoints(CurrentHousehold.getCurrentHouseholdId());
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   DatabaseManager.updateChorePoints(CurrentHousehold.getCurrentHouseholdId());
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -46,29 +45,28 @@ class _ChoreScreen extends State<ChoreScreen> {
         backgroundColor: ColorConstants.lightPurple,
       ),
       body: Container(
-        color: ColorConstants.white,
-        child: Column(
-          children: [
-            Center(child: Text("To-Do",
-                style: TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 20))
-            ),
+          color: ColorConstants.white,
+          child: Column(children: [
+            Center(
+                child: Text("To-Do",
+                    style:
+                        TextStyle(fontWeight: FontWeight.w900, fontSize: 20))),
             // TODO: Potentially put below code into function?
             FutureBuilder<String>(
               future: toDoListLoaded,
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 List<Widget> children;
-                if(snapshot.hasData) {
-                  children = <Widget> [
+                if (snapshot.hasData) {
+                  children = <Widget>[
                     Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 24),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Center( child: getChoreTile(currHousehold, ChoreStatus.toDo)),
-                        )
-                    )
+                          child: Center(
+                              child: getChoreTile(
+                                  currHousehold, ChoreStatus.toDo)),
+                        ))
                   ];
                 } else if (snapshot.hasError) {
                   children = <Widget>[
@@ -103,26 +101,26 @@ class _ChoreScreen extends State<ChoreScreen> {
                 );
               },
             ),
-            Center(child: Text("In Progress",
-                style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 20))
-            ),
+            Center(
+                child: Text("In Progress",
+                    style:
+                        TextStyle(fontWeight: FontWeight.w900, fontSize: 20))),
             // TODO: Potentially put below code into function?
             FutureBuilder<String>(
               future: inProgressListLoaded,
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 List<Widget> children;
-                if(snapshot.hasData) {
-                  children = <Widget> [
+                if (snapshot.hasData) {
+                  children = <Widget>[
                     Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 24),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Center( child: getChoreTile(currHousehold, ChoreStatus.inProgress)),
-                        )
-                    )
+                          child: Center(
+                              child: getChoreTile(
+                                  currHousehold, ChoreStatus.inProgress)),
+                        ))
                   ];
                 } else if (snapshot.hasError) {
                   children = <Widget>[
@@ -157,26 +155,26 @@ class _ChoreScreen extends State<ChoreScreen> {
                 );
               },
             ),
-            Center(child: Text("Completed",
-                style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 20))
-            ),
+            Center(
+                child: Text("Completed",
+                    style:
+                        TextStyle(fontWeight: FontWeight.w900, fontSize: 20))),
             // TODO: Potentially put below code into function?
             FutureBuilder<String>(
               future: completedListLoaded,
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 List<Widget> children;
-                if(snapshot.hasData) {
-                  children = <Widget> [
+                if (snapshot.hasData) {
+                  children = <Widget>[
                     Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 24),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Center( child: getChoreTile(currHousehold, ChoreStatus.completed)),
-                        )
-                    )
+                          child: Center(
+                              child: getChoreTile(
+                                  currHousehold, ChoreStatus.completed)),
+                        ))
                   ];
                 } else if (snapshot.hasError) {
                   children = <Widget>[
@@ -211,14 +209,10 @@ class _ChoreScreen extends State<ChoreScreen> {
                 );
               },
             ),
-          ]
-        )
-      ),
-      floatingActionButton:  CreateAddChoreButton(
-        onButtonPress: () {
-          Navigator.pushNamed(context, "/addChore");
-        }
-      ),
+          ])),
+      floatingActionButton: CreateAddChoreButton(onButtonPress: () {
+        Navigator.pushNamed(context, "/addChore");
+      }),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
@@ -259,13 +253,14 @@ Widget getChoreTile(Household currHousehold, ChoreStatus status) {
     tileColor = Colors.indigo[200];
     pointCircleColor = Colors.indigo[800];
     list = currHousehold.choresCompleted;
-  } else { // status is ChoreEnums.archived
+  } else {
+    // status is ChoreEnums.archived
     tileColor = Colors.blueGrey[200];
     pointCircleColor = Colors.blueGrey[800];
     list = currHousehold.choresArchived;
   }
 
-  if(list.isEmpty) {
+  if (list.isEmpty) {
     return Text("No chores in category!");
   }
 
@@ -275,19 +270,14 @@ Widget getChoreTile(Household currHousehold, ChoreStatus status) {
   return ExpansionTile(
     title: Text(
       choreItem.name,
-      style: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 20
-      ),
+      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
     ),
     backgroundColor: tileColor,
     collapsedBackgroundColor: tileColor,
     subtitle: Text(
-      choreItem.assignedUserId ?? "Unassigned", // TODO: We need to change this to be getting user NAME not id. But yet, either way it should never print "null" which it is doing right now.
-      style: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 14
-      ),
+      choreItem.assignedUserId ??
+          "Unassigned", // TODO: We need to change this to be getting user NAME not id. But yet, either way it should never print "null" which it is doing right now.
+      style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
     ),
     trailing: Container(
         width: 60,
@@ -299,43 +289,31 @@ Widget getChoreTile(Household currHousehold, ChoreStatus status) {
         ),
         child: Align(
           alignment: Alignment.center,
-          child: Text(
-              choreItem.score.toString(),
+          child: Text(choreItem.points.toString(),
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: ColorConstants.white
-              )
-          ),
-        )
-    ),
+                  color: ColorConstants.white)),
+        )),
     children: <Widget>[
       ListTile(
         visualDensity: VisualDensity.compact,
-        title: Text(
-            "Details",
+        title: Text("Details",
             style: TextStyle(
               fontWeight: FontWeight.w500,
             )),
       ),
       ListTile(
-          visualDensity: VisualDensity.compact,
-          title: Text(
-              choreItem.details
-          )),
+          visualDensity: VisualDensity.compact, title: Text(choreItem.details)),
       ListTile(
           visualDensity: VisualDensity.compact,
-          title: Text(
-              "Deadline",
+          title: Text("Deadline",
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-              ))
-      ),
+              ))),
       ListTile(
           visualDensity: VisualDensity.compact,
-          title: Text(
-              choreItem.deadline
-          )),
+          title: Text(choreItem.deadline)),
     ],
     onExpansionChanged: (bool expanded) {
       // Do nothing for now

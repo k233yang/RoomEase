@@ -40,13 +40,19 @@ class DatabaseManager {
     return event.snapshot.value as String;
   }
 
-  static void getUserName(String userId) {
+  static void getAndStoreUserName(String userId) {
     DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
     CurrentUser.userNameSubscription.cancel();
     CurrentUser.userNameSubscription =
         usersRef.onValue.listen((DatabaseEvent event) {
       CurrentUser.setCurrentUserName(event.snapshot.value as String);
     });
+  }
+
+  static Future<String> getUserName(String userId) async {
+    DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
+    DatabaseEvent event = await usersRef.once();
+    return event.snapshot.value as String;
   }
 
   static StreamBuilder userNameStreamBuilder(String userId) {
@@ -323,6 +329,7 @@ class DatabaseManager {
       "name": name
     });
     CurrentHousehold.setCurrentHouseholdId(householdCode);
+    DatabaseManager.householdUserIdSubscription(householdCode);
   }
 
   static void joinHousehold(User user, String householdCode) async {
@@ -368,6 +375,39 @@ class DatabaseManager {
         _databaseInstance.ref("households/$householdId/name");
     DatabaseEvent event = await householdRef.once();
     return event.snapshot.value as String;
+  }
+
+  static Future<List<String>> getUserIdsFromHousehold(
+      String householdId) async {
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdId/users");
+    DatabaseEvent event = await householdRef.once();
+    List<String> userIds = [];
+    for (DataSnapshot d in event.snapshot.children) {
+      userIds.add(d.value as String);
+    }
+    return userIds;
+  }
+
+  static void householdUserIdSubscription(String householdId) {
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdId/users");
+    CurrentHousehold.householdUserIdsSubscription.cancel();
+    CurrentHousehold.householdUserIdsSubscription =
+        householdRef.onValue.listen((DatabaseEvent event) async {
+      List<String> userIds = [];
+      for (DataSnapshot d in event.snapshot.children) {
+        userIds.add(d.value as String);
+      }
+      Map<String, List<String>> userNameStatusMap = {};
+      for (String id in userIds) {
+        String name = await DatabaseManager.getUserName(id);
+        String status = await DatabaseManager.getUserCurrentStatus(id);
+        userNameStatusMap[id] = [name, status];
+      }
+
+      CurrentHousehold.householdStatusMap = userNameStatusMap;
+    });
   }
 
   // ------------------------ END HOUSEHOLD OPERATIONS ------------------------
