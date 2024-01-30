@@ -54,7 +54,13 @@ Widget profileDetails() {
     children: [
       Text(CurrentUser.getCurrentUserName()),
       Text("Member of: ${CurrentHousehold.getCurrentHouseholdName()}"),
-      Text("Edit Information")
+      Text("Household code: ${CurrentHousehold.getCurrentHouseholdId()}"),
+      TextButton(
+        child: Text("Edit Information"),
+        onPressed: (() {
+          // TODO: add edit info screen
+        }),
+      )
     ],
   );
 }

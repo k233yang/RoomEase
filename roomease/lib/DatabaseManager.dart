@@ -332,10 +332,7 @@ class DatabaseManager {
 
     DatabaseReference householdRef =
         _databaseInstance.ref("households/$householdCode");
-    householdRef.set({
-      "users": <String>[user.userId],
-      "name": name
-    });
+    householdRef.update({"name": name});
     DatabaseReference householdUserRef =
         _databaseInstance.ref("households/$householdCode/users/${user.userId}");
     householdUserRef.update({"name": user.name, "status": "Home"});
