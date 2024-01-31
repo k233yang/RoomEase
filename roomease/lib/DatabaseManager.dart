@@ -50,10 +50,17 @@ class DatabaseManager {
     });
   }
 
-  static Future<String> getUserName(String userId) async {
+  static Future<String> getUserName(String? userId) async {
+    if (userId == null) {
+      throw Exception("Cannot retrieve user name, user id is null");
+    }
     DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
     DatabaseEvent event = await usersRef.once();
-    return event.snapshot.value as String;
+    if (event.snapshot.value == null) {
+      return "";
+    } else {
+      return event.snapshot.value as String;
+    }
   }
 
   static StreamBuilder userNameStreamBuilder(String userId) {
