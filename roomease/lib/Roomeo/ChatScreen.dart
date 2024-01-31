@@ -85,7 +85,7 @@ class _ChatScreen extends State<ChatScreen> {
           // add user + Roomeo response to the DB
           await getRoomeoResponse(message, dateTime);
           // fetch the category of the message
-          String category = await selectOption(message);
+          String category = await getCommandCategory(message);
           print(category);
 
           WidgetsBinding.instance.addPostFrameCallback((_) {

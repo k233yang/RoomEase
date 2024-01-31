@@ -131,7 +131,7 @@ Future<void> getRoomeoResponse(String message, DateTime dateTime) async {
 /* Gets Roomeo to categorize a message. The categories are:
 ‘View/Edit Schedule’, ‘View/Set Status’, ‘Chore Delegation’,
 ‘Ask for Advice’, ‘Send a Message’, and ‘Unknown’ */
-Future<String> selectOption(String message) async {
+Future<String> getCommandCategory(String message) async {
   final Map<String, String> requestHeaders = {
     "Content-Type": "application/json",
     "Authorization": "Bearer $OpenAIApiKey"
@@ -169,26 +169,34 @@ Future<String> selectOption(String message) async {
   }
 }
 
+/*Generate the request object to be sent to determine command parameters */
 Map<String, dynamic> generateGetCommandParameterRequestObject(
     String category, String message) {
   String parametersToFindAddendum = "";
   String parameterJSONFormat = "";
   switch (category) {
     case 'Remove from Schedule':
-      parameterJSONFormat = "TaskDescription";
-      parametersToFindAddendum = "1. The description of the task to remove";
+      parameterJSONFormat =
+          "1. TaskDescription \n 2. TaskPerson \n 3. TaskTitle";
+      parametersToFindAddendum =
+          "1. The description of the task to remove \n 2. The name of the person assigned to the task \n 3. The title of the task to remove";
       break;
     case 'Add to Schedule':
       DateTime now = DateTime.now();
+      parameterJSONFormat =
+          "1. TaskDescription \n 2. TaskDate \n 3. TaskTitle \n 4. TaskPerson";
       parametersToFindAddendum =
-          "1. The description of the task to be added \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) to help determine this";
+          "1. The description of the task to be added \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) to help determine this \n 3. The title of the task \n 4. The name of the person assigned to the task";
       break;
     case 'Update Schedule':
       DateTime now = DateTime.now();
+      parameterJSONFormat =
+          "1. TaskDescriptionOld \n 2. TaskDescriptionNew \n 3. TaskDate \n 4. TaskPerson \n 5. TaskTitleOld \n 6. TaskTitleNew";
       parametersToFindAddendum =
-          "1. The description of the old task to be updated \n 2. The description of the new task that will replace the old task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) to help determine this. If the date is not specified, the value of this parameter will be 'None'";
+          "1. The description of the old task to be updated \n 2. The description of the new task that will replace the old task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) to help determine this. \n 4. The name of the person assigned to the task \n 5. The title of the old task \n 6. The title of the newly updated task";
       break;
     case 'Set Status':
+      parameterJSONFormat = "1. Status";
       parametersToFindAddendum =
           "1. The status that the user wants to set to. The valid statuses are: Online, Away, Offline";
       break;
@@ -203,12 +211,16 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
     {
       "role": "system",
       "content":
-          "You are a virtual assistant meant to find command parameters given a user input for the following type of command: $category. You are to find and list the following parameters: \n $parametersToFindAddendum \n Output the results in a JSON style string, using the keys: \n $parameterJSONFormat \n If you cannot determine the values of all the parameters from the input, use the value 'Missing' for the respective parameter in the output."
+          "You are a virtual assistant named 'Roomeo' meant to find command parameters given an input for the following type of command: $category. You are to find and list the following parameters: \n $parametersToFindAddendum \n Output the results in a JSON style string, using the keys: \n $parameterJSONFormat \n for each of the parameters, respectively. If you cannot determine the values of all the parameters from the input, use the value 'Missing' for the respective parameter in the JSON output. Output ONLY the JSON style string."
     },
     {"role": "user", "content": message}
   ];
-  return {};
-  /*You are a virtual assistant named "Roomeo" meant to find command parameters given a user input for the following type of command: 'Remove from Schedule'. You are to find and list the following parameters: 
+  final Map<String, dynamic> requestData = {
+    "model": "gpt-3.5-turbo",
+    "messages": requestDataMessage
+  };
+  return {"requestHeaders": requestHeaders, "requestData": requestData};
+/*You are a virtual assistant named "Roomeo" meant to find command parameters given a user input for the following type of command: 'Remove from Schedule'. You are to find and list the following parameters: 
 1. The description of the task to remove
 Output the results in a JSON style string, using the keys: 
 1. TaskDescription
@@ -228,12 +240,41 @@ void sendMessage(/*userID, message*/) {}
 
 //Future<Map<String, String>> getRemoveScheduleTokens(String message) async {}
 
-void determineCommand(String category, String message) {
+Future<Map<String, dynamic>> getCommandParameters(
+    String category, String message) async {
+  // generate the command parameter parsing request object:
+  Map<String, dynamic> commandRequestObject =
+      generateGetCommandParameterRequestObject(category, message);
+  if (commandRequestObject == {}) {
+    // TODO: handle empty object instance
+  }
+  if (!commandRequestObject.containsKey("requestHeaders")) {
+    return Future.error("getCommandParameters failed: invalid requestHeader");
+  }
+  if (!commandRequestObject.containsKey("requestData")) {
+    return Future.error("getCommandParameters failed: invalid requestData");
+  }
+  final res = await http.post(Uri.parse(apiURL),
+      headers: commandRequestObject["requestHeaders"],
+      body: jsonEncode(commandRequestObject["requestData"]));
+  if (res.statusCode != 200) {
+    throw Exception(
+        "Failed to get command parameters. HTTP status: ${res.statusCode}");
+  }
+  final decodedRes = jsonDecode(res.body);
+  final int lastResponseIndex = decodedRes["choices"].length - 1;
+  String commandParamsAsString =
+      decodedRes["choices"][lastResponseIndex]["message"]["content"];
+  Map<String, dynamic> commandParameters = {"category": category};
+  commandParameters.addAll(jsonDecode(commandParamsAsString));
+  return commandParameters;
+}
+
+void dispatchCommand(String category, String message) {
   // determine relevant tokens: e.g. if a user wants to add a task to a schedule,
   // determine what strings are needed to build a task object from the message
   // for:
   // REMOVING A TASK FROM A SCHEDULE:
-
   //  1. need to determine the ID of what task to remove (hard part)
   //      (might need to query a vector DB to properly do this) one potential solution
   //      is to query the top X most relevant task ID's, and have a user select
