@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/DatabaseManager.dart';
 import '../CurrentHousehold.dart';
 import '../Household.dart';
@@ -29,13 +28,9 @@ class _ChoreScreen extends State<ChoreScreen> {
     inProgressListLoaded =
         currHousehold.updateChoresList(ChoreStatus.inProgress);
     completedListLoaded = currHousehold.updateChoresList(ChoreStatus.completed);
-  }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   DatabaseManager.updateChorePoints(CurrentHousehold.getCurrentHouseholdId());
-  // }
+      DatabaseManager.updateChorePoints(CurrentHousehold.getCurrentHouseholdId());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,169 +46,86 @@ class _ChoreScreen extends State<ChoreScreen> {
                 child: Text("To-Do",
                     style:
                         TextStyle(fontWeight: FontWeight.w900, fontSize: 20))),
-            // TODO: Potentially put below code into function?
-            FutureBuilder<String>(
-              future: toDoListLoaded,
-              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                List<Widget> children;
-                if (snapshot.hasData) {
-                  children = <Widget>[
-                    Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 24),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Center(
-                              child: getChoreTile(
-                                  currHousehold, ChoreStatus.toDo)),
-                        ))
-                  ];
-                } else if (snapshot.hasError) {
-                  children = <Widget>[
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 60,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text('Error: ${snapshot.error}'),
-                    ),
-                  ];
-                } else {
-                  children = const <Widget>[
-                    SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: CircularProgressIndicator(),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 16),
-                      child: Text('Loading chores...'),
-                    ),
-                  ];
-                }
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: children,
-                  ),
-                );
-              },
-            ),
+            buildChoreTiles(ChoreStatus.toDo),
             Center(
                 child: Text("In Progress",
                     style:
                         TextStyle(fontWeight: FontWeight.w900, fontSize: 20))),
-            // TODO: Potentially put below code into function?
-            FutureBuilder<String>(
-              future: inProgressListLoaded,
-              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                List<Widget> children;
-                if (snapshot.hasData) {
-                  children = <Widget>[
-                    Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 24),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Center(
-                              child: getChoreTile(
-                                  currHousehold, ChoreStatus.inProgress)),
-                        ))
-                  ];
-                } else if (snapshot.hasError) {
-                  children = <Widget>[
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 60,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text('Error: ${snapshot.error}'),
-                    ),
-                  ];
-                } else {
-                  children = const <Widget>[
-                    SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: CircularProgressIndicator(),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 16),
-                      child: Text('Loading chores...'),
-                    ),
-                  ];
-                }
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: children,
-                  ),
-                );
-              },
-            ),
+            buildChoreTiles(ChoreStatus.inProgress),
             Center(
                 child: Text("Completed",
                     style:
                         TextStyle(fontWeight: FontWeight.w900, fontSize: 20))),
-            // TODO: Potentially put below code into function?
-            FutureBuilder<String>(
-              future: completedListLoaded,
-              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                List<Widget> children;
-                if (snapshot.hasData) {
-                  children = <Widget>[
-                    Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 24),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Center(
-                              child: getChoreTile(
-                                  currHousehold, ChoreStatus.completed)),
-                        ))
-                  ];
-                } else if (snapshot.hasError) {
-                  children = <Widget>[
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 60,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text('Error: ${snapshot.error}'),
-                    ),
-                  ];
-                } else {
-                  children = const <Widget>[
-                    SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: CircularProgressIndicator(),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 16),
-                      child: Text('Loading chores...'),
-                    ),
-                  ];
-                }
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: children,
-                  ),
-                );
-              },
-            ),
+            buildChoreTiles(ChoreStatus.completed),
           ])),
       floatingActionButton: CreateAddChoreButton(onButtonPress: () {
         Navigator.pushNamed(context, "/addChore");
       }),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  FutureBuilder<String> buildChoreTiles(ChoreStatus status) {
+    Future<String> list;
+
+    if (status == ChoreStatus.toDo) {
+      list = toDoListLoaded;
+    } else if (status == ChoreStatus.inProgress) {
+      list = inProgressListLoaded;
+    } else if (status == ChoreStatus.completed) {
+      list = completedListLoaded;
+    } else {     // status is ChoreEnums.archived
+      throw Exception("Chore status 'Archived' not supported for buildChoreTiles(status)");
+    }
+
+    return FutureBuilder<String>(
+      future: list,
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        List<Widget> children;
+        if (snapshot.hasData) {
+          children = <Widget>[
+            Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 24),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Center(
+                      child: getChoreTile(
+                          currHousehold, status)),
+                ))
+          ];
+        } else if (snapshot.hasError) {
+          children = <Widget>[
+            const Icon(
+              Icons.error_outline,
+              color: Colors.red,
+              size: 60,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Text('Error: ${snapshot.error}'),
+            ),
+          ];
+        } else {
+          children = const <Widget>[
+            SizedBox(
+              width: 60,
+              height: 60,
+              child: CircularProgressIndicator(),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Text('Loading chores...'),
+            ),
+          ];
+        }
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: children,
+          ),
+        );
+      },
     );
   }
 }
@@ -253,8 +165,7 @@ Widget getChoreTile(Household currHousehold, ChoreStatus status) {
     tileColor = Colors.indigo[200];
     pointCircleColor = Colors.indigo[800];
     list = currHousehold.choresCompleted;
-  } else {
-    // status is ChoreEnums.archived
+  } else { // status is ChoreEnums.archived
     tileColor = Colors.blueGrey[200];
     pointCircleColor = Colors.blueGrey[800];
     list = currHousehold.choresArchived;
