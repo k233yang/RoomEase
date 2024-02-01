@@ -21,32 +21,62 @@ class _ProfileState extends State<Profile> {
           backgroundColor: ColorConstants.lightPurple,
         ),
         body: Padding(
-            padding: EdgeInsets.only(top: 20, bottom: 20),
+            padding: EdgeInsets.only(top: 40, bottom: 20),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              profileSection(),
-              UserStatusDropdown(),
-              addCustomUserStatus(),
+              Expanded(
+                  child: Column(children: [
+                profileSection(),
+                Divider(indent: 20, endIndent: 20),
+                userStatusSection(),
+                Divider(indent: 20, endIndent: 20)
+              ])),
               logOutButton(context)
             ])));
   }
 }
 
 Widget profileSection() {
-  return Row(
-    children: [
-      Padding(
-          padding: EdgeInsets.only(left: 50),
-          child: Image(
-            image: AssetImage('assets/user_profile_icon.png'),
-            height: 100,
-            width: 100,
-          )),
-      Padding(
-          padding: EdgeInsets.only(left: 30, right: 50),
-          child: profileDetails())
-    ],
-  );
+  return Padding(
+      padding: EdgeInsets.only(bottom: 20),
+      child: Column(children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+                padding: EdgeInsets.only(left: 50),
+                child: Image(
+                  image: AssetImage('assets/user_profile_icon.png'),
+                  height: 100,
+                  width: 100,
+                )),
+            Spacer(),
+            Padding(
+                padding: EdgeInsets.only(right: 50), child: profileDetails())
+          ],
+        ),
+        Row(children: [
+          Padding(
+              padding: EdgeInsets.only(left: 40, top: 30),
+              child: editProfileButton())
+        ])
+      ]));
+}
+
+Widget editProfileButton() {
+  return OutlinedButton(
+      onPressed: () {
+        // TODO: add edit profile screen
+      },
+      child: Row(children: [
+        Text("Edit Profile"),
+        Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: Image(
+                image: AssetImage('assets/edit_icon.png'),
+                height: 30,
+                width: 30)),
+      ]));
 }
 
 Widget profileDetails() {
@@ -54,31 +84,22 @@ Widget profileDetails() {
     children: [
       Text(CurrentUser.getCurrentUserName()),
       Text("Member of: ${CurrentHousehold.getCurrentHouseholdName()}"),
-      Text("Household code: ${CurrentHousehold.getCurrentHouseholdId()}"),
-      TextButton(
-        child: Text("Edit Information"),
-        onPressed: (() {
-          // TODO: add edit info screen
-        }),
-      )
+      Text("Household Code: ${CurrentHousehold.getCurrentHouseholdId()}")
     ],
   );
 }
 
-Widget addCustomUserStatus() {
-  return Padding(
-      padding: EdgeInsets.only(left: 50),
-      child: TextButton(
-        child: Text("Add Custom Status"),
-        onPressed: () async {
-          // TODO: Add textfield and update status list
-        },
-      ));
+Widget addCustomUserStatusButton() {
+  return OutlinedButton(
+    child: Text("Add Custom Status"),
+    onPressed: () async {
+      // TODO: Add textfield and update status list
+    },
+  );
 }
 
 Widget logOutButton(BuildContext context) {
-  return Padding(
-      padding: EdgeInsets.only(left: 50),
+  return Center(
       child: TextButton(
           onPressed: () {
             SharedPreferencesUtility.clear();
@@ -86,6 +107,21 @@ Widget logOutButton(BuildContext context) {
                 context, "/welcome", (_) => false);
           },
           child: Text("Log Out")));
+}
+
+Widget userStatusSection() {
+  return Padding(
+      padding: EdgeInsets.only(top: 10, bottom: 10),
+      child: Row(
+        children: [
+          Padding(
+              padding: EdgeInsets.only(left: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [UserStatusDropdown(), addCustomUserStatusButton()],
+              ))
+        ],
+      ));
 }
 
 class UserStatusDropdown extends StatefulWidget {
@@ -100,32 +136,29 @@ class _UserStatusDropdown extends State<UserStatusDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.only(left: 50),
-        child: Row(
-          children: [
-            Text("Current Status"),
-            Padding(
-                padding: EdgeInsets.only(left: 30),
-                child: DropdownButton<String>(
-                  value: CurrentUser.getCurrentUserStatus(),
-                  items: CurrentUser.getCurrentUserStatusList()
-                      .map<DropdownMenuItem<String>>((String status) {
-                    return DropdownMenuItem<String>(
-                      value: status,
-                      child: Text(status),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      dropdownValue = value!;
-                    });
-                    DatabaseManager.setUserCurrentStatus(
-                        value!, CurrentUser.getCurrentUserId());
-                    CurrentUser.setCurrentUserStatus(value);
-                  },
-                )),
-          ],
-        ));
+    return Row(
+      children: [
+        Padding(
+            padding: EdgeInsets.only(left: 30),
+            child: DropdownButton<String>(
+              value: CurrentUser.getCurrentUserStatus(),
+              items: CurrentUser.getCurrentUserStatusList()
+                  .map<DropdownMenuItem<String>>((String status) {
+                return DropdownMenuItem<String>(
+                  value: status,
+                  child: Text(status),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  dropdownValue = value!;
+                });
+                DatabaseManager.setUserCurrentStatus(
+                    value!, CurrentUser.getCurrentUserId());
+                CurrentUser.setCurrentUserStatus(value);
+              },
+            )),
+      ],
+    );
   }
 }

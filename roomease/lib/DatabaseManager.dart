@@ -70,6 +70,7 @@ class DatabaseManager {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Text(
+                style: TextStyle(fontSize: 20),
                 'Hello ${(snapshot.data! as DatabaseEvent).snapshot.value as String}!');
           } else {
             return Text("");

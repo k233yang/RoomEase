@@ -106,7 +106,11 @@ class HomeScreen extends StatelessWidget {
           title: const Text('Home'),
           backgroundColor: ColorConstants.lightPurple,
         ),
-        body: Column(children: [HomeCards(updateIndex), statusList()]));
+        body: Column(children: [
+          HomeCards(updateIndex),
+          Divider(indent: 20, endIndent: 20),
+          statusList()
+        ]));
   }
 }
 
@@ -122,7 +126,9 @@ class HomeCards extends StatelessWidget {
             padding: EdgeInsets.only(top: 20),
             child: DatabaseManager.userNameStreamBuilder(
                 CurrentUser.getCurrentUserId())),
-        Padding(padding: EdgeInsets.only(top: 20), child: ChatCard(updateIndex))
+        Padding(
+            padding: EdgeInsets.only(top: 20, bottom: 20),
+            child: ChatCard(updateIndex))
       ],
     ));
   }
@@ -139,32 +145,53 @@ class ChatCard extends StatelessWidget {
         },
         child: Card(
             child: Padding(
-                padding: EdgeInsets.all(32.0),
+                padding: EdgeInsets.all(15.0),
                 child: Column(children: [Text("Chat with Roomeo")]))));
   }
 }
 
 Widget statusList() {
-  return ValueListenableBuilder(
-      valueListenable: CurrentHousehold.householdStatusValueListener,
-      builder: (context, value, child) {
-        if (value.entries.isNotEmpty) {
-          List<Widget> statusList = value.values
-              .map((entry) => Row(children: [
-                    Text(entry["name"]!),
-                    Padding(
-                        padding: EdgeInsets.only(left: 50),
-                        child: Text(entry["status"]!))
-                  ]))
-              .toList();
-          statusList.insert(0, Row(children: [Text("Roommate Statuses")]));
-          return Padding(
-              padding: EdgeInsets.only(left: 50, right: 50, top: 50),
-              child: Column(
-                children: statusList,
-              ));
-        } else {
-          return Text("No roommate status data");
-        }
-      });
+  return Padding(
+      padding: EdgeInsets.only(top: 30),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+            padding: EdgeInsets.only(left: 50),
+            child: Text(
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                "Roommate Statuses")),
+        ValueListenableBuilder(
+            valueListenable: CurrentHousehold.householdStatusValueListener,
+            builder: (context, value, child) {
+              if (value.entries.isNotEmpty) {
+                List<Widget> statusList = value.values
+                    .map((entry) => Row(children: [
+                          Text(style: TextStyle(fontSize: 15), entry["name"]!),
+                          Spacer(),
+                          Padding(
+                              padding: EdgeInsets.only(left: 50),
+                              child: Text(
+                                  style: TextStyle(fontSize: 15),
+                                  entry["status"]!))
+                        ]))
+                    .toList();
+                return Padding(
+                    padding: EdgeInsets.only(left: 50, right: 50, top: 10),
+                    child: Column(
+                      children: statusList,
+                    ));
+              } else {
+                return Column(children: [
+                  SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: CircularProgressIndicator(),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Text('Loading Roommate Statuses...'),
+                  ),
+                ]);
+              }
+            })
+      ]));
 }
