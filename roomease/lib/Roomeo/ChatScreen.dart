@@ -81,12 +81,14 @@ class _ChatScreen extends State<ChatScreen> {
               curve: Curves.easeOut,
             );
           });
-
           // add user + Roomeo response to the DB
           await getRoomeoResponse(message, dateTime);
           // fetch the category of the message
           String category = await getCommandCategory(message);
-          print(category);
+          print("CATEGORY IS: $category");
+          Map<String, dynamic> commandParams =
+              await getCommandParameters(category, message);
+          print(commandParams);
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
             scrollController.animateTo(

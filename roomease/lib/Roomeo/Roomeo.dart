@@ -10,6 +10,19 @@ import 'package:roomease/Roomeo/ChatGPTAPI.dart';
 import 'package:roomease/Roomeo/EmbedVector.dart';
 import '../Errors.dart';
 
+const List<String> catList = [
+  'Remove from Schedule',
+  'Add to Schedule',
+  'Update Schedule',
+  'Set Status',
+  'View Schedule',
+  'View Status',
+  'Chore Delegation',
+  'Ask for Advice',
+  'Send a Message',
+  'Unknown'
+];
+
 /* Adds a message to the chatroom, as well as fetches Roomeo's response
 by querying relvant messages in the VDB and adds it to the chatroom as well.*/
 Future<void> getRoomeoResponse(String message, DateTime dateTime) async {
@@ -145,7 +158,7 @@ Future<String> getCommandCategory(String message) async {
     {
       "role": "user",
       "content":
-          "Given the following user input, determine what category this input falls into. The categories are: 'View Schedule', 'Add to Schedule, 'Remove from Schedule', 'Update Schedule', 'View Status', 'Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized or if the input is irrelevant to the previous categories. The user input is: '$message'"
+          "Given the following user input, determine what category this input falls into. The categories are: 'View Schedule', 'Add to Schedule, 'Remove from Schedule', 'Update Schedule', 'View Status', 'Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized or if the input is irrelevant to the previous categories. Give me only the category of the message, and nothing else. The user input is: '$message'"
     }
   ];
 
@@ -186,14 +199,14 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
       parameterJSONFormat =
           "1. TaskDescription \n 2. TaskDate \n 3. TaskTitle \n 4. TaskPerson";
       parametersToFindAddendum =
-          "1. The description of the task to be added \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) to help determine this \n 3. The title of the task \n 4. The name of the person assigned to the task";
+          "1. The description of the task to be added \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The title of the task \n 4. The name of the person assigned to the task";
       break;
     case 'Update Schedule':
       DateTime now = DateTime.now();
       parameterJSONFormat =
           "1. TaskDescriptionOld \n 2. TaskDescriptionNew \n 3. TaskDate \n 4. TaskPerson \n 5. TaskTitleOld \n 6. TaskTitleNew";
       parametersToFindAddendum =
-          "1. The description of the old task to be updated \n 2. The description of the new task that will replace the old task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) to help determine this. \n 4. The name of the person assigned to the task \n 5. The title of the old task \n 6. The title of the newly updated task";
+          "1. The description of the old task to be updated \n 2. The description of the new task that will replace the old task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 4. The name of the person assigned to the task \n 5. The title of the old task \n 6. The title of the newly updated task";
       break;
     case 'Set Status':
       parameterJSONFormat = "1. Status";
