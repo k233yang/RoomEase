@@ -425,11 +425,17 @@ class DatabaseManager {
       String name,
       String details,
       String deadline,
+      String dateCreated,
+      String dateLastIncremented,
       int points,
       int threshold,
-      String createdByUserId) async {
+      int timesIncremented,
+      int daysSinceLastIncremented,
+      String createdByUserId,
+      String? assignedUserId,
+      String status ) async {
     DatabaseReference choresRef =
-        _databaseInstance.ref("households/$householdCode/choresToDo");
+        _databaseInstance.ref("households/$householdCode/$status");
 
     final choreKey = choresRef.push().key;
     if (choreKey == null) {
@@ -437,27 +443,24 @@ class DatabaseManager {
     }
 
     DatabaseReference choreRef =
-        _databaseInstance.ref("households/$householdCode/choresToDo/$choreKey");
+        _databaseInstance.ref("households/$householdCode/$status/$choreKey");
 
-    String current_date =
-        DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now());
-
-    choreRef.set({
+    choreRef.update({
       "id": choreKey,
       "name": name,
       "details": details,
       "deadline": deadline,
-      "dateCreated": current_date,
-      "dateLastIncremented": current_date,
+      "dateCreated": dateCreated,
+      "dateLastIncremented": dateLastIncremented,
       "points": points,
       "threshold": threshold,
-      "timesIncremented": 0,
-      "daysSinceLastIncremented": 0,
+      "timesIncremented": timesIncremented,
+      "daysSinceLastIncremented": daysSinceLastIncremented,
       "createdByUserId": createdByUserId,
-      "assignedUserId": null,
-      "status": "toDo"
+      "assignedUserId": assignedUserId,
+      "status": status
     }).then((value) {
-      print("Successfully added chore");
+      print("Successfully added chore!");
     }).catchError((value) {
       print(value);
       throw Exception('Could not add chore');
@@ -527,6 +530,46 @@ class DatabaseManager {
         });
       }
     }
+  }
+
+static Future<void> deleteChore(String choreId, ChoreStatus status) async {
+    String householdCode = CurrentHousehold.getCurrentHouseholdId();
+    DatabaseReference choreRef =
+      _databaseInstance.ref("households/$householdCode/${status.value}/$choreId");
+    await choreRef.remove();
+}
+
+static Future<void> updateChoreStatus(String? assignedUserId, String choreId, ChoreStatus choreStatus, ChoreStatus newChoreStatus) async {
+    String householdCode = CurrentHousehold.getCurrentHouseholdId();
+
+    DatabaseReference choreRef =
+      _databaseInstance.ref("households/$householdCode/${choreStatus.value}/$choreId");
+  
+    DatabaseEvent event = await choreRef.once();
+
+    final choreJson = event.snapshot.child;
+
+    if (newChoreStatus == ChoreStatus.toDo) {
+      assignedUserId = null;
+    }
+
+    addChore(
+      householdCode,
+      choreJson("name").value.toString(),
+      choreJson("details").value.toString(),
+      choreJson("deadline").value.toString(),
+      choreJson("dateCreated").value.toString(),
+      choreJson("dateLastIncremented").value.toString(),
+      int.parse(choreJson("points").value.toString()),
+      int.parse(choreJson("threshold").value.toString()),
+      int.parse(choreJson("timesIncremented").value.toString()),
+      int.parse(choreJson("daysSinceLastIncremented").value.toString()),
+      choreJson("createdByUserId").value.toString(),
+      assignedUserId,
+      newChoreStatus.value,
+    );
+
+    await choreRef.remove();
   }
   // ------------------------ END CHORE OPERATIONS ------------------------
 }

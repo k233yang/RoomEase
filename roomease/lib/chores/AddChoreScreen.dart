@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/CurrentHousehold.dart';
+import 'package:roomease/chores/ChoreStatus.dart';
 import '../colors/ColorConstants.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
@@ -189,9 +190,16 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                                   nameController.text,
                                   detailsController.text,
                                   deadlineController.text,
+                                  DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
+                                  DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
                                   points,
                                   threshold,
-                                  CurrentUser.getCurrentUserId());
+                                  0,
+                                  0,
+                                  CurrentUser.getCurrentUserId(),
+                                  null,
+                                  ChoreStatus.toDo.value
+                              );
                             } catch (e) {
                               print('Failed to add chore: $e');
                             }

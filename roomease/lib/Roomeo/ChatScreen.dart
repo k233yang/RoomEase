@@ -30,11 +30,13 @@ class _ChatScreen extends State<ChatScreen> {
     // Scroll to the bottom when the widget is built
     SchedulerBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(milliseconds: 200), () {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
+        if (scrollController.hasClients) {
+            scrollController.animateTo(
+            scrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
+        }
       });
     });
   }
@@ -75,11 +77,13 @@ class _ChatScreen extends State<ChatScreen> {
           setState(() {});
           // Scroll to the bottom when a new message is added
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            scrollController.animateTo(
-              scrollController.position.maxScrollExtent,
-              duration: Duration(milliseconds: 500),
-              curve: Curves.easeOut,
-            );
+            if (scrollController.hasClients) {
+              scrollController.animateTo(
+                scrollController.position.maxScrollExtent,
+                duration: Duration(milliseconds: 500),
+                curve: Curves.easeOut,
+              );
+            }
           });
           // add user + Roomeo response to the DB
           await getRoomeoResponse(message, dateTime);
@@ -91,11 +95,13 @@ class _ChatScreen extends State<ChatScreen> {
           print(commandParams);
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            scrollController.animateTo(
-              scrollController.position.maxScrollExtent,
-              duration: Duration(milliseconds: 500),
-              curve: Curves.easeOut,
-            );
+            if (scrollController.hasClients) {
+              scrollController.animateTo(
+                scrollController.position.maxScrollExtent,
+                duration: Duration(milliseconds: 500),
+                curve: Curves.easeOut,
+              );
+            }
           });
         },
         decoration: InputDecoration(
