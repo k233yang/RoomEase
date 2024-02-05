@@ -22,6 +22,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.2.16
   pinecone: ^0.7.2
+  grouped_list: ^4.2.0
 
 dev_dependencies:
   flutter_test:
