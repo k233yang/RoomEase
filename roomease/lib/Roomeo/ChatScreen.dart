@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
+import 'package:roomease/Roomeo/ChatBoxGeneric.dart';
 import 'package:roomease/Roomeo/RoomeoUser.dart';
 import '../Message.dart';
 import '../colors/ColorConstants.dart';
-import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:roomease/Roomeo/Roomeo.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
+import 'package:roomease/Roomeo/ChatScreenOptions.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -21,13 +21,11 @@ class _ChatScreen extends State<ChatScreen> {
   late TextEditingController _controller;
   final messageList = <Message>[];
   late FocusNode textFieldFocusNode;
-  static late ScrollController scrollController;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
-    scrollController = ScrollController();
     textFieldFocusNode = FocusNode();
     // Scroll to the bottom when the widget is built
   }
@@ -41,31 +39,22 @@ class _ChatScreen extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Chat with Roomeo'),
-          backgroundColor: ColorConstants.lightPurple,
-        ),
-        body: Column(
-          children: [
-            Expanded(
-                child: DatabaseManager.messagesStreamBuilder(
-                    CurrentUser.getCurrentUserId() + RoomeoUser.user.userId)),
-            Container(
-              color: ColorConstants.white,
-              child: chatTextField(),
-            ),
-          ],
-        )
-
-        // Container(
-        //   color: ColorConstants.white,
-        //   child: Column(children: [
-        //     DatabaseManager.messagesStreamBuilder(
-        //         CurrentUser.getCurrentUserId() + RoomeoUser.user.userId),
-        //     Center(child: chatTextField()),
-        //   ]),
-        // ),
-        );
+      appBar: AppBar(
+        title: const Text('Chat with Roomeo'),
+        backgroundColor: ColorConstants.lightPurple,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+              child: DatabaseManager.messagesStreamBuilder(
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId)),
+          Container(
+            color: ColorConstants.white,
+            child: chatTextField(),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget chatTextField() {
@@ -86,9 +75,10 @@ class _ChatScreen extends State<ChatScreen> {
             // fetch the category of the message
             String category = await getCommandCategory(message);
             print("CATEGORY IS: $category");
-            Map<String, dynamic> commandParams =
+            Map<String, String> commandParams =
                 await getCommandParameters(category, message);
-            print(commandParams);
+            print("COMMAND PARAMS ARE: $commandParams");
+            print("COMMANDPARAM DATA TYPE IS: ${commandParams.runtimeType}");
           }
         },
         decoration: InputDecoration(
@@ -128,25 +118,7 @@ Widget buildListMessage(List<Message> messages) {
         ),
       ),
     ),
-    itemBuilder: (context, Message message) => Align(
-      alignment: message.senderId == CurrentUser.getCurrentUserId()
-          ? Alignment.centerRight
-          : Alignment.centerLeft,
-      child: ConstrainedBox(
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-        child: Card(
-          color: message.senderId == CurrentUser.getCurrentUserId()
-              ? ColorConstants.lightPurple
-              : ColorConstants.lighterGray,
-          elevation: 5,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(message.text),
-          ),
-        ),
-      ),
-    ),
+    itemBuilder: (context, Message message) => ChatBoxGeneric(message),
   );
 }
 

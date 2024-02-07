@@ -253,7 +253,7 @@ void sendMessage(/*userID, message*/) {}
 
 //Future<Map<String, String>> getRemoveScheduleTokens(String message) async {}
 
-Future<Map<String, dynamic>> getCommandParameters(
+Future<Map<String, String>> getCommandParameters(
     String category, String message) async {
   // generate the command parameter parsing request object:
   Map<String, dynamic> commandRequestObject =
@@ -278,8 +278,11 @@ Future<Map<String, dynamic>> getCommandParameters(
   final int lastResponseIndex = decodedRes["choices"].length - 1;
   String commandParamsAsString =
       decodedRes["choices"][lastResponseIndex]["message"]["content"];
-  Map<String, dynamic> commandParameters = {"category": category};
-  commandParameters.addAll(jsonDecode(commandParamsAsString));
+  Map<String, dynamic> tempMap = jsonDecode(commandParamsAsString);
+
+  Map<String, String> commandParameters =
+      tempMap.map((key, value) => MapEntry(key, value.toString()));
+  commandParameters["category"] = category;
   return commandParameters;
 }
 
