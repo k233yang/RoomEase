@@ -215,18 +215,18 @@ class DatabaseManager {
     });
 
     return newKey;
-    // TransactionResult result =
-    //     await messagesRef.runTransaction((Object? messages) {
-    //   if (messages == null) {
-    //     // No messages yet
-    //     return Transaction.success(<String>[messageToAdd]);
-    //   }
+  }
 
-    //   List<String> _messages = List<String>.from(messages as List);
-    //   _messages.add(messageToAdd);
-    //   // Return the new data.
-    //   return Transaction.success(_messages);
-    // });
+  static Future<void> removeMessageFromID(
+      String messageRoomID, String messageID) async {
+    DatabaseReference messageRef = _databaseInstance
+        .ref()
+        .child("messageRooms/$messageRoomID/messages/$messageID");
+    try {
+      await messageRef.remove();
+    } catch (e) {
+      return Future.error('Failed to remove message: $e');
+    }
   }
 
   static StreamBuilder messagesStreamBuilder(String messageRoomId) {
