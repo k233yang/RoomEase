@@ -21,9 +21,9 @@ class DatabaseManager {
 
   // ------------------------ USER OPERATIONS ------------------------
 
-  static void addUser(User user) {
-    DatabaseReference usersRef = _databaseInstance.ref("users/${user.userId}");
-    usersRef.update({"name": user.name});
+  static void addUser(String userId, String userName) {
+    DatabaseReference usersRef = _databaseInstance.ref("users/${userId}");
+    usersRef.update({"name": userName});
   }
 
   // Used when logging in so we can keep track of which household the user belongs to.
@@ -126,6 +126,27 @@ class DatabaseManager {
 
       List<String> _userStatusList = List<String>.from(userStatusList as List);
       _userStatusList.add(status);
+      // Return the new data.
+      return Transaction.success(_userStatusList);
+    });
+  }
+
+  static Future<void> removeStatusFromUserStatusList(
+      String status, String userId) async {
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/userStatusList");
+
+    TransactionResult result =
+        await usersRef.runTransaction((Object? userStatusList) {
+      if (userStatusList == null) {
+        // No status list, make new list
+        List<String> newUserStatusList = [];
+        CurrentUser.setCurrentMessageRoomIds(newUserStatusList);
+        return Transaction.success(newUserStatusList);
+      }
+
+      List<String> _userStatusList = List<String>.from(userStatusList as List);
+      _userStatusList.remove(status);
       // Return the new data.
       return Transaction.success(_userStatusList);
     });
@@ -433,7 +454,7 @@ class DatabaseManager {
       int daysSinceLastIncremented,
       String createdByUserId,
       String? assignedUserId,
-      String status ) async {
+      String status) async {
     DatabaseReference choresRef =
         _databaseInstance.ref("households/$householdCode/$status");
 
@@ -532,19 +553,20 @@ class DatabaseManager {
     }
   }
 
-static Future<void> deleteChore(String choreId, ChoreStatus status) async {
+  static Future<void> deleteChore(String choreId, ChoreStatus status) async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
-    DatabaseReference choreRef =
-      _databaseInstance.ref("households/$householdCode/${status.value}/$choreId");
+    DatabaseReference choreRef = _databaseInstance
+        .ref("households/$householdCode/${status.value}/$choreId");
     await choreRef.remove();
-}
+  }
 
-static Future<void> updateChoreStatus(String? assignedUserId, String choreId, ChoreStatus choreStatus, ChoreStatus newChoreStatus) async {
+  static Future<void> updateChoreStatus(String? assignedUserId, String choreId,
+      ChoreStatus choreStatus, ChoreStatus newChoreStatus) async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
 
-    DatabaseReference choreRef =
-      _databaseInstance.ref("households/$householdCode/${choreStatus.value}/$choreId");
-  
+    DatabaseReference choreRef = _databaseInstance
+        .ref("households/$householdCode/${choreStatus.value}/$choreId");
+
     DatabaseEvent event = await choreRef.once();
 
     final choreJson = event.snapshot.child;

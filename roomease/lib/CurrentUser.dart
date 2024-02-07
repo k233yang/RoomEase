@@ -71,4 +71,18 @@ class CurrentUser {
   static void setCurrentUserStatus(String status) {
     SharedPreferencesUtility.setValue("userStatus", status);
   }
+
+  static void addStatusToStatusList(String status) {
+    List<String> userStatusList =
+        SharedPreferencesUtility.getStringList("userStatusList");
+    userStatusList.add(status);
+    SharedPreferencesUtility.setValue("userStatusList", userStatusList);
+  }
+
+  static void removeStatusFromStatusList(String status) {
+    List<String> userStatusList =
+        SharedPreferencesUtility.getStringList("userStatusList");
+    userStatusList.remove(status);
+    SharedPreferencesUtility.setValue("userStatusList", userStatusList);
+  }
 }

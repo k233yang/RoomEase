@@ -78,7 +78,8 @@ class _JoinHousehold extends State<JoinHousehold> {
   }
 
   Future<void> updateUserInformation() async {
-    DatabaseManager.addUser(CurrentUser.getCurrentUser());
+    DatabaseManager.addUser(
+        CurrentUser.getCurrentUserId(), CurrentUser.getCurrentUserName());
     DatabaseManager.joinHousehold(
         CurrentUser.getCurrentUser(), householdCodeController.text);
 

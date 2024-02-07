@@ -3,6 +3,8 @@ import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'package:roomease/chores/ChoreScreen.dart';
 import 'package:roomease/chores/AddChoreScreen.dart';
+import 'package:roomease/profile/AddCustomStatusScreen.dart';
+import 'package:roomease/profile/EditProfileScreen.dart';
 import 'package:roomease/profile/ProfileScreen.dart';
 import 'package:roomease/welcome/CreateHousehold.dart';
 import 'package:roomease/welcome/CreateJoinHouseholdScreen.dart';
@@ -49,6 +51,8 @@ class MyApp extends StatelessWidget {
         '/chores': (_) => ChoreScreen(),
         '/addChore': (_) => AddChoreScreen(),
         '/profile': (_) => Profile(),
+        '/editProfile': (_) => EditProfile(),
+        '/addCustomStatus': (_) => AddCustomStatus(),
       },
     );
   }
