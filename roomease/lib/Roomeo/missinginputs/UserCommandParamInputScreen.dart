@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
-
-import '../colors/ColorConstants.dart';
+import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
+import 'package:roomease/Roomeo/missinginputs/MissingUserInput.dart';
+import '../../colors/ColorConstants.dart';
 
 /// A custom widget that renders if the user has not provided sufficient information
 /// to Roomeo about the command they entered. (e.g. if a user has not specified a
@@ -67,15 +68,48 @@ class _UserCommandParamInputScreenState
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-              'I need more information to ${widget.commandParams['category']}'),
-          Flexible(
-            child: ListView.builder(
-              itemCount: missingParams.length,
-              itemBuilder: (context, index) {
-                return Text(missingParams[index]);
-              },
+            'I need more information to ${widget.commandParams['category']}',
+            style: TextStyle(
+              fontSize: 24,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            'Task due date:',
+            style: TextStyle(
+              fontSize: 16,
             ),
           ),
+          MissingDateInput(
+            onDateSelect: (DateTime selectedDate) {
+              // TODO: pass date back to widget
+              print("selected date: $selectedDate");
+            },
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            'Assign task to:',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+
+          // ListView.builder(
+          //   itemCount: missingParams.length,
+          //   itemBuilder: (context, index) {
+          //     // if (missingParams[index] == command category)
+          //     return Text(missingParams[index]);
+          //   },
+          // ),
+          MissingUserInput(onUserSelect: (String selectedUser) {
+            // TODO: pass selected user back to widget
+            print("selected user: $selectedUser");
+          }),
         ],
       ),
     );

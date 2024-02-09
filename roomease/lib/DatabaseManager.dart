@@ -409,9 +409,21 @@ class DatabaseManager {
     DatabaseEvent event = await householdRef.once();
     List<String> userIds = [];
     for (DataSnapshot d in event.snapshot.children) {
-      userIds.add(d.value as String);
+      userIds.add(d.key as String);
     }
     return userIds;
+  }
+
+  static Future<List<String>> getUserNamesFromHousehold(
+      String householdId) async {
+    List<String> householdUserIds = await getUserIdsFromHousehold(householdId);
+    List<Future<String>> userNameFutures = [];
+    for (String userId in householdUserIds) {
+      Future<String> userNameFuture = getUserName(userId);
+      userNameFutures.add(userNameFuture);
+    }
+    // make concurrent requests for all user names
+    return await Future.wait(userNameFutures);
   }
 
   static void householdUserIdSubscription(String householdId) {

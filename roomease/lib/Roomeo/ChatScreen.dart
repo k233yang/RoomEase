@@ -8,7 +8,8 @@ import '../colors/ColorConstants.dart';
 import 'package:roomease/Roomeo/Roomeo.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
-import 'package:roomease/Roomeo/UserCommandParamInputScreen.dart';
+import 'package:roomease/Roomeo/missinginputs/UserCommandParamInputScreen.dart';
+import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -146,7 +147,6 @@ Widget buildListMessage(List<Message> messages) {
     padding: const EdgeInsets.all(8),
     reverse: true,
     order: GroupedListOrder.DESC,
-    useStickyGroupSeparators: true,
     floatingHeader: true,
     elements: messages,
     groupBy: (message) => DateTime(

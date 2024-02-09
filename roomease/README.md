@@ -1,16 +1,10 @@
-# roomease
+# RoomEase
 
-A new Flutter project.
+  ![RoomEase logo](https://i.imgur.com/brC46eW.png)
 
-## Getting Started
+RoomEase is a shared household management cross-platform mobile application developed in Flutter/Dart. 
 
-This project is a starting point for a Flutter application.
+RoomEase's objective is to increase the quality of life among roommates by alleviating shared living issues, done through an implementation of a chore incentive system, a non-confrontational notification mechanism, and a user-friendly virtual assistant mediator.
+  
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Documentation
