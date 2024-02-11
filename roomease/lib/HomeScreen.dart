@@ -7,6 +7,7 @@ import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 import 'package:roomease/profile/ProfileScreen.dart';
 
+import 'calendar/CalendarScreen.dart';
 import 'chores/ChoreScreen.dart';
 
 class Home extends StatefulWidget {
@@ -24,7 +25,7 @@ class _HomeState extends State {
     _children = [
       HomeScreen(updateIndex),
       ChatScreen(),
-      ChatScreen(),
+      CalendarScreen(),
       ChoreScreen(),
       Profile()
     ];
