@@ -8,7 +8,8 @@ import '../colors/ColorConstants.dart';
 import 'package:roomease/Roomeo/Roomeo.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
-import 'package:roomease/Roomeo/ChatScreenOptions.dart';
+import 'package:roomease/Roomeo/missinginputs/UserCommandParamInputScreen.dart';
+import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -70,16 +71,63 @@ class _ChatScreen extends State<ChatScreen> {
             _controller.clear();
             textFieldFocusNode.requestFocus();
             setState(() {});
-            // add user + Roomeo response to the DB
-            await getRoomeoResponse(message, dateTime);
-            // fetch the category of the message
-            String category = await getCommandCategory(message);
-            print("CATEGORY IS: $category");
-            Map<String, String> commandParams =
-                await getCommandParameters(category, message);
-            print("COMMAND PARAMS ARE: $commandParams");
-            print("COMMANDPARAM DATA TYPE IS: ${commandParams.runtimeType}");
+            // add user + Roomeo response to the DB. Get the gptResponse message
+
+            // TODO: PLEASE REFACTOR TO SCHEMATIC
+
+            // below operations can be performed concurrently:
+            late String userMessageKey;
+            late String category;
+            try {
+              var results = await Future.wait([
+                addUserInput(message,
+                    dateTime), // add message to FB, get the key/ID for that message
+                getCommandCategory(
+                    message), // get the command category of the message
+              ]);
+              userMessageKey = results[0];
+              category = results[1];
+            } catch (e) {
+              print(
+                  'Error occured adding message to Firebase or getting command category: $e');
+            }
+
+            if (isParseableCommand(category)) {
+              Map<String, String> commandParams =
+                  await getCommandParameters(category, message);
+              print("PARAMETERS ARE: $commandParams");
+              // if there are missing params, navigate to UserCommandParamInputScreen
+              // to promnpt the user for the missing params
+              if (commandParams.containsValue("Missing")) {
+                if (mounted) {
+                  // Check if the widget is still in the tree
+                  final result = await Navigator.of(context).push(
+                    // Directly use context if it's valid
+                    MaterialPageRoute(
+                      builder: (context) => UserCommandParamInputScreen(
+                        category: category,
+                        commandParams: commandParams,
+                        onParamsUpdated: (updatedParams) {
+                          setState(() {
+                            commandParams = updatedParams;
+                          });
+                        },
+                      ),
+                    ),
+                  );
+                  // if the user exited the UserCommandParamInputScreen, delete
+                  // the most recent message, it is no longer useful
+                  if (result != null && result['exited'] == true) {
+                    await DatabaseManager.removeMessageFromID(
+                      CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                      userMessageKey,
+                    );
+                  }
+                }
+              }
+            }
           }
+          print('done');
         },
         decoration: InputDecoration(
             filled: true,
@@ -93,12 +141,12 @@ class _ChatScreen extends State<ChatScreen> {
   }
 }
 
+// this thing gets the stream of messages
 Widget buildListMessage(List<Message> messages) {
   return GroupedListView<Message, DateTime>(
     padding: const EdgeInsets.all(8),
     reverse: true,
     order: GroupedListOrder.DESC,
-    useStickyGroupSeparators: true,
     floatingHeader: true,
     elements: messages,
     groupBy: (message) => DateTime(
@@ -118,26 +166,8 @@ Widget buildListMessage(List<Message> messages) {
         ),
       ),
     ),
-    itemBuilder: (context, Message message) => ChatBoxGeneric(message),
+    itemBuilder: (context, Message message) {
+      return ChatBoxGeneric(message);
+    },
   );
 }
-
-// Widget chatMessage(Message message) {
-//   MainAxisAlignment alignment;
-//   if (message.senderId == CurrentUser.getCurrentUserId()) {
-//     alignment = MainAxisAlignment.end;
-//   } else {
-//     alignment = MainAxisAlignment.start;
-//   }
-//   return Row(
-//     mainAxisAlignment: alignment,
-//     children: [
-//       BubbleSpecialThree(
-//         isSender: message.senderId == CurrentUser.getCurrentUserId(),
-//         text: message.text,
-//         color: ColorConstants.lightPurple,
-//         textStyle: TextStyle(color: Colors.white, fontSize: 16),
-//       )
-//     ],
-//   );
-// }

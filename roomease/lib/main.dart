@@ -13,6 +13,7 @@ import 'package:roomease/welcome/LoginScreen.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:roomease/welcome/WelcomeScreen.dart';
+import 'calendar/AddEventScreen.dart';
 import 'firebase_options.dart';
 import 'welcome/RegisterScreen.dart';
 
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
         '/joinHousehold': (_) => JoinHousehold(),
         '/chores': (_) => ChoreScreen(),
         '/addChore': (_) => AddChoreScreen(),
+        '/addEvent': (_) => AddEventScreen(),
         '/profile': (_) => Profile(),
         '/editProfile': (_) => EditProfile(),
         '/addCustomStatus': (_) => AddCustomStatus(),

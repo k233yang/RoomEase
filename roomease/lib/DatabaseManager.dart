@@ -215,18 +215,18 @@ class DatabaseManager {
     });
 
     return newKey;
-    // TransactionResult result =
-    //     await messagesRef.runTransaction((Object? messages) {
-    //   if (messages == null) {
-    //     // No messages yet
-    //     return Transaction.success(<String>[messageToAdd]);
-    //   }
+  }
 
-    //   List<String> _messages = List<String>.from(messages as List);
-    //   _messages.add(messageToAdd);
-    //   // Return the new data.
-    //   return Transaction.success(_messages);
-    // });
+  static Future<void> removeMessageFromID(
+      String messageRoomID, String messageID) async {
+    DatabaseReference messageRef = _databaseInstance
+        .ref()
+        .child("messageRooms/$messageRoomID/messages/$messageID");
+    try {
+      await messageRef.remove();
+    } catch (e) {
+      return Future.error('Failed to remove message: $e');
+    }
   }
 
   static StreamBuilder messagesStreamBuilder(String messageRoomId) {
@@ -409,9 +409,21 @@ class DatabaseManager {
     DatabaseEvent event = await householdRef.once();
     List<String> userIds = [];
     for (DataSnapshot d in event.snapshot.children) {
-      userIds.add(d.value as String);
+      userIds.add(d.key as String);
     }
     return userIds;
+  }
+
+  static Future<List<String>> getUserNamesFromHousehold(
+      String householdId) async {
+    List<String> householdUserIds = await getUserIdsFromHousehold(householdId);
+    List<Future<String>> userNameFutures = [];
+    for (String userId in householdUserIds) {
+      Future<String> userNameFuture = getUserName(userId);
+      userNameFutures.add(userNameFuture);
+    }
+    // make concurrent requests for all user names
+    return await Future.wait(userNameFutures);
   }
 
   static void householdUserIdSubscription(String householdId) {
