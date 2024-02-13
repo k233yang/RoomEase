@@ -12,7 +12,9 @@ import 'package:roomease/Roomeo/missinginputs/UserCommandParamInputScreen.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  const ChatScreen({super.key, required this.chatRoomId});
+
+  final String chatRoomId;
 
   @override
   State<ChatScreen> createState() => _ChatScreen();

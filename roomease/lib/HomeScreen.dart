@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:roomease/CurrentHousehold.dart';
+import 'package:roomease/Roomeo/ChatListScreen.dart';
 import 'package:roomease/Roomeo/ChatScreen.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
@@ -24,7 +25,7 @@ class _HomeState extends State {
   void initState() {
     _children = [
       HomeScreen(updateIndex),
-      ChatScreen(),
+      ChatListScreen(),
       CalendarScreen(),
       ChoreScreen(),
       Profile()

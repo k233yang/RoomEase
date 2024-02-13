@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/HomeScreen.dart';
+import 'package:roomease/Roomeo/ChatListScreen.dart';
+import 'package:roomease/Roomeo/ChatScreen.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'package:roomease/chores/ChoreScreen.dart';
 import 'package:roomease/chores/AddChoreScreen.dart';
@@ -55,6 +57,7 @@ class MyApp extends StatelessWidget {
         '/profile': (_) => Profile(),
         '/editProfile': (_) => EditProfile(),
         '/addCustomStatus': (_) => AddCustomStatus(),
+        '/chatList': (_) => ChatListScreen()
       },
     );
   }
