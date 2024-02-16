@@ -606,4 +606,45 @@ class DatabaseManager {
     await choreRef.remove();
   }
   // ------------------------ END CHORE OPERATIONS ------------------------
+
+  // ------------------------ CALENDAR OPERATIONS ------------------------
+
+   static void addEvent(
+      String householdCode,
+      String name,
+      String details,
+      String startTime,
+      String endTime,
+      String dateCreated,
+      String type,
+      String createdByUserId,
+    ) async {
+    DatabaseReference eventsRef =
+        _databaseInstance.ref("households/$householdCode/events");
+
+    final eventKey = eventsRef.push().key;
+    if (eventKey == null) {
+      throw Exception('Event key is null');
+    }
+
+    DatabaseReference eventRef =
+        _databaseInstance.ref("households/$householdCode/events/$eventKey");
+
+    eventRef.update({
+      "id": eventKey,
+      "name": name,
+      "details": details,
+      "startTime": startTime,
+      "endTime": endTime,
+      "dateCreated": dateCreated,
+      "type": type,
+      "createdByUserId": createdByUserId,
+    }).then((value) {
+      print("Successfully added event!");
+    }).catchError((value) {
+      print(value);
+      throw Exception('Could not add event');
+    });
+  }
+  // ------------------------ END CHORE OPERATIONS ------------------------
 }

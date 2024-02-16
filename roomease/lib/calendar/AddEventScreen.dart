@@ -87,24 +87,24 @@ class _AddEventScreen extends State<AddEventScreen> {
                               initialDate: DateTime.now(),
                               firstDate: DateTime.now(),
                               lastDate: DateTime(3000))
-                              .then((deadlineDate) {
-                            if (deadlineDate != null) {
+                              .then((startDate) {
+                            if (startDate != null) {
                               showTimePicker(
                                 context: context,
                                 initialTime: TimeOfDay.now(),
-                              ).then((deadlineTime) {
-                                if (deadlineTime != null) {
-                                  DateTime deadlineDateTime = DateTime(
-                                    deadlineDate.year,
-                                    deadlineDate.month,
-                                    deadlineDate.day,
-                                    deadlineTime.hour,
-                                    deadlineTime.minute,
+                              ).then((startTime) {
+                                if (startTime != null) {
+                                  DateTime startDateTime = DateTime(
+                                    startDate.year,
+                                    startDate.month,
+                                    startDate.day,
+                                    startTime.hour,
+                                    startTime.minute,
                                   );
                                   String formattedDateTime =
                                   DateFormat('yyyy-MM-dd')
                                       .add_jm()
-                                      .format(deadlineDateTime);
+                                      .format(startDateTime);
                                   setState(() {
                                     startTimeController.text =
                                         formattedDateTime; //set output date to TextField value.
@@ -137,24 +137,24 @@ class _AddEventScreen extends State<AddEventScreen> {
                               initialDate: DateTime.now(),
                               firstDate: DateTime.now(),
                               lastDate: DateTime(3000))
-                              .then((deadlineDate) {
-                            if (deadlineDate != null) {
+                              .then((endDate) {
+                            if (endDate != null) {
                               showTimePicker(
                                 context: context,
                                 initialTime: TimeOfDay.now(),
-                              ).then((deadlineTime) {
-                                if (deadlineTime != null) {
-                                  DateTime deadlineDateTime = DateTime(
-                                    deadlineDate.year,
-                                    deadlineDate.month,
-                                    deadlineDate.day,
-                                    deadlineTime.hour,
-                                    deadlineTime.minute,
+                              ).then((endTime) {
+                                if (endTime != null) {
+                                  DateTime endDateTime = DateTime(
+                                    endDate.year,
+                                    endDate.month,
+                                    endDate.day,
+                                    endTime.hour,
+                                    endTime.minute,
                                   );
                                   String formattedDateTime =
                                   DateFormat('yyyy-MM-dd')
                                       .add_jm()
-                                      .format(deadlineDateTime);
+                                      .format(endDateTime);
                                   setState(() {
                                     endTimeController.text =
                                         formattedDateTime; //set output date to TextField value.
@@ -205,19 +205,16 @@ class _AddEventScreen extends State<AddEventScreen> {
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             try {
-                              // DatabaseManager.addChore(
-                              //     CurrentHousehold.getCurrentHouseholdId(),
-                              //     nameController.text,
-                              //     detailsController.text,
-                              //     startTimeController.text,
-                              //     typeValue,
-                              //     threshold,
-                              //     0,
-                              //     0,
-                              //     CurrentUser.getCurrentUserId(),
-                              //     null,
-                              //     ChoreStatus.toDo.value
-                              // );
+                              DatabaseManager.addEvent(
+                                CurrentHousehold.getCurrentHouseholdId(),
+                                nameController.text,
+                                detailsController.text,
+                                startTimeController.text,
+                                endTimeController.text,
+                                DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
+                                type,
+                                CurrentUser.getCurrentUserId(),
+                              );
                             } catch (e) {
                               print('Failed to add event: $e');
                             }
