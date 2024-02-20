@@ -228,23 +228,23 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
   switch (category) {
     case 'Remove from Schedule':
       parameterJSONFormat =
-          "1. TaskDescription \n 2. TaskPerson \n 3. TaskTitle";
+          "1. TaskTitle \n 2. TaskPerson \n 3. TaskDescription";
       parametersToFindAddendum =
-          "1. The description of the task to remove \n 2. The name of the person assigned to the task \n 3. The title of the task to remove";
+          "1. The title of the task to remove \n 2. The name of the person assigned to the task \n 3. The description of the task to remove";
       break;
     case 'Add to Schedule':
       DateTime now = DateTime.now();
       parameterJSONFormat =
-          "1. TaskDescription \n 2. TaskDate \n 3. TaskTitle \n 4. TaskPerson";
+          "1. TaskTitle \n 2. TaskDate \n 3. TaskDescription \n 4. TaskPerson";
       parametersToFindAddendum =
-          "1. The description of the task to be added \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The title of the task \n 4. The name of the person assigned to the task";
+          "1. The title of the task \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The description of the task to be added \n 4. The name of the person assigned to the task";
       break;
     case 'Update Schedule':
       DateTime now = DateTime.now();
       parameterJSONFormat =
-          "1. TaskDescriptionOld \n 2. TaskDescriptionNew \n 3. TaskDate \n 4. TaskPerson \n 5. TaskTitleOld \n 6. TaskTitleNew";
+          "1. TaskTitleOld \n 2. TaskTitleNew \n 3. TaskDate \n 4. TaskPerson \n 5. TaskDescriptionOld\n 6. TaskDescriptionNew";
       parametersToFindAddendum =
-          "1. The description of the old task to be updated \n 2. The description of the new task that will replace the old task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 4. The name of the person assigned to the task \n 5. The title of the old task \n 6. The title of the newly updated task";
+          "1. The title of the old task \n 2. The title of the newly updated task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 4. The name of the person assigned to the task \n 5. The description of the old task to be updated \n 6. The description of the new task that will replace the old task";
       break;
     case 'Set Status':
       parameterJSONFormat = "1. Status";

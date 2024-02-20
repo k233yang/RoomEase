@@ -41,21 +41,27 @@ class _ChatScreen extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chat with Roomeo'),
-        backgroundColor: ColorConstants.lightPurple,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-              child: DatabaseManager.messagesStreamBuilder(
-                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId)),
-          Container(
-            color: ColorConstants.white,
-            child: chatTextField(),
-          ),
-        ],
+    return GestureDetector(
+      onTap: () {
+        // tap outside keyboard to unfocus it
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Chat with Roomeo'),
+          backgroundColor: ColorConstants.lightPurple,
+        ),
+        body: Column(
+          children: [
+            Expanded(
+                child: DatabaseManager.messagesStreamBuilder(
+                    CurrentUser.getCurrentUserId() + RoomeoUser.user.userId)),
+            Container(
+              color: ColorConstants.white,
+              child: chatTextField(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -118,7 +124,7 @@ class _ChatScreen extends State<ChatScreen> {
                     ),
                   );
                   // if the user exited the UserCommandParamInputScreen, delete
-                  // the most recent message, it is no longer useful
+                  // the most recent message. It is no longer useful
                   if (result != null && result['exited'] == true) {
                     await DatabaseManager.removeMessageFromID(
                       CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
@@ -127,9 +133,13 @@ class _ChatScreen extends State<ChatScreen> {
                   }
                 }
               }
+            } else if (category == 'View Schedule') {
+              final localContext = context;
+              if (mounted) {
+                Navigator.pushNamed(localContext, '/calendar');
+              }
             }
           }
-          print('done');
         },
         decoration: InputDecoration(
             filled: true,

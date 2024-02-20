@@ -20,17 +20,33 @@ class _MissingUserInputState extends State<MissingUserInput> {
   Future<void> _loadHouseholdMembers() async {
     householdMembers = await DatabaseManager.getUserNamesFromHousehold(
         CurrentHousehold.getCurrentHouseholdId());
+    householdMembers.insert(0, "Select a user");
     String currentUserName = CurrentUser.getCurrentUserName();
+
+    // make the current user the 2nd item in the dropdown
     int currentUserIndex = householdMembers.indexOf(currentUserName);
     if (currentUserIndex != -1) {
       householdMembers.removeAt(currentUserIndex);
-      householdMembers.insert(0, currentUserName);
+      householdMembers.insert(1, currentUserName);
     }
     if (householdMembers.isNotEmpty) {
       setState(() {
         dropdownValue = householdMembers[0];
       });
     }
+  }
+
+  Text renderDropDownListOptions(String userName) {
+    if (userName == 'Select a user') {
+      return Text(
+        userName,
+        style: TextStyle(color: Color.fromARGB(255, 160, 160, 160)),
+      );
+    }
+    if (userName == CurrentUser.getCurrentUserName()) {
+      return Text('$userName (You)');
+    }
+    return Text(userName);
   }
 
   @override
@@ -41,28 +57,33 @@ class _MissingUserInputState extends State<MissingUserInput> {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      value: dropdownValue,
-      icon: const Icon(Icons.arrow_downward),
-      elevation: 16,
-      style: const TextStyle(color: Colors.deepPurple),
-      underline: Container(
-        height: 2,
-        color: Colors.deepPurpleAccent,
-      ),
-      onChanged: (String? newValue) {
-        // This is called when the user selects an item.
-        setState(() {
-          dropdownValue = newValue!;
-        });
-        widget.onUserSelect(newValue!);
-      },
-      items: householdMembers.map<DropdownMenuItem<String>>((String userName) {
-        return DropdownMenuItem<String>(
-          value: userName,
-          child: Text(userName),
-        );
-      }).toList(),
+    return Column(
+      children: [
+        Text('Choose a person to assign this task to:'),
+        DropdownButton<String>(
+          value: dropdownValue,
+          icon: const Icon(Icons.arrow_downward),
+          elevation: 16,
+          style: const TextStyle(color: Colors.deepPurple),
+          underline: Container(
+            height: 2,
+            color: Colors.deepPurpleAccent,
+          ),
+          onChanged: (String? newValue) {
+            // This is called when the user selects an item.
+            setState(() {
+              dropdownValue = newValue!;
+            });
+            widget.onUserSelect(
+                newValue! == 'Select a user' ? 'Missing' : newValue);
+          },
+          items:
+              householdMembers.map<DropdownMenuItem<String>>((String userName) {
+            return DropdownMenuItem<String>(
+                value: userName, child: renderDropDownListOptions(userName));
+          }).toList(),
+        ),
+      ],
     );
   }
 }

@@ -13,6 +13,14 @@ class MissingDateInput extends StatefulWidget {
 class _MissingDateInputState extends State<MissingDateInput> {
   DateTime selectedDate = DateTime.now();
 
+  @override
+  void initState() {
+    super.initState();
+    // Pass the default selectedDate back to the parent widget
+    widget.onDateSelect(DateTime(selectedDate.year, selectedDate.month,
+        selectedDate.day, selectedDate.hour, selectedDate.minute));
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -22,10 +30,11 @@ class _MissingDateInputState extends State<MissingDateInput> {
     );
     if (picked != null && picked != selectedDate) {
       setState(() {
-        selectedDate = picked;
+        selectedDate = DateTime(picked.year, picked.month, picked.day,
+            selectedDate.hour, selectedDate.minute);
       });
-      widget.onDateSelect(
-          selectedDate); // Pass the selected date back to the parent
+      widget.onDateSelect(DateTime(selectedDate.year, selectedDate.month,
+          selectedDate.day, selectedDate.hour, selectedDate.minute));
     }
   }
 
@@ -44,8 +53,8 @@ class _MissingDateInputState extends State<MissingDateInput> {
           picked.minute,
         );
       });
-      widget.onDateSelect(
-          selectedDate); // Pass the selected date and time back to the parent
+      widget.onDateSelect(DateTime(selectedDate.year, selectedDate.month,
+          selectedDate.day, picked.hour, picked.minute));
     }
   }
 

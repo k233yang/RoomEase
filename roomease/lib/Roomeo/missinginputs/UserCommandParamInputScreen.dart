@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:grouped_list/grouped_list.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingUserInput.dart';
+import 'package:roomease/Roomeo/missinginputs/MissingTextInput.dart';
 import '../../colors/ColorConstants.dart';
 
 /// A custom widget that renders if the user has not provided sufficient information
@@ -41,6 +41,36 @@ class _UserCommandParamInputScreenState
     return missingParams;
   }
 
+  Widget generateMissingInputWidgets(String commandCategory) {
+    if (commandCategory.contains('TaskTitle')) {
+      return MissingTextInput(onTextInput: (String userInput) {
+        // just update widget.
+        widget.commandParams[commandCategory] = userInput;
+      });
+    } else if (commandCategory.contains('TaskDate')) {
+      return MissingDateInput(onDateSelect: (DateTime userInput) {
+        widget.commandParams[commandCategory] = userInput.toString();
+      });
+    } else if (commandCategory.contains('TaskDescription')) {
+      return MissingTextInput(
+        isInputSingleLine: false,
+        onTextInput: (String userInput) {
+          widget.commandParams[commandCategory] = userInput;
+        },
+      );
+    } else if (commandCategory.contains('TaskPerson')) {
+      return MissingUserInput(onUserSelect: (String userInput) {
+        widget.commandParams[commandCategory] = userInput;
+      });
+    } else {
+      return Text('You fucked up');
+    }
+  }
+
+  void onSubmitMissingParams() {
+    print(widget.commandParams);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -68,48 +98,32 @@ class _UserCommandParamInputScreenState
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'I need more information to ${widget.commandParams['category']}',
+            'More information needed to ${widget.category.toLowerCase()}:',
             style: TextStyle(
-              fontSize: 24,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Task due date:',
-            style: TextStyle(
-              fontSize: 16,
+              color: Color.fromARGB(255, 160, 160, 160),
+              fontSize: 18,
             ),
           ),
-          MissingDateInput(
-            onDateSelect: (DateTime selectedDate) {
-              // TODO: pass date back to widget
-              print("selected date: $selectedDate");
-            },
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Assign task to:',
-            style: TextStyle(
-              fontSize: 16,
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true, // Make ListView as tall as its children
+              itemCount: missingParams.length,
+              itemBuilder: (context, index) {
+                return generateMissingInputWidgets(missingParams[index]);
+              },
             ),
           ),
-
-          // ListView.builder(
-          //   itemCount: missingParams.length,
-          //   itemBuilder: (context, index) {
-          //     // if (missingParams[index] == command category)
-          //     return Text(missingParams[index]);
-          //   },
-          // ),
-          MissingUserInput(onUserSelect: (String selectedUser) {
-            // TODO: pass selected user back to widget
-            print("selected user: $selectedUser");
-          }),
+          ElevatedButton(
+            onPressed: onSubmitMissingParams,
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: ColorConstants.lightPurple,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+            ),
+            child: Text('Submit'),
+          )
         ],
       ),
     );
@@ -121,3 +135,7 @@ class _UserCommandParamInputScreenState
 // Categorize the message as 'Unknown' if the user input cannot be categorized or if the input
 // is irrelevant to the previous categories. Give me only the category of the message, and
 // nothing else. The user input is: '$message'"
+
+// checklist:
+// done (on my end): add to schedule, view schedule, 
+// total done: (2/9)
