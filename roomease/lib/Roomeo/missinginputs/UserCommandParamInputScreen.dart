@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
+import 'package:roomease/Roomeo/missinginputs/MissingStatusInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingUserInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingTextInput.dart';
 import '../../colors/ColorConstants.dart';
@@ -62,12 +63,17 @@ class _UserCommandParamInputScreenState
       return MissingUserInput(onUserSelect: (String userInput) {
         widget.commandParams[commandCategory] = userInput;
       });
+    } else if (commandCategory.contains('Status')) {
+      return MissingStatusInput(onStatusInput: (String userInput) {
+        widget.commandParams[commandCategory] = userInput;
+      });
     } else {
       return Text('You fucked up');
     }
   }
 
   void onSubmitMissingParams() {
+    // TODO: go back to chat screen and do shit with the newly updated params
     print(widget.commandParams);
   }
 
@@ -137,5 +143,5 @@ class _UserCommandParamInputScreenState
 // nothing else. The user input is: '$message'"
 
 // checklist:
-// done (on my end): add to schedule, view schedule, 
-// total done: (2/9)
+// done (on my end): add to schedule, view schedule, set status 
+// total done: (3/9)

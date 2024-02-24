@@ -142,13 +142,18 @@ class ChatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () {
-          updateIndex(1);
-        },
-        child: Card(
-            child: Padding(
-                padding: EdgeInsets.all(15.0),
-                child: Column(children: [Text("Chat with Roomeo")]))));
+      onTap: () {
+        updateIndex(1);
+      },
+      child: Card(
+        child: Padding(
+          padding: EdgeInsets.all(15.0),
+          child: Column(
+            children: [Text("Chat with Roomeo")],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -170,17 +175,20 @@ Widget statusList() {
                           Text(style: TextStyle(fontSize: 15), entry["name"]!),
                           Spacer(),
                           Padding(
-                              padding: EdgeInsets.only(left: 50),
-                              child: Text(
-                                  style: TextStyle(fontSize: 15),
-                                  entry["status"]!))
+                            padding: EdgeInsets.only(left: 50),
+                            child: Text(
+                              style: TextStyle(fontSize: 15),
+                              entry["status"]!,
+                            ),
+                          )
                         ]))
                     .toList();
                 return Padding(
-                    padding: EdgeInsets.only(left: 50, right: 50, top: 10),
-                    child: Column(
-                      children: statusList,
-                    ));
+                  padding: EdgeInsets.only(left: 50, right: 50, top: 10),
+                  child: Column(
+                    children: statusList,
+                  ),
+                );
               } else {
                 return Column(children: [
                   SizedBox(
