@@ -94,7 +94,13 @@ class _ChatScreen extends State<ChatScreen> {
                     message), // get the command category of the message
               ]);
               userMessageKey = results[0];
-              category = results[1];
+              // do some precautionary cleaning
+              final pattern = RegExp(r'[a-zA-Z0-9 ]');
+              category = results[1]
+                  .split('')
+                  .where((char) => pattern.hasMatch(char))
+                  .join('');
+              print('CATEGORY IS: $category');
             } catch (e) {
               print(
                   'Error occured adding message to Firebase or getting command category: $e');

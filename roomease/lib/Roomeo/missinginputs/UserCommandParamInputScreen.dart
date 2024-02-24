@@ -43,26 +43,51 @@ class _UserCommandParamInputScreenState
   }
 
   Widget generateMissingInputWidgets(String commandCategory) {
-    if (commandCategory.contains('TaskTitle')) {
+    if (commandCategory.contains('Title')) {
       return MissingTextInput(onTextInput: (String userInput) {
         // just update widget.
         widget.commandParams[commandCategory] = userInput;
       });
-    } else if (commandCategory.contains('TaskDate')) {
+    } else if (commandCategory.contains('Date')) {
       return MissingDateInput(onDateSelect: (DateTime userInput) {
         widget.commandParams[commandCategory] = userInput.toString();
       });
-    } else if (commandCategory.contains('TaskDescription')) {
+    } else if (commandCategory.contains('Description')) {
       return MissingTextInput(
         isInputSingleLine: false,
         onTextInput: (String userInput) {
           widget.commandParams[commandCategory] = userInput;
         },
       );
+    } else if (commandCategory.contains('Message')) {
+      return MissingTextInput(
+        isInputSingleLine: false,
+        isMessageInput: true,
+        onTextInput: (String userInput) {
+          widget.commandParams[commandCategory] = userInput;
+        },
+      );
     } else if (commandCategory.contains('TaskPerson')) {
-      return MissingUserInput(onUserSelect: (String userInput) {
-        widget.commandParams[commandCategory] = userInput;
-      });
+      return MissingUserInput(
+        onUserSelect: (String userInput) {
+          widget.commandParams[commandCategory] = userInput;
+        },
+        placeholder: 'Select a person to assign this task to:',
+      );
+    } else if (commandCategory.contains('ViewPerson')) {
+      return MissingUserInput(
+        onUserSelect: (String userInput) {
+          widget.commandParams[commandCategory] = userInput;
+        },
+        placeholder: "Select a person's status to view:",
+      );
+    } else if (commandCategory.contains('SendPerson')) {
+      return MissingUserInput(
+        onUserSelect: (String userInput) {
+          widget.commandParams[commandCategory] = userInput;
+        },
+        placeholder: "Who would you like to message? :",
+      );
     } else if (commandCategory.contains('Status')) {
       return MissingStatusInput(onStatusInput: (String userInput) {
         widget.commandParams[commandCategory] = userInput;
@@ -143,5 +168,5 @@ class _UserCommandParamInputScreenState
 // nothing else. The user input is: '$message'"
 
 // checklist:
-// done (on my end): add to schedule, view schedule, set status 
-// total done: (3/9)
+// done (on my end): add to schedule, view schedule, set status, view status
+// total done: (4/9)

@@ -34,6 +34,7 @@ const List<String> parseableCommands = [
   'Set Status',
   'Chore Delegation',
   'Send a Message',
+  'View Status'
 ];
 
 /// determine if a command is parseable
@@ -54,6 +55,182 @@ Future<String> addUserInput(String message, DateTime dateTime) async {
   }
   return userMessageKey;
 }
+
+/* Gets Roomeo to categorize a message. The categories are:
+‘View/Edit Schedule’, ‘View/Set Status’, ‘Chore Delegation’,
+‘Ask for Advice’, ‘Send a Message’, and ‘Unknown’ */
+Future<String> getCommandCategory(String message) async {
+  final Map<String, String> requestHeaders = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer $OpenAIApiKey"
+  };
+
+  List<Map<String, String>> requestDataMessage = [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant that categorizes messages."
+    },
+    {
+      "role": "user",
+      "content":
+          "Given the following user input, determine what category this input falls into. The categories are: 'View Schedule', 'Add to Schedule, 'Remove from Schedule', 'Update Schedule', 'View Status', 'Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized or if the input is irrelevant to the previous categories. Your response ONLY contains the values of these categories, and NOTHING ELSE. The user input is: '$message'"
+    }
+  ];
+
+  final Map<String, dynamic> requestData = {
+    "model": "gpt-3.5-turbo",
+    "messages": requestDataMessage
+  };
+
+  final res = await http.post(Uri.parse(apiURL),
+      headers: requestHeaders, body: jsonEncode(requestData));
+
+  if (res.statusCode == 200) {
+    final decodedRes = jsonDecode(res.body);
+    final int lastResponseIndex = decodedRes["choices"].length - 1;
+    final chatGPTRes =
+        decodedRes["choices"][lastResponseIndex]["message"]["content"];
+    print('CHATGPT RES: $chatGPTRes');
+    return chatGPTRes;
+  } else {
+    throw Exception(
+        "getChatGPTResponse failed. HTTP status: ${res.statusCode}");
+  }
+}
+
+/*Generate the request object to be sent to determine command parameters */
+Map<String, dynamic> generateGetCommandParameterRequestObject(
+    String category, String message) {
+  String parametersToFindAddendum = "";
+  String parameterJSONFormat = "";
+  switch (category) {
+    case 'Remove from Schedule':
+      parameterJSONFormat =
+          "1. TaskTitle \n 2. TaskPerson \n 3. TaskDescription";
+      parametersToFindAddendum =
+          "1. The title of the task to remove \n 2. The name of the person assigned to the task \n 3. The description of the task to remove";
+      break;
+    case 'Add to Schedule':
+      DateTime now = DateTime.now();
+      parameterJSONFormat =
+          "1. TaskTitle \n 2. TaskDate \n 3. TaskDescription \n 4. TaskPerson";
+      parametersToFindAddendum =
+          "1. The title of the task \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The description of the task to be added \n 4. The name of the person assigned to the task";
+      break;
+    case 'Update Schedule':
+      DateTime now = DateTime.now();
+      parameterJSONFormat =
+          "1. TaskTitleOld \n 2. TaskTitleNew \n 3. TaskDate \n 4. TaskPerson \n 5. TaskDescriptionOld\n 6. TaskDescriptionNew";
+      parametersToFindAddendum =
+          "1. The title of the old task \n 2. The title of the newly updated task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 4. The name of the person assigned to the task \n 5. The description of the old task to be updated \n 6. The description of the new task that will replace the old task";
+      break;
+    case 'Set Status':
+      parameterJSONFormat = "1. Status";
+      parametersToFindAddendum = "1. The status that the user wants to set to.";
+      break;
+    case 'View Status':
+      parameterJSONFormat = "1. ViewPerson";
+      parametersToFindAddendum =
+          "1. The person of the status who should be viewed";
+      break;
+    case 'Send a Message':
+      parameterJSONFormat = "1. SendPerson \n 2. Message";
+      parametersToFindAddendum =
+          "1. The person that the message should be sent to \n 2. The actual message";
+      break;
+    default:
+      return {};
+  }
+  final Map<String, String> requestHeaders = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer $OpenAIApiKey"
+  };
+  List<Map<String, String>> requestDataMessage = [
+    {
+      "role": "system",
+      "content":
+          "You are a virtual assistant named 'Roomeo' meant to find command parameters given an input for the following type of command: $category. You are to find and list the following parameters: \n $parametersToFindAddendum \n Output the results in a JSON style string, using the keys: \n $parameterJSONFormat \n for each of the parameters, respectively. If you cannot determine the values of all the parameters from the input, use the value 'Missing' for the respective parameter in the JSON output. Output ONLY the JSON style string."
+    },
+    {"role": "user", "content": message}
+  ];
+  final Map<String, dynamic> requestData = {
+    "model": "gpt-3.5-turbo",
+    "messages": requestDataMessage
+  };
+  return {"requestHeaders": requestHeaders, "requestData": requestData};
+/*You are a virtual assistant named "Roomeo" meant to find command parameters given a user input for the following type of command: 'Remove from Schedule'. You are to find and list the following parameters: 
+1. The description of the task to remove
+Output the results in a JSON style string, using the keys: 
+1. TaskDescription
+for each of the parameters. If you cannot determine the values of all the parameters from the input, use the value 'Missing' for the respective parameter in the JSON output. Give me only the JSON style string.
+The input is: "Roomeo, remove gardening from my schedule" */
+}
+
+void viewSchedule() {}
+
+void removeTaskFromSchedule(/*scheduleID, taskIDToRemove*/) {}
+
+void addTaskToSchedule(/*scheduleID, taskToAdd*/) {}
+
+void updateSchedule(/*scheduleID, taskToUpdate, newTask*/) {}
+
+void sendMessage(/*userID, message*/) {}
+
+//Future<Map<String, String>> getRemoveScheduleTokens(String message) async {}
+
+Future<Map<String, String>> getCommandParameters(
+    String category, String message) async {
+  // generate the command parameter parsing request object:
+  Map<String, dynamic> commandRequestObject =
+      generateGetCommandParameterRequestObject(category, message);
+  if (commandRequestObject == {}) {
+    // TODO: handle empty object instance
+  }
+  if (!commandRequestObject.containsKey("requestHeaders")) {
+    return Future.error("getCommandParameters failed: invalid requestHeader");
+  }
+  if (!commandRequestObject.containsKey("requestData")) {
+    return Future.error("getCommandParameters failed: invalid requestData");
+  }
+  final res = await http.post(Uri.parse(apiURL),
+      headers: commandRequestObject["requestHeaders"],
+      body: jsonEncode(commandRequestObject["requestData"]));
+  if (res.statusCode != 200) {
+    throw Exception(
+        "Failed to get command parameters. HTTP status: ${res.statusCode}");
+  }
+  final decodedRes = jsonDecode(res.body);
+  final int lastResponseIndex = decodedRes["choices"].length - 1;
+  String commandParamsAsString =
+      decodedRes["choices"][lastResponseIndex]["message"]["content"];
+  Map<String, dynamic> tempMap = jsonDecode(commandParamsAsString);
+
+  Map<String, String> commandParameters =
+      tempMap.map((key, value) => MapEntry(key, value.toString()));
+  commandParameters["category"] = category;
+  return commandParameters;
+}
+
+void dispatchCommand(String category, String message) {
+  // determine relevant tokens: e.g. if a user wants to add a task to a schedule,
+  // determine what strings are needed to build a task object from the message
+  // for:
+  // REMOVING A TASK FROM A SCHEDULE:
+  //  1. need to determine the ID of what task to remove (hard part)
+  //      (might need to query a vector DB to properly do this) one potential solution
+  //      is to query the top X most relevant task ID's, and have a user select
+  //      which task to remove
+  //  2. remove it from firebase, as well as the vector DB
+  // ADDING A TASK TO A SCHEDULE:
+  //  1. generate a task ID
+  //  2. vectorize the task and put it into the VDB
+  // UPDATING THE SCHEDULE:
+  //  1. determine what task needs updating
+  //      use an approach similar to determining task ID for removal
+  //  2. vectorize the task. modify the vector data for that task in the vdb
+  //  3. modify the task in firebase
+}
+
 
 /* Adds a message to the chatroom, as well as fetches Roomeo's response
 by querying relvant messages in the VDB and adds it to the chatroom as well.*/
@@ -178,168 +355,3 @@ by querying relvant messages in the VDB and adds it to the chatroom as well.*/
 //     throw Future.error("no chatGPT message");
 //   }
 // }
-
-/* Gets Roomeo to categorize a message. The categories are:
-‘View/Edit Schedule’, ‘View/Set Status’, ‘Chore Delegation’,
-‘Ask for Advice’, ‘Send a Message’, and ‘Unknown’ */
-Future<String> getCommandCategory(String message) async {
-  final Map<String, String> requestHeaders = {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer $OpenAIApiKey"
-  };
-
-  List<Map<String, String>> requestDataMessage = [
-    {
-      "role": "system",
-      "content": "You are a helpful assistant that categorizes messages."
-    },
-    {
-      "role": "user",
-      "content":
-          "Given the following user input, determine what category this input falls into. The categories are: 'View Schedule', 'Add to Schedule, 'Remove from Schedule', 'Update Schedule', 'View Status', 'Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized or if the input is irrelevant to the previous categories. Give me only the category of the message, and nothing else. The user input is: '$message'"
-    }
-  ];
-
-  final Map<String, dynamic> requestData = {
-    "model": "gpt-3.5-turbo",
-    "messages": requestDataMessage
-  };
-
-  final res = await http.post(Uri.parse(apiURL),
-      headers: requestHeaders, body: jsonEncode(requestData));
-
-  if (res.statusCode == 200) {
-    final decodedRes = jsonDecode(res.body);
-    final int lastResponseIndex = decodedRes["choices"].length - 1;
-    final chatGPTRes =
-        decodedRes["choices"][lastResponseIndex]["message"]["content"];
-    return chatGPTRes;
-  } else {
-    throw Exception(
-        "getChatGPTResponse failed. HTTP status: ${res.statusCode}");
-  }
-}
-
-/*Generate the request object to be sent to determine command parameters */
-Map<String, dynamic> generateGetCommandParameterRequestObject(
-    String category, String message) {
-  String parametersToFindAddendum = "";
-  String parameterJSONFormat = "";
-  switch (category) {
-    case 'Remove from Schedule':
-      parameterJSONFormat =
-          "1. TaskTitle \n 2. TaskPerson \n 3. TaskDescription";
-      parametersToFindAddendum =
-          "1. The title of the task to remove \n 2. The name of the person assigned to the task \n 3. The description of the task to remove";
-      break;
-    case 'Add to Schedule':
-      DateTime now = DateTime.now();
-      parameterJSONFormat =
-          "1. TaskTitle \n 2. TaskDate \n 3. TaskDescription \n 4. TaskPerson";
-      parametersToFindAddendum =
-          "1. The title of the task \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The description of the task to be added \n 4. The name of the person assigned to the task";
-      break;
-    case 'Update Schedule':
-      DateTime now = DateTime.now();
-      parameterJSONFormat =
-          "1. TaskTitleOld \n 2. TaskTitleNew \n 3. TaskDate \n 4. TaskPerson \n 5. TaskDescriptionOld\n 6. TaskDescriptionNew";
-      parametersToFindAddendum =
-          "1. The title of the old task \n 2. The title of the newly updated task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 4. The name of the person assigned to the task \n 5. The description of the old task to be updated \n 6. The description of the new task that will replace the old task";
-      break;
-    case 'Set Status':
-      parameterJSONFormat = "1. Status";
-      parametersToFindAddendum =
-          "1. The status that the user wants to set to. The valid statuses are: Online, Away, Offline";
-      break;
-    default:
-      return {};
-  }
-  final Map<String, String> requestHeaders = {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer $OpenAIApiKey"
-  };
-  List<Map<String, String>> requestDataMessage = [
-    {
-      "role": "system",
-      "content":
-          "You are a virtual assistant named 'Roomeo' meant to find command parameters given an input for the following type of command: $category. You are to find and list the following parameters: \n $parametersToFindAddendum \n Output the results in a JSON style string, using the keys: \n $parameterJSONFormat \n for each of the parameters, respectively. If you cannot determine the values of all the parameters from the input, use the value 'Missing' for the respective parameter in the JSON output. Output ONLY the JSON style string."
-    },
-    {"role": "user", "content": message}
-  ];
-  final Map<String, dynamic> requestData = {
-    "model": "gpt-3.5-turbo",
-    "messages": requestDataMessage
-  };
-  return {"requestHeaders": requestHeaders, "requestData": requestData};
-/*You are a virtual assistant named "Roomeo" meant to find command parameters given a user input for the following type of command: 'Remove from Schedule'. You are to find and list the following parameters: 
-1. The description of the task to remove
-Output the results in a JSON style string, using the keys: 
-1. TaskDescription
-for each of the parameters. If you cannot determine the values of all the parameters from the input, use the value 'Missing' for the respective parameter in the JSON output. Give me only the JSON style string.
-The input is: "Roomeo, remove gardening from my schedule" */
-}
-
-void viewSchedule() {}
-
-void removeTaskFromSchedule(/*scheduleID, taskIDToRemove*/) {}
-
-void addTaskToSchedule(/*scheduleID, taskToAdd*/) {}
-
-void updateSchedule(/*scheduleID, taskToUpdate, newTask*/) {}
-
-void sendMessage(/*userID, message*/) {}
-
-//Future<Map<String, String>> getRemoveScheduleTokens(String message) async {}
-
-Future<Map<String, String>> getCommandParameters(
-    String category, String message) async {
-  // generate the command parameter parsing request object:
-  Map<String, dynamic> commandRequestObject =
-      generateGetCommandParameterRequestObject(category, message);
-  if (commandRequestObject == {}) {
-    // TODO: handle empty object instance
-  }
-  if (!commandRequestObject.containsKey("requestHeaders")) {
-    return Future.error("getCommandParameters failed: invalid requestHeader");
-  }
-  if (!commandRequestObject.containsKey("requestData")) {
-    return Future.error("getCommandParameters failed: invalid requestData");
-  }
-  final res = await http.post(Uri.parse(apiURL),
-      headers: commandRequestObject["requestHeaders"],
-      body: jsonEncode(commandRequestObject["requestData"]));
-  if (res.statusCode != 200) {
-    throw Exception(
-        "Failed to get command parameters. HTTP status: ${res.statusCode}");
-  }
-  final decodedRes = jsonDecode(res.body);
-  final int lastResponseIndex = decodedRes["choices"].length - 1;
-  String commandParamsAsString =
-      decodedRes["choices"][lastResponseIndex]["message"]["content"];
-  Map<String, dynamic> tempMap = jsonDecode(commandParamsAsString);
-
-  Map<String, String> commandParameters =
-      tempMap.map((key, value) => MapEntry(key, value.toString()));
-  commandParameters["category"] = category;
-  return commandParameters;
-}
-
-void dispatchCommand(String category, String message) {
-  // determine relevant tokens: e.g. if a user wants to add a task to a schedule,
-  // determine what strings are needed to build a task object from the message
-  // for:
-  // REMOVING A TASK FROM A SCHEDULE:
-  //  1. need to determine the ID of what task to remove (hard part)
-  //      (might need to query a vector DB to properly do this) one potential solution
-  //      is to query the top X most relevant task ID's, and have a user select
-  //      which task to remove
-  //  2. remove it from firebase, as well as the vector DB
-  // ADDING A TASK TO A SCHEDULE:
-  //  1. generate a task ID
-  //  2. vectorize the task and put it into the VDB
-  // UPDATING THE SCHEDULE:
-  //  1. determine what task needs updating
-  //      use an approach similar to determining task ID for removal
-  //  2. vectorize the task. modify the vector data for that task in the vdb
-  //  3. modify the task in firebase
-}

@@ -5,17 +5,19 @@ import 'package:roomease/DatabaseManager.dart';
 
 /// allows user to input a user in their current household
 class MissingUserInput extends StatefulWidget {
-  const MissingUserInput({super.key, required this.onUserSelect});
+  const MissingUserInput(
+      {super.key, required this.onUserSelect, required this.placeholder});
 
   final Function(String) onUserSelect;
+  final String placeholder;
 
   @override
   State<MissingUserInput> createState() => _MissingUserInputState();
 }
 
 class _MissingUserInputState extends State<MissingUserInput> {
-  late List<String> householdMembers;
-  late String dropdownValue;
+  List<String> householdMembers = [];
+  String dropdownValue = 'Select a user';
 
   Future<void> _loadHouseholdMembers() async {
     householdMembers = await DatabaseManager.getUserNamesFromHousehold(
@@ -59,7 +61,7 @@ class _MissingUserInputState extends State<MissingUserInput> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text('Choose a person to assign this task to:'),
+        Text(widget.placeholder),
         DropdownButton<String>(
           value: dropdownValue,
           icon: const Icon(Icons.arrow_downward),
