@@ -211,6 +211,29 @@ Future<Map<String, String>> getCommandParameters(
   return commandParameters;
 }
 
+String generateFullCommandInput(Map<String, String> parameters) {
+  switch (parameters['category']) {
+    case 'Remove from Schedule':
+      return 'Remove the task "${parameters['TaskTitle']}" assigned by ${parameters['TaskPerson']} from the schedule.';
+    case 'Add to Schedule':
+      if (parameters['TaskDescription'] != 'Missing') {
+        return 'Add the task "${parameters['TaskTitle']}" with the details "${parameters['TaskDescription']}" to the schedule. The task is due on ${parameters['TaskDate']}, and assigned to ${parameters['TaskPerson']}.';
+      }
+      return 'Add the task "${parameters['TaskTitle']}" to the schedule. The task is due on ${parameters['TaskDate']}, and assigned to ${parameters['TaskPerson']}.';
+    case 'Update Schedule':
+      // TODO
+      return "";
+    case 'Set Status':
+      return 'Set my status to ${parameters['Status']}';
+    case 'View Status':
+      return 'What is ${parameters['ViewPerson']}\'s status right now?';
+    case 'Send a Message':
+      return 'Send "${parameters['Message']}" to ${parameters['SendPerson']}';
+    default:
+      return "";
+  }
+}
+
 void dispatchCommand(String category, String message) {
   // determine relevant tokens: e.g. if a user wants to add a task to a schedule,
   // determine what strings are needed to build a task object from the message

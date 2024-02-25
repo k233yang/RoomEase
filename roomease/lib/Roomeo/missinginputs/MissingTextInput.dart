@@ -36,7 +36,8 @@ class MissingTextInputState extends State<MissingTextInput> {
 
   void _handleTextInputChange() {
     // This function is called every time the text changes
-    widget.onTextInput(_controller.text);
+    String textInput = _controller.text.isEmpty ? 'Missing' : _controller.text;
+    widget.onTextInput(textInput);
   }
 
   String determinePlaceholder() {
@@ -46,7 +47,7 @@ class MissingTextInputState extends State<MissingTextInput> {
     if (widget.isInputSingleLine) {
       return 'Task Title';
     }
-    return 'Task Details/Desctiption';
+    return 'Task Details/Desctiption (Optional)';
   }
 
   @override
