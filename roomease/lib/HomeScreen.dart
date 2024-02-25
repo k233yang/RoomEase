@@ -194,7 +194,8 @@ Widget statusList() {
                   SizedBox(
                     width: 60,
                     height: 60,
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                        color: ColorConstants.lightPurple),
                   ),
                   Padding(
                     padding: EdgeInsets.only(top: 16),

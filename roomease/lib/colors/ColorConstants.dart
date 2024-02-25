@@ -14,7 +14,20 @@ Color hexToColor(String hex) {
 class ColorConstants {
   static Color lightGray = hexToColor('#D3D3D3');
   static Color lighterGray = hexToColor('#ECECEC');
+
   static Color lightPurple = hexToColor('#CDB9F6');
+  static Color lavender = hexToColor('#f6dbff');
   static Color darkPurple = hexToColor('#513194');
+
   static Color white = hexToColor('#FFFFFF');
+  static Color black = hexToColor('#000000');
+
+  static Color skyBlue = hexToColor('#d4eeff');
+  static Color lightBlue = hexToColor('#e6feff');
+
+  static Color lightPink = hexToColor('#ffebfb');
+  static Color pink = hexToColor('#ffd4f6');
+  static Color lightRed = hexToColor('#ffdbe2');
+
+  static Color lightGreen = hexToColor('#ccffcc');
 }
