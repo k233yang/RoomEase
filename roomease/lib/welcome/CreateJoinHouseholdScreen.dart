@@ -17,10 +17,12 @@ class CreateJoinHouseholdScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Center(
-                  child: Text(
-                    "Are you creating a new household or joining an existing household?",
-                    textAlign: TextAlign.center,
-                  ),
+                  child: Padding(
+                      padding: EdgeInsets.only(left: 50, right: 50, bottom: 30),
+                      child: Text(
+                          "Are you creating a new household or joining an existing household?",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 15))),
                 ),
                 CreateJoinHouseholdButton(
                     buttonText: "Create Household",

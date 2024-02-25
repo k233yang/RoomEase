@@ -24,7 +24,8 @@ class _RegisterState extends State<Register> {
       appBar: AppBar(
         title: Text("RoomEase"),
       ),
-      body: Form(
+      body: SingleChildScrollView(
+          child: Form(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -146,7 +147,7 @@ class _RegisterState extends State<Register> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

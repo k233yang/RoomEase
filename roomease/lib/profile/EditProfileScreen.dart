@@ -19,6 +19,9 @@ class _EditProfileState extends State<EditProfile> {
   late User user;
   var initialName = CurrentUser.getCurrentUserName();
   var initialEmail = "";
+  bool showWidget = false;
+  int selectedIcon = CurrentUser.getCurrentUserIconNumber();
+  int initialUserIcon = CurrentUser.getCurrentUserIconNumber();
 
   @override
   void initState() {
@@ -45,6 +48,47 @@ class _EditProfileState extends State<EditProfile> {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Padding(
+                        padding: EdgeInsets.only(bottom: 10),
+                        child: Column(children: [
+                          Image(
+                            image: AssetImage(iconNumberMapping(selectedIcon)),
+                            height: 100,
+                            width: 100,
+                          ),
+                          TextButton(
+                              onPressed: () => {
+                                    setState(() {
+                                      showWidget = !showWidget;
+                                    })
+                                  },
+                              child: Text("Change Profile Picture"))
+                        ])),
+                    Column(children: [
+                      showWidget
+                          ? Padding(
+                              padding: EdgeInsets.only(bottom: 20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  smallIcon(
+                                      'assets/user_profile_icon_pink.png', 0),
+                                  smallIcon(
+                                      'assets/user_profile_icon_purple.png', 1),
+                                  smallIcon(
+                                      'assets/user_profile_icon_blue.png', 2),
+                                  smallIcon(
+                                      'assets/user_profile_icon_aqua.png', 3),
+                                  smallIcon(
+                                      'assets/user_profile_icon_green.png', 4),
+                                  smallIcon(
+                                      'assets/user_profile_icon_yellow.png', 5),
+                                  smallIcon(
+                                      'assets/user_profile_icon_orange.png', 6),
+                                ],
+                              ))
+                          : Container()
+                    ]),
                     Padding(
                         padding: EdgeInsets.only(bottom: 20),
                         child: TextFormField(
@@ -84,12 +128,93 @@ class _EditProfileState extends State<EditProfile> {
                                       nameController.text);
                                 }
                                 if (emailController.text != initialEmail) {
-                                  user.updateEmail(emailController.text);
+                                  user.verifyBeforeUpdateEmail(
+                                      emailController.text);
+                                }
+                                if (initialUserIcon != selectedIcon) {
+                                  CurrentUser.setCurrentUserIconNumber(
+                                      selectedIcon);
+                                  DatabaseManager.setUserCurrentIconNumber(
+                                      CurrentUser.getCurrentUserId(),
+                                      selectedIcon);
                                 }
                                 Navigator.pop(context);
                               }
                             }))
                   ])),
         ));
+  }
+
+  Widget smallIcon(String imagePath, int iconNumber) {
+    if (iconNumber == 6) {
+      if (iconNumber == selectedIcon) {
+        return Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black, width: 1),
+              shape: BoxShape.rectangle,
+            ),
+            child: IconButton(
+                onPressed: () => {setState(() => selectedIcon = iconNumber)},
+                icon: Image(
+                  image: AssetImage(imagePath),
+                  height: 30,
+                  width: 30,
+                )));
+      } else {
+        return IconButton(
+            onPressed: () => {setState(() => selectedIcon = iconNumber)},
+            icon: Image(
+              image: AssetImage(imagePath),
+              height: 30,
+              width: 30,
+            ));
+      }
+    } else {
+      if (iconNumber == selectedIcon) {
+        return Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black, width: 1),
+              shape: BoxShape.rectangle,
+            ),
+            child: IconButton(
+                onPressed: () => {setState(() => selectedIcon = iconNumber)},
+                icon: Image(
+                  image: AssetImage(imagePath),
+                  height: 30,
+                  width: 30,
+                )));
+      } else {
+        return IconButton(
+            onPressed: () => {setState(() => selectedIcon = iconNumber)},
+            icon: Image(
+              image: AssetImage(imagePath),
+              height: 30,
+              width: 30,
+            ));
+      }
+    }
+  }
+}
+
+String iconNumberMapping(int iconNumber) {
+  switch (iconNumber) {
+    case 0:
+      return 'assets/user_profile_icon_pink.png';
+    case 1:
+      return 'assets/user_profile_icon_purple.png';
+    case 2:
+      return 'assets/user_profile_icon_blue.png';
+    case 3:
+      return 'assets/user_profile_icon_aqua.png';
+    case 4:
+      return 'assets/user_profile_icon_green.png';
+    case 5:
+      return 'assets/user_profile_icon_yellow.png';
+    case 6:
+      return 'assets/user_profile_icon_orange.png';
+    case 100:
+      return 'assets/roomeo_user_icon.png';
+    default:
+      return 'assets/user_profile_icon_purple.png';
   }
 }

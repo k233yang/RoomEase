@@ -4,6 +4,7 @@ import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'package:roomease/colors/ColorConstants.dart';
+import 'package:roomease/profile/EditProfileScreen.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -55,7 +56,8 @@ class _ProfileState extends State<Profile> {
               Padding(
                   padding: EdgeInsets.only(left: 50),
                   child: Image(
-                    image: AssetImage('assets/user_profile_icon.png'),
+                    image: AssetImage(iconNumberMapping(
+                        CurrentUser.getCurrentUserIconNumber())),
                     height: 100,
                     width: 100,
                   )),

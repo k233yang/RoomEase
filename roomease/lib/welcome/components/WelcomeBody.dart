@@ -70,6 +70,11 @@ class WelcomeBody extends StatelessWidget {
         await DatabaseManager.getUserStatusList(user.user!.uid);
     CurrentUser.setCurrentUserStatusList(userStatusList);
     SharedPreferencesUtility.setValue("isLoggedIn", true);
+
+    // User icon
+    int iconNumber =
+        await DatabaseManager.getUserCurrentIconNumber(user.user!.uid);
+    CurrentUser.setCurrentUserIconNumber(iconNumber);
   }
 }
 

@@ -78,37 +78,35 @@ class _JoinHousehold extends State<JoinHousehold> {
   }
 
   Future<void> updateUserInformation() async {
-    DatabaseManager.addUser(
-        CurrentUser.getCurrentUserId(), CurrentUser.getCurrentUserName());
+    String userId = CurrentUser.getCurrentUserId();
+
+    DatabaseManager.addUser(userId, CurrentUser.getCurrentUserName());
     DatabaseManager.joinHousehold(
         CurrentUser.getCurrentUser(), householdCodeController.text);
 
     // Update user message rooms
-    DatabaseManager.addMessageRoom(MessageRoom(
-        CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-        [],
-        <RUser.User>[CurrentUser.getCurrentUser(), RoomeoUser.user]));
-    DatabaseManager.addMessageRoomIdToUser(CurrentUser.getCurrentUserId(),
-        CurrentUser.getCurrentUserId() + RoomeoUser.user.userId);
-    CurrentUser.setCurrentMessageRoomIds(
-        [CurrentUser.getCurrentUserId() + RoomeoUser.user.userId]);
+    DatabaseManager.addMessageRoom(MessageRoom(userId + RoomeoUser.user.userId,
+        [], <RUser.User>[CurrentUser.getCurrentUser(), RoomeoUser.user]));
+    DatabaseManager.addMessageRoomIdToUser(
+        CurrentUser.getCurrentUserId(), userId + RoomeoUser.user.userId);
+    CurrentUser.setCurrentMessageRoomIds([userId + RoomeoUser.user.userId]);
 
     // Update user household
     CurrentHousehold.setCurrentHouseholdId(householdCodeController.text);
     String householdName =
         await DatabaseManager.getHouseholdName(householdCodeController.text);
     CurrentHousehold.setCurrentHouseholdName(householdName);
-    DatabaseManager.addHouseholdToUser(
-        CurrentUser.getCurrentUser().userId, householdCodeController.text);
+    DatabaseManager.addHouseholdToUser(userId, householdCodeController.text);
 
     // Update user status
-    await DatabaseManager.addStatusToUserStatusList(
-        "Home", CurrentUser.getCurrentUserId());
-    await DatabaseManager.addStatusToUserStatusList(
-        "Away", CurrentUser.getCurrentUserId());
-    DatabaseManager.setUserCurrentStatus(
-        "Home", CurrentUser.getCurrentUserId());
+    await DatabaseManager.addStatusToUserStatusList("Home", userId);
+    await DatabaseManager.addStatusToUserStatusList("Away", userId);
+    DatabaseManager.setUserCurrentStatus("Home", userId);
     CurrentUser.setCurrentUserStatusList(["Home", "Away"]);
     CurrentUser.setCurrentUserStatus("Home");
+
+    // User icon
+    CurrentUser.setCurrentUserIconNumber(1);
+    DatabaseManager.setUserCurrentIconNumber(userId, 1);
   }
 }

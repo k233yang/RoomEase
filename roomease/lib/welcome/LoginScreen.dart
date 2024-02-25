@@ -154,5 +154,9 @@ class _LoginState extends State<Login> {
     List<String> userStatusList =
         await DatabaseManager.getUserStatusList(userId);
     CurrentUser.setCurrentUserStatusList(userStatusList);
+
+    // User icon
+    int iconNumber = await DatabaseManager.getUserCurrentIconNumber(userId);
+    CurrentUser.setCurrentUserIconNumber(iconNumber);
   }
 }

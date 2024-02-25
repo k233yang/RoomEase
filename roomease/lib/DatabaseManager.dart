@@ -179,6 +179,23 @@ class DatabaseManager {
     return userStatusList;
   }
 
+  static void setUserCurrentIconNumber(String userId, int iconNumber) {
+    DatabaseReference usersRef = _databaseInstance.ref("users/$userId");
+    usersRef.update({"iconNumber": iconNumber});
+  }
+
+  static Future<int> getUserCurrentIconNumber(String userId) async {
+    DatabaseReference usersRef =
+        _databaseInstance.ref("users/$userId/iconNumber");
+    DatabaseEvent event = await usersRef.once();
+    if (event.snapshot.value == null) {
+      DatabaseReference updateRef = _databaseInstance.ref("users/$userId");
+      updateRef.update({"iconNumber": 1});
+      return 1;
+    }
+    return event.snapshot.value as int;
+  }
+
   // ------------------------ END USER OPERATIONS ------------------------
 
   // ------------------------ MESSAGE OPERATIONS ------------------------
@@ -609,16 +626,16 @@ class DatabaseManager {
 
   // ------------------------ CALENDAR OPERATIONS ------------------------
 
-   static void addEvent(
-      String householdCode,
-      String name,
-      String details,
-      String startTime,
-      String endTime,
-      String dateCreated,
-      String type,
-      String createdByUserId,
-    ) async {
+  static void addEvent(
+    String householdCode,
+    String name,
+    String details,
+    String startTime,
+    String endTime,
+    String dateCreated,
+    String type,
+    String createdByUserId,
+  ) async {
     DatabaseReference eventsRef =
         _databaseInstance.ref("households/$householdCode/events");
 

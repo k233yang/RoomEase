@@ -41,7 +41,7 @@ class _ChatListScreen extends State<ChatListScreen> {
               child: Row(
                 children: [
                   Image(
-                      image: AssetImage('assets/user_profile_icon.png'),
+                      image: AssetImage('assets/user_profile_icon_purple.png'),
                       width: 40,
                       height: 40),
                   Padding(

@@ -17,8 +17,9 @@ class CurrentUser {
         SharedPreferencesUtility.getStringList("userStatusList");
     List<String> messageRoomIds =
         SharedPreferencesUtility.getStringList("messageRoomIds");
+    int iconNumber = SharedPreferencesUtility.getInt("iconNumber");
     return User(userName, userId, householdId, userStatus, userStatusList,
-        messageRoomIds);
+        messageRoomIds, iconNumber);
   }
 
   static String getCurrentUserId() {
@@ -84,5 +85,13 @@ class CurrentUser {
         SharedPreferencesUtility.getStringList("userStatusList");
     userStatusList.remove(status);
     SharedPreferencesUtility.setValue("userStatusList", userStatusList);
+  }
+
+  static int getCurrentUserIconNumber() {
+    return SharedPreferencesUtility.getInt("iconNumber");
+  }
+
+  static void setCurrentUserIconNumber(int iconNumber) {
+    SharedPreferencesUtility.setValue("iconNumber", iconNumber);
   }
 }
