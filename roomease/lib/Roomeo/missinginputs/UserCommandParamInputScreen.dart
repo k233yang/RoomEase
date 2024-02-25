@@ -98,8 +98,33 @@ class _UserCommandParamInputScreenState
   }
 
   void onSubmitMissingParams() {
-    // TODO: go back to chat screen and do shit with the newly updated params
-    print(widget.commandParams);
+    bool hasMissingNonDescription = widget.commandParams.entries.any(
+      (entry) => entry.value == "Missing" && !entry.key.contains("Description"),
+    );
+
+    if (hasMissingNonDescription) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Incomplete Information"),
+            content:
+                Text("Please fill out the missing values before proceeding."),
+            actions: <Widget>[
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // TODO: go back to chat screen and do shit with the newly updated params
+      print(widget.commandParams);
+    }
   }
 
   @override
@@ -111,51 +136,56 @@ class _UserCommandParamInputScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fill out Missing Info'),
-        backgroundColor: ColorConstants.lightPurple,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop({
-              'exited': true,
-              'data': widget.commandParams,
-            });
-          },
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Fill out Missing Info'),
+          backgroundColor: ColorConstants.lightPurple,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pop({
+                'exited': true,
+                'data': widget.commandParams,
+              });
+            },
+          ),
         ),
-      ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'More information needed to ${widget.category.toLowerCase()}:',
-            style: TextStyle(
-              color: Color.fromARGB(255, 160, 160, 160),
-              fontSize: 18,
-            ),
-          ),
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true, // Make ListView as tall as its children
-              itemCount: missingParams.length,
-              itemBuilder: (context, index) {
-                return generateMissingInputWidgets(missingParams[index]);
-              },
-            ),
-          ),
-          ElevatedButton(
-            onPressed: onSubmitMissingParams,
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: ColorConstants.lightPurple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'More information needed to ${widget.category.toLowerCase()}:',
+              style: TextStyle(
+                color: Color.fromARGB(255, 160, 160, 160),
+                fontSize: 18,
               ),
             ),
-            child: Text('Submit'),
-          )
-        ],
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true, // Make ListView as tall as its children
+                itemCount: missingParams.length,
+                itemBuilder: (context, index) {
+                  return generateMissingInputWidgets(missingParams[index]);
+                },
+              ),
+            ),
+            ElevatedButton(
+              onPressed: onSubmitMissingParams,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: ColorConstants.lightPurple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+              ),
+              child: Text('Submit'),
+            )
+          ],
+        ),
       ),
     );
   }

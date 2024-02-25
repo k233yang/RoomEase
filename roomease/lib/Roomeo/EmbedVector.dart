@@ -13,7 +13,7 @@ Future<List<double>> getVectorEmbeddingArray(String input) async {
 
   final Map<String, String> vectorRequestData = {
     "input": input,
-    "model": "text-embedding-ada-002"
+    "model": "text-embedding-3-small"
   };
 
   try {
