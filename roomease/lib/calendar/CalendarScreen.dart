@@ -20,15 +20,14 @@ class _CalendarScreen extends State<CalendarScreen> {
       ),
       body: SfCalendar(
         view: CalendarView.month,
+        todayHighlightColor: ColorConstants.lightPurple,
       ),
-    floatingActionButton: CreateAddEventButton(onButtonPress: () {
-      Navigator.pushNamed(context, "/addEvent").then((value) {
-        setState(() {
-
+      floatingActionButton: CreateAddEventButton(onButtonPress: () {
+        Navigator.pushNamed(context, "/addEvent").then((value) {
+          setState(() {});
         });
-      });
-    }),
-    floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      }),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
@@ -43,7 +42,7 @@ class CreateAddEventButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
         foregroundColor: ColorConstants.white,
-        backgroundColor: ColorConstants.darkPurple,
+        backgroundColor: ColorConstants.lightPurple,
         shape: CircleBorder(),
         onPressed: onButtonPress,
         child: const Icon(Icons.add));

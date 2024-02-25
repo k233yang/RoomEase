@@ -173,7 +173,7 @@ Widget buildListMessage(List<Message> messages) {
       height: 40,
       child: Center(
         child: Card(
-          color: ColorConstants.darkPurple,
+          color: ColorConstants.lightPurple,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
