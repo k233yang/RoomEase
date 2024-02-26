@@ -152,12 +152,12 @@ class DatabaseManager {
     });
   }
 
-  static void setUserCurrentStatus(String status, String userId) {
+  static void setUserCurrentStatus(String status, String userId) async {
     DatabaseReference usersRef = _databaseInstance.ref("users/$userId");
     usersRef.update({"userStatus": status});
     DatabaseReference householdRef = _databaseInstance.ref(
         "households/${CurrentHousehold.getCurrentHouseholdId()}/users/$userId");
-    householdRef.update({"status": status});
+    await householdRef.update({"status": status});
   }
 
   static Future<String> getUserCurrentStatus(String userId) async {
