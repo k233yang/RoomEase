@@ -148,6 +148,8 @@ class _ChatScreen extends State<ChatScreen> {
                   userMessageKey,
                   fullCommandInput,
                 );
+                // get Roomeo's response to the command
+                await getRoomeoResponse(fullCommandInput, userMessageKey);
               }
               // view schedule doesn't need parameters, so we can just show it
               else if (category == 'View Schedule') {
@@ -155,7 +157,11 @@ class _ChatScreen extends State<ChatScreen> {
                 if (mounted) {
                   Navigator.pushNamed(localContext, '/calendar');
                 }
+                // get Roomeo's response to the command
+                await getRoomeoResponse(message, userMessageKey);
               }
+            } else {
+              await getRoomeoResponse(message, userMessageKey);
             }
           }
         },
