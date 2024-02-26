@@ -106,44 +106,62 @@ class _ChatScreen extends State<ChatScreen> {
                   'Error occured adding message to Firebase or getting command category: $e');
             }
 
-            if (isParseableCommand(category)) {
-              Map<String, String> commandParams =
-                  await getCommandParameters(category, message);
-              print("PARAMETERS ARE: $commandParams");
-              // if there are missing params, navigate to UserCommandParamInputScreen
-              // to promnpt the user for the missing params
-              if (commandParams.containsValue("Missing")) {
-                if (mounted) {
-                  // Check if the widget is still in the tree
-                  final result = await Navigator.of(context).push(
-                    // Directly use context if it's valid
-                    MaterialPageRoute(
-                      builder: (context) => UserCommandParamInputScreen(
-                        category: category,
-                        commandParams: commandParams,
-                        onParamsUpdated: (updatedParams) {
-                          setState(() {
-                            commandParams = updatedParams;
-                          });
-                        },
+            if (isCommand(category)) {
+              if (isParseableCommand(category)) {
+                Map<String, String> commandParams =
+                    await getCommandParameters(category, message);
+                print("PARAMETERS ARE: $commandParams");
+                // if there are missing params, navigate to UserCommandParamInputScreen
+                // to promnpt the user for the missing params
+                if (commandParams.containsValue("Missing")) {
+                  if (mounted) {
+                    // Check if the widget is still in the tree
+                    final result = await Navigator.of(context).push(
+                      // Directly use context if it's valid
+                      MaterialPageRoute(
+                        builder: (context) => UserCommandParamInputScreen(
+                          category: category,
+                          commandParams: commandParams,
+                          onParamsUpdated: (updatedParams) {
+                            setState(() {
+                              commandParams = updatedParams;
+                            });
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                  // if the user exited the UserCommandParamInputScreen, delete
-                  // the most recent message. It is no longer useful
-                  if (result != null && result['exited'] == true) {
-                    await DatabaseManager.removeMessageFromID(
-                      CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-                      userMessageKey,
                     );
+                    // if the user exited the UserCommandParamInputScreen, delete
+                    // the most recent message. It is no longer useful
+                    if (result != null && result['exited'] == true) {
+                      await DatabaseManager.removeMessageFromID(
+                        CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                        userMessageKey,
+                      );
+                    }
                   }
                 }
+                // replace the old message with this correct input:
+                String fullCommandInput =
+                    generateFullCommandInput(commandParams);
+                await DatabaseManager.replaceMessage(
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  userMessageKey,
+                  fullCommandInput,
+                );
+                // get Roomeo's response to the command
+                await getRoomeoResponse(fullCommandInput, userMessageKey);
               }
-            } else if (category == 'View Schedule') {
-              final localContext = context;
-              if (mounted) {
-                Navigator.pushNamed(localContext, '/calendar');
+              // view schedule doesn't need parameters, so we can just show it
+              else if (category == 'View Schedule') {
+                final localContext = context;
+                if (mounted) {
+                  Navigator.pushNamed(localContext, '/calendar');
+                }
+                // get Roomeo's response to the command
+                await getRoomeoResponse(message, userMessageKey);
               }
+            } else {
+              await getRoomeoResponse(message, userMessageKey);
             }
           }
         },
