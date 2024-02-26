@@ -180,10 +180,15 @@ class _ChatScreen extends State<ChatScreen> {
 
 // this thing gets the stream of messages
 Widget buildListMessage(List<Message> messages) {
+  print("START");
+  for (var message in messages) {
+    print(message.text);
+  }
   return GroupedListView<Message, DateTime>(
     padding: const EdgeInsets.all(8),
     reverse: true,
     order: GroupedListOrder.DESC,
+    itemComparator: (a, b) => a.timestamp.compareTo(b.timestamp),
     floatingHeader: true,
     elements: messages,
     groupBy: (message) => DateTime(
