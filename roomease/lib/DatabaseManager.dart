@@ -246,6 +246,18 @@ class DatabaseManager {
     }
   }
 
+  static Future<void> replaceMessage(
+      String messageRoomID, String messageID, String newMessage) async {
+    DatabaseReference messageRef = _databaseInstance
+        .ref()
+        .child("messageRooms/$messageRoomID/messages/$messageID");
+    try {
+      await messageRef.update({'text': newMessage});
+    } catch (e) {
+      return Future.error('Failed to remove message: $e');
+    }
+  }
+
   static StreamBuilder messagesStreamBuilder(String messageRoomId) {
     DatabaseReference messagesRef =
         _databaseInstance.ref("messageRooms/$messageRoomId/messages");

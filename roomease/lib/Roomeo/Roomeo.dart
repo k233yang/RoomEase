@@ -13,7 +13,7 @@ import 'package:roomease/Roomeo/EmbedVector.dart';
 import '../Errors.dart';
 
 /// list of command categories Roomeo can recognize from an input
-const List<String> catList = [
+const List<String> commandCatList = [
   'Remove from Schedule',
   'Add to Schedule',
   'Update Schedule',
@@ -23,7 +23,6 @@ const List<String> catList = [
   'Chore Delegation',
   'Ask for Advice',
   'Send a Message',
-  'Unknown'
 ];
 
 /// list of commands that require parsing (i.e. requires specific user input)
@@ -40,6 +39,11 @@ const List<String> parseableCommands = [
 /// determine if a command is parseable
 bool isParseableCommand(String category) {
   return parseableCommands.contains(category) ? true : false;
+}
+
+/// determine if category is a command
+bool isCommand(String category) {
+  return commandCatList.contains(category) ? true : false;
 }
 
 /// Adds user message to the database. Returns the key/ID for that message

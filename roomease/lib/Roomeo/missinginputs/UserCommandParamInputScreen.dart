@@ -124,6 +124,10 @@ class _UserCommandParamInputScreenState
     } else {
       // TODO: go back to chat screen and do shit with the newly updated params
       print(widget.commandParams);
+      Navigator.of(context).pop({
+        'exited': false,
+        'data': widget.commandParams,
+      });
     }
   }
 
