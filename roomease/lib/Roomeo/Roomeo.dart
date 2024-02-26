@@ -14,21 +14,22 @@ import '../Errors.dart';
 
 /// list of command categories Roomeo can recognize from an input
 const List<String> commandCatList = [
-  'Remove from Schedule',
-  'Add to Schedule',
-  'Update Schedule',
+  'Remove Chore',
+  'Add Chore',
+  'Update Chore',
   'Set Status',
   'View Schedule',
   'View Status',
   'Chore Delegation',
+  //'Ask for Advice',
   'Send a Message',
 ];
 
 /// list of commands that require parsing (i.e. requires specific user input)
 const List<String> parseableCommands = [
-  'Remove from Schedule',
-  'Add to Schedule',
-  'Update Schedule',
+  'Remove Chore',
+  'Add Chore',
+  'Update Chore',
   'Set Status',
   'Chore Delegation',
   'Send a Message',
@@ -60,7 +61,7 @@ Future<String> addUserInput(String message, DateTime dateTime) async {
 }
 
 /* Gets Roomeo to categorize a message. The categories are:
-‘View/Edit Schedule’, ‘View/Set Status’, ‘Chore Delegation’,
+‘View/Edit Chore’, ‘View/Set Status’, ‘Chore Delegation’,
 ‘Ask for Advice’, ‘Send a Message’, and ‘Unknown’ */
 Future<String> getCommandCategory(String message) async {
   final Map<String, String> requestHeaders = {
@@ -76,7 +77,7 @@ Future<String> getCommandCategory(String message) async {
     {
       "role": "user",
       "content":
-          "Given the following user input, determine what category this input falls into. The categories are: 'View Schedule', 'Add to Schedule, 'Remove from Schedule', 'Update Schedule', 'View Status', 'Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized or if the input is irrelevant to the previous categories. Your response ONLY contains the values of these categories, and NOTHING ELSE. The user input is: '$message'"
+          "Given the following user input, determine what category this input falls into. The categories are: 'View Schedule', 'Add Chore', 'Remove Chore', 'Update Chore', 'View Status', 'Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized or if the input is irrelevant to the previous categories. Your response ONLY contains the values of these categories, and NOTHING ELSE. The user input is: '$message'"
     }
   ];
 
@@ -107,25 +108,25 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
   String parametersToFindAddendum = "";
   String parameterJSONFormat = "";
   switch (category) {
-    case 'Remove from Schedule':
+    case 'Remove Chore':
       parameterJSONFormat =
-          "1. TaskTitle \n 2. TaskPerson \n 3. TaskDescription";
+          "1. ChoreTitle \n 2. ChorePerson \n 3. ChoreDescription";
       parametersToFindAddendum =
-          "1. The title of the task to remove \n 2. The name of the person assigned to the task \n 3. The description of the task to remove";
+          "1. The title of the chore to remove \n 2. The name of the person assigned to the chore \n 3. The description of the chore to remove";
       break;
-    case 'Add to Schedule':
+    case 'Add Chore':
       DateTime now = DateTime.now();
       parameterJSONFormat =
-          "1. TaskTitle \n 2. TaskDate \n 3. TaskDescription \n 4. TaskPerson";
+          "1. ChoreTitle \n 2. ChoreDate \n 3. ChoreDescription \n 4. ChorePerson";
       parametersToFindAddendum =
-          "1. The title of the task \n 2. The date and time the task is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The description of the task to be added \n 4. The name of the person assigned to the task";
+          "1. The title of the chore \n 2. The date and time the chore is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The description of the chore to be added \n 4. The name of the person assigned to the chore";
       break;
-    case 'Update Schedule':
+    case 'Update Chore':
       DateTime now = DateTime.now();
       parameterJSONFormat =
-          "1. TaskTitleOld \n 2. TaskTitleNew \n 3. TaskDate \n 4. TaskPerson \n 5. TaskDescriptionOld\n 6. TaskDescriptionNew";
+          "1. ChoreTitleOld \n 2. ChoreTitleNew \n 3. ChoreDate \n 4. ChorePerson \n 5. ChoreDescriptionOld\n 6. ChoreDescriptionNew";
       parametersToFindAddendum =
-          "1. The title of the old task \n 2. The title of the newly updated task \n 3. The new date of the updated task, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 4. The name of the person assigned to the task \n 5. The description of the old task to be updated \n 6. The description of the new task that will replace the old task";
+          "1. The title of the old chore \n 2. The title of the newly updated chore \n 3. The new date of the updated chore, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 4. The name of the person assigned to the chore \n 5. The description of the old chore to be updated \n 6. The description of the new chore that will replace the old chore";
       break;
     case 'Set Status':
       parameterJSONFormat = "1. Status";
@@ -162,23 +163,12 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
   };
   return {"requestHeaders": requestHeaders, "requestData": requestData};
 /*You are a virtual assistant named "Roomeo" meant to find command parameters given a user input for the following type of command: 'Remove from Schedule'. You are to find and list the following parameters: 
-1. The description of the task to remove
+1. The description of the chore to remove
 Output the results in a JSON style string, using the keys: 
-1. TaskDescription
+1. ChoreDescription
 for each of the parameters. If you cannot determine the values of all the parameters from the input, use the value 'Missing' for the respective parameter in the JSON output. Give me only the JSON style string.
 The input is: "Roomeo, remove gardening from my schedule" */
 }
-
-void viewSchedule() {}
-
-void removeTaskFromSchedule(/*scheduleID, taskIDToRemove*/) {}
-
-void addTaskToSchedule(/*scheduleID, taskToAdd*/) {}
-
-void updateSchedule(/*scheduleID, taskToUpdate, newTask*/) {}
-
-void sendMessage(/*userID, message*/) {}
-
 //Future<Map<String, String>> getRemoveScheduleTokens(String message) async {}
 
 Future<Map<String, String>> getCommandParameters(
@@ -216,14 +206,14 @@ Future<Map<String, String>> getCommandParameters(
 
 String generateFullCommandInput(Map<String, String> parameters) {
   switch (parameters['category']) {
-    case 'Remove from Schedule':
-      return 'Remove the task "${parameters['TaskTitle']}" assigned by ${parameters['TaskPerson']} from the schedule.';
-    case 'Add to Schedule':
-      if (parameters['TaskDescription'] != 'Missing') {
-        return 'Add the task "${parameters['TaskTitle']}" with the details "${parameters['TaskDescription']}" to the schedule. The task is due on ${parameters['TaskDate']}, and assigned to ${parameters['TaskPerson']}.';
+    case 'Remove Chore':
+      return 'Remove the chore "${parameters['ChoreTitle']}" assigned by ${parameters['ChorePerson']} from the schedule.';
+    case 'Add Chore':
+      if (parameters['ChoreDescription'] != 'Missing') {
+        return 'Add the chore "${parameters['ChoreTitle']}" with the details "${parameters['ChoreDescription']}" to the schedule. The chore is due on ${parameters['ChoreDate']}, and assigned to ${parameters['ChorePerson']}.';
       }
-      return 'Add the task "${parameters['TaskTitle']}" to the schedule. The task is due on ${parameters['TaskDate']}, and assigned to ${parameters['TaskPerson']}.';
-    case 'Update Schedule':
+      return 'Add the chore "${parameters['ChoreTitle']}" to the schedule. The chore is due on ${parameters['ChoreDate']}, and assigned to ${parameters['ChorePerson']}.';
+    case 'Update Chore':
       // TODO
       return "";
     case 'Set Status':
@@ -235,26 +225,6 @@ String generateFullCommandInput(Map<String, String> parameters) {
     default:
       return "";
   }
-}
-
-void dispatchCommand(String category, String message) {
-  // determine relevant tokens: e.g. if a user wants to add a task to a schedule,
-  // determine what strings are needed to build a task object from the message
-  // for:
-  // REMOVING A TASK FROM A SCHEDULE:
-  //  1. need to determine the ID of what task to remove (hard part)
-  //      (might need to query a vector DB to properly do this) one potential solution
-  //      is to query the top X most relevant task ID's, and have a user select
-  //      which task to remove
-  //  2. remove it from firebase, as well as the vector DB
-  // ADDING A TASK TO A SCHEDULE:
-  //  1. generate a task ID
-  //  2. vectorize the task and put it into the VDB
-  // UPDATING THE SCHEDULE:
-  //  1. determine what task needs updating
-  //      use an approach similar to determining task ID for removal
-  //  2. vectorize the task. modify the vector data for that task in the vdb
-  //  3. modify the task in firebase
 }
 
 /* Fetches Roomeo's response by querying relvant messages in the VDB and adds it to the chatroom as well.*/
@@ -292,7 +262,6 @@ Future<void> getRoomeoResponse(String message, String messageKey) async {
   } catch (e) {
     print(e);
   }
-  print('Fetched firebase stuff');
   // put user message vector to vector DB
   try {
     if (userResVector != null) {

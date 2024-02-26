@@ -291,16 +291,14 @@ class DatabaseManager {
               if (messageJson['timestamp'] != null) {
                 timestamp = messageJson['timestamp'];
               }
+              Message msg = Message(
+                  text!, senderId!, senderName!, DateTime.parse(timestamp!));
 
-              messageList.add(Message(
-                  text!, senderId!, senderName!, DateTime.parse(timestamp!)));
+              messageList.add(msg);
             }
 
             messageList.sort((a, b) {
-              return a.timestamp
-                  .toString()
-                  .toLowerCase()
-                  .compareTo(b.timestamp.toString().toLowerCase());
+              return a.timestamp.compareTo(b.timestamp);
             });
             return buildListMessage(messageList);
           } else {

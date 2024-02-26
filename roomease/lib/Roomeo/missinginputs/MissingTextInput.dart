@@ -45,9 +45,9 @@ class MissingTextInputState extends State<MissingTextInput> {
       return 'Message';
     }
     if (widget.isInputSingleLine) {
-      return 'Task Title';
+      return 'Chore Title';
     }
-    return 'Task Details/Desctiption (Optional)';
+    return 'Chore Details/Desctiption (Optional)';
   }
 
   @override

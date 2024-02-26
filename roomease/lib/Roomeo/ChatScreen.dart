@@ -112,7 +112,7 @@ class _ChatScreen extends State<ChatScreen> {
                     await getCommandParameters(category, message);
                 print("PARAMETERS ARE: $commandParams");
                 // if there are missing params, navigate to UserCommandParamInputScreen
-                // to promnpt the user for the missing params
+                // to prompt the user for the missing params
                 if (commandParams.containsValue("Missing")) {
                   if (mounted) {
                     // Check if the widget is still in the tree
@@ -131,12 +131,13 @@ class _ChatScreen extends State<ChatScreen> {
                       ),
                     );
                     // if the user exited the UserCommandParamInputScreen, delete
-                    // the most recent message. It is no longer useful
+                    // the most recent message, and we are done. It is no longer useful
                     if (result != null && result['exited'] == true) {
                       await DatabaseManager.removeMessageFromID(
                         CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
                         userMessageKey,
                       );
+                      return;
                     }
                   }
                 }

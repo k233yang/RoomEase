@@ -22,6 +22,7 @@ Future<String> getChatGPTResponse(String message, List<Message> context) async {
   ];
 
   List<Map<String, String>> contextMessages = [];
+  print("YOO-HOOO");
   for (var i = 0; i < context.length; i++) {
     print(context[i].text);
     contextMessages.add({

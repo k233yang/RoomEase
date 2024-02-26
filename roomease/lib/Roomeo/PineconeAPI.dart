@@ -77,7 +77,6 @@ Future<void> insertVector(
 Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
     {int messagesToFetch = 10}) async {
   // get the index of the room
-  // get the index of the room
   var fetchIndexUrl =
       Uri.parse('https://api.pinecone.io/indexes/${roomID.toLowerCase()}');
   var fetchIndexRes = await http.get(fetchIndexUrl, headers: <String, String>{
@@ -88,7 +87,7 @@ Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
   if (fetchIndexRes.statusCode == 200) {
     final decodedFetchIndexRes = jsonDecode(fetchIndexRes.body);
     final String indexEndpoint = decodedFetchIndexRes['host'];
-    var queryVectorUrl = Uri.parse('https://${indexEndpoint}/query');
+    var queryVectorUrl = Uri.parse('https://$indexEndpoint/query');
     var queryVectorRes = await http.post(queryVectorUrl,
         headers: <String, String>{
           'Accept': 'application/json',
@@ -96,7 +95,8 @@ Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
           'Api-Key': PineConeAPIKey
         },
         body: jsonEncode(
-            <String, dynamic>{'topK': messagesToFetch, 'vector': vector}));
+          <String, dynamic>{'topK': messagesToFetch, 'vector': vector},
+        ));
     if (queryVectorRes.statusCode == 200) {
       var decodedQueryVectorRes = jsonDecode(queryVectorRes.body);
       List<dynamic> queryVectorResArray = decodedQueryVectorRes['matches'];
@@ -105,6 +105,7 @@ Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
         res.add(queryVectorResArray[i]['id']);
         res.sort();
       }
+      print("RES: $res");
       return res;
     } else {
       throw Exception(

@@ -7,7 +7,7 @@ import '../../colors/ColorConstants.dart';
 
 /// A custom widget that renders if the user has not provided sufficient information
 /// to Roomeo about the command they entered. (e.g. if a user has not specified a
-/// date to complete a chore by for a task). The widget prompts the user to enter
+/// date to complete a chore by for a chore). The widget prompts the user to enter
 /// any relevant missing information, and adjusts the commandParams parameter
 /// with the missing data
 
@@ -67,12 +67,12 @@ class _UserCommandParamInputScreenState
           widget.commandParams[commandCategory] = userInput;
         },
       );
-    } else if (commandCategory.contains('TaskPerson')) {
+    } else if (commandCategory.contains('ChorePerson')) {
       return MissingUserInput(
         onUserSelect: (String userInput) {
           widget.commandParams[commandCategory] = userInput;
         },
-        placeholder: 'Select a person to assign this task to:',
+        placeholder: 'Select a person to assign this chore to:',
       );
     } else if (commandCategory.contains('ViewPerson')) {
       return MissingUserInput(
