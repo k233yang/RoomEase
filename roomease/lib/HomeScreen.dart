@@ -56,36 +56,36 @@ class _HomeState extends State {
           BottomNavigationBarItem(
             icon: Image(
                 image: AssetImage('assets/home_icon.png'),
-                height: 50,
-                width: 50),
+                height: 40,
+                width: 40),
             label: "",
           ),
           BottomNavigationBarItem(
             icon: Image(
                 image: AssetImage('assets/chat_icon.png'),
-                height: 50,
-                width: 50),
+                height: 40,
+                width: 40),
             label: "",
           ),
           BottomNavigationBarItem(
             icon: Image(
                 image: AssetImage('assets/schedule_icon.png'),
-                height: 50,
-                width: 50),
+                height: 40,
+                width: 40),
             label: "",
           ),
           BottomNavigationBarItem(
             icon: Image(
                 image: AssetImage('assets/chores_icon.png'),
-                height: 50,
-                width: 50),
+                height: 40,
+                width: 40),
             label: "",
           ),
           BottomNavigationBarItem(
             icon: Image(
                 image: AssetImage('assets/profile_icon.png'),
-                height: 50,
-                width: 50),
+                height: 40,
+                width: 40),
             label: "",
           ),
         ],
