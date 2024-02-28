@@ -117,9 +117,9 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
     case 'Add Chore':
       DateTime now = DateTime.now();
       parameterJSONFormat =
-          "1. ChoreTitle \n 2. ChoreDate \n 3. ChoreDescription \n 4. ChorePerson";
+          "1. ChoreTitle \n 2. ChoreDate \n 3. ChoreDescription \n 4. ChorePerson \n 5. ChorePoints \n 6. ChorePointsThreshold";
       parametersToFindAddendum =
-          "1. The title of the chore \n 2. The date and time the chore is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The description of the chore to be added \n 4. The name of the person assigned to the chore";
+          "1. The title of the chore \n 2. The date and time the chore is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The description of the chore to be added \n 4. The name of the person assigned to the chore \n 5. How many points the chore is worth when completed \n 6. The threshold of points needed to complete the chore";
       break;
     case 'Update Chore':
       DateTime now = DateTime.now();
@@ -228,59 +228,73 @@ String generateFullCommandInput(Map<String, String> parameters) {
 }
 
 /* Fetches Roomeo's response by querying relvant messages in the VDB and adds it to the chatroom as well.*/
-Future<void> getRoomeoResponse(String message, String messageKey) async {
-  // fetch the user message's generated vector:
+Future<void> getRoomeoResponse(String message, String messageKey,
+    {bool isChore = false}) async {
+  // fetch the user message's generated vector concurrently with other operations:
+  final userResVectorFuture = getVectorEmbeddingArray(message);
+
   List<double>? userResVector;
   try {
-    userResVector = await getVectorEmbeddingArray(message);
+    userResVector = await userResVectorFuture;
     print(userResVector);
   } catch (e) {
     print('Failed to get user vector for input message: $message.');
     print(': $e');
   }
-  //Query the vDB, then firebase for most relevant convos, and feed that info to chatGPT as context
+
+  // Query the vDB, then firebase for most relevant convos, and feed that info to chatGPT as context
   List<Message> contextMessageList = [];
-  try {
-    if (userResVector != null) {
-      List<String> messageIDList = await fetchTopMessages(
-          userResVector,
-          CurrentUser.getCurrentUserId() +
-              RoomeoUser
-                  .user.userId); // contains the firebase ID's for the messages
+  List<String>? messageIDList;
+  if (userResVector != null) {
+    final fetchTopMessagesFuture = fetchTopMessages(
+        userResVector, CurrentUser.getCurrentUserId() + RoomeoUser.user.userId);
+
+    try {
+      messageIDList = await fetchTopMessagesFuture;
       messageIDList.sort((a, b) => a.compareTo(b));
-      for (var i = 0; i < messageIDList.length; i++) {
-        Message res = await DatabaseManager.getMessageFromID(
-            CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-            messageIDList[i]);
-        contextMessageList.add(res);
-        print('message $i: ${res.text}');
+      var fetchMessagesFutures = messageIDList
+          .map((messageID) => DatabaseManager.getMessageFromID(
+              CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+              messageID))
+          .toList();
+
+      var fetchedMessages = await Future.wait(fetchMessagesFutures);
+      contextMessageList.addAll(fetchedMessages);
+      for (var i = 0; i < fetchedMessages.length; i++) {
+        print('message $i: ${fetchedMessages[i].text}');
       }
-    } else {
-      throw NullObjectError(
-          'Querying vector DB failed: null user response vector!');
+    } catch (e) {
+      print(e);
     }
-  } catch (e) {
-    print(e);
+  } else {
+    throw NullObjectError(
+        'Querying vector DB failed: null user response vector!');
   }
-  // put user message vector to vector DB
-  try {
-    if (userResVector != null) {
-      await insertVector(userResVector,
+
+  // Put user message vector to vector DB
+  final insertVectorFuture = isChore
+      ? insertVector(
+          userResVector,
+          CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+          messageKey,
+          metadata: {'isChore': isChore},
+        )
+      : insertVector(userResVector,
           CurrentUser.getCurrentUserId() + RoomeoUser.user.userId, messageKey);
-    } else {
-      if (userResVector == null) {
-        throw NullObjectError(
-            'Insertion into vector DB failed: null user response vector!');
-      }
-    }
+
+  try {
+    await insertVectorFuture;
   } catch (e) {
     print(e);
   }
-  // get chatGPT's response to user's message, add response to firebase as well as get response's message key
-  String? chatGPTMessageKey;
+
+  // Get chatGPT's response to user's message, add response to firebase as well as get response's message key
   String? chatGPTMessage;
+  final chatGPTResponseFuture = getChatGPTResponse(message, contextMessageList);
+
   try {
-    chatGPTMessage = await getChatGPTResponse(message, contextMessageList);
+    chatGPTMessage = await chatGPTResponseFuture;
+    String? chatGPTMessageKey;
     try {
       chatGPTMessageKey = await DatabaseManager.addMessage(
           CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
@@ -289,45 +303,27 @@ Future<void> getRoomeoResponse(String message, String messageKey) async {
     } catch (e) {
       print('Failed to add chatGPT message to firebase: $e');
     }
+
+    // Fetch chatGPT message's generated vector and put it into DB
+    final chatGPTResVectorFuture = getVectorEmbeddingArray(chatGPTMessage);
+    List<double>? chatGPTResVector;
+    try {
+      chatGPTResVector = await chatGPTResVectorFuture;
+      print(chatGPTResVector);
+      if (chatGPTMessageKey != null) {
+        await insertVector(
+            chatGPTResVector,
+            CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+            chatGPTMessageKey);
+      } else {
+        throw NullObjectError(
+            'Insertion into vector DB failed: null chatGPT response vector or message key!');
+      }
+    } catch (e) {
+      print('Failed to get chatGPT vector for input message: $message.');
+      print(': $e');
+    }
   } catch (e) {
     print('failed to get chatGPT response: $e');
   }
-  // fetch chatGPT message's generated vector
-  List<double>? chatGPTResVector;
-  try {
-    if (chatGPTMessage != null) {
-      chatGPTResVector = await getVectorEmbeddingArray(chatGPTMessage);
-      print(chatGPTResVector);
-    } else {
-      throw NullObjectError('Null gptMessage!');
-    }
-  } catch (e) {
-    print('Failed to get chatGPT vector for input message: $message.');
-    print(': $e');
-  }
-  // put chatGPT vector into DB:
-  try {
-    if (chatGPTResVector != null && chatGPTMessageKey != null) {
-      await insertVector(
-          chatGPTResVector,
-          CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-          chatGPTMessageKey);
-    } else {
-      if (userResVector == null) {
-        throw NullObjectError(
-            'Insertion into vector DB failed: null chatGPT response vector!');
-      }
-      if (chatGPTMessageKey == null) {
-        throw NullObjectError(
-            'Insertion into vector DB failed: null chatGPT message key!');
-      }
-    }
-  } catch (e) {
-    print(e);
-  }
-  // if (chatGPTMessage != null) {
-  //   return chatGPTMessage;
-  // } else {
-  //   throw Future.error("no chatGPT message");
-  // }
 }

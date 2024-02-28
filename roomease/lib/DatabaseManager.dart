@@ -63,6 +63,17 @@ class DatabaseManager {
     }
   }
 
+  static Future<String?> getUserIdByName(String userName) async {
+    DatabaseReference usersRef = _databaseInstance.ref("users");
+    DatabaseEvent event = await usersRef.once();
+    for (DataSnapshot user in event.snapshot.children) {
+      if (user.child("name").value == userName) {
+        return user.key;
+      }
+    }
+    return null; // Return null if userName not found
+  }
+
   static StreamBuilder userNameStreamBuilder(String userId) {
     DatabaseReference usersRef = _databaseInstance.ref("users/$userId/name");
     return StreamBuilder(
@@ -480,7 +491,7 @@ class DatabaseManager {
 
   // ------------------------ CHORE OPERATIONS ------------------------
 
-  static void addChore(
+  static Future<String> addChore(
       String householdCode,
       String name,
       String details,
@@ -498,6 +509,7 @@ class DatabaseManager {
         _databaseInstance.ref("households/$householdCode/$status");
 
     final choreKey = choresRef.push().key;
+    print('CHOREKEY IS: $choreKey');
     if (choreKey == null) {
       throw Exception('Chore key is null');
     }
@@ -525,6 +537,7 @@ class DatabaseManager {
       print(value);
       throw Exception('Could not add chore');
     });
+    return choreKey;
   }
 
   static Future<List<Chore>> getChoresFromDB(

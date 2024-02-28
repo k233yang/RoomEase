@@ -38,8 +38,8 @@ Future<void> createRoomIndex(String roomID,
 }
 
 // add a message's vector to a given room's index. Note: message's firebase ID is needed
-Future<void> insertVector(
-    List<double> vector, String roomID, String vectorID) async {
+Future<void> insertVector(List<double> vector, String roomID, String vectorID,
+    {Map<String, dynamic> metadata = const {}}) async {
   // get the index of the room
   var fetchIndexUrl =
       Uri.parse('https://api.pinecone.io/indexes/${roomID.toLowerCase()}');
@@ -52,17 +52,25 @@ Future<void> insertVector(
     final decodedFetchIndexRes = jsonDecode(fetchIndexRes.body);
     final String indexEndpoint = decodedFetchIndexRes['host'];
     var insertVectorUrl = Uri.parse('https://${indexEndpoint}/vectors/upsert');
-    var insertVectorRes = await http.post(insertVectorUrl,
-        headers: <String, String>{
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Api-Key': PineConeAPIKey
-        },
-        body: jsonEncode(<String, dynamic>{
-          'vectors': [
-            {'id': vectorID, 'values': vector}
-          ]
-        }));
+
+    Map<String, dynamic> requestBody = {
+      'vectors': [
+        {'id': vectorID, 'values': vector}
+      ]
+    };
+    if (metadata.isNotEmpty) {
+      requestBody['vectors'][0]['metadata'] = metadata;
+    }
+
+    var insertVectorRes = await http.post(
+      insertVectorUrl,
+      headers: <String, String>{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Api-Key': PineConeAPIKey
+      },
+      body: jsonEncode(requestBody),
+    );
     if (insertVectorRes.statusCode != 200) {
       throw Exception(
           'Failed to insert vector into index: ${insertVectorRes.statusCode}');

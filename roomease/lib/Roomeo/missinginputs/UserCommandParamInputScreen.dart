@@ -3,6 +3,7 @@ import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingStatusInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingUserInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingTextInput.dart';
+import 'package:roomease/Roomeo/missinginputs/MissingPointInput.dart';
 import '../../colors/ColorConstants.dart';
 
 /// A custom widget that renders if the user has not provided sufficient information
@@ -92,6 +93,20 @@ class _UserCommandParamInputScreenState
       return MissingStatusInput(onStatusInput: (String userInput) {
         widget.commandParams[commandCategory] = userInput;
       });
+    } else if (commandCategory == 'ChorePointsThreshold') {
+      return MissingPointInput(
+        onPointInput: (int userInput) {
+          widget.commandParams[commandCategory] = userInput.toString();
+        },
+        placeholder: 'Points Threshold',
+      );
+    } else if (commandCategory == 'ChorePoints') {
+      return MissingPointInput(
+        onPointInput: (int userInput) {
+          widget.commandParams[commandCategory] = userInput.toString();
+        },
+        placeholder: 'Points',
+      );
     } else {
       return Text('You fucked up');
     }

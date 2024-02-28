@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Roomeo/ChatBoxGeneric.dart';
 import 'package:roomease/Roomeo/RoomeoUser.dart';
+import 'package:roomease/chores/ChoreStatus.dart';
 import '../Message.dart';
 import '../colors/ColorConstants.dart';
 import 'package:roomease/Roomeo/Roomeo.dart';
@@ -149,8 +151,33 @@ class _ChatScreen extends State<ChatScreen> {
                   userMessageKey,
                   fullCommandInput,
                 );
-                // get Roomeo's response to the command
-                await getRoomeoResponse(fullCommandInput, userMessageKey);
+
+                if (category == 'Add Chore') {
+                  print('ADDING CHORE');
+                  Future roomeoResponse = getRoomeoResponse(
+                      fullCommandInput, userMessageKey,
+                      isChore: true);
+                  Future addChoreFuture = DatabaseManager.addChore(
+                      CurrentHousehold.getCurrentHouseholdId(),
+                      commandParams['ChoreTitle']!,
+                      commandParams['ChoreDescription']! == 'Missing'
+                          ? ''
+                          : commandParams['ChoreDescription']!,
+                      commandParams['ChoreDate']!,
+                      DateFormat('yyyy-MM-dd hh:mm:ss a').format(dateTime),
+                      DateFormat('yyyy-MM-dd hh:mm:ss a').format(dateTime),
+                      int.parse(commandParams['ChorePoints']!),
+                      int.parse(commandParams['ChorePointsThreshold']!),
+                      0,
+                      0,
+                      CurrentUser.getCurrentUserId(),
+                      await DatabaseManager.getUserIdByName(
+                          commandParams['ChorePerson']!),
+                      ChoreStatus.toDo.value);
+                  await Future.wait([roomeoResponse, addChoreFuture]);
+                } else {
+                  await getRoomeoResponse(fullCommandInput, userMessageKey);
+                }
               }
               // view schedule doesn't need parameters, so we can just show it
               else if (category == 'View Schedule') {
