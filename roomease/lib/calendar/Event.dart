@@ -1,12 +1,13 @@
 class Event {
   String id;
-  String name;
+  String name; // eventName
   String details;
-  String startTime;
-  String endTime;
+  String startTime; // from
+  String endTime; // to
   String dateCreated;
-  String type;
+  String type; // decides background colour
   String createdByUserId;
+  // TODO: add isAllDay boolean option
 
   Event(
     this.id,

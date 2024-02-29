@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
+import '../CurrentHousehold.dart';
+import '../Household.dart';
 import '../colors/ColorConstants.dart';
+import 'Event.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -11,6 +14,16 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreen extends State<CalendarScreen> {
+  late final Household currHousehold;
+  late Future<String> calendarEventsLoaded;
+
+  @override
+  void initState() {
+    super.initState();
+    currHousehold = CurrentHousehold.getCurrentHousehold();
+    calendarEventsLoaded = currHousehold.updateCalendarEventsList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,10 +31,7 @@ class _CalendarScreen extends State<CalendarScreen> {
         title: const Text('Calendar'),
         backgroundColor: ColorConstants.lightPurple,
       ),
-      body: SfCalendar(
-        view: CalendarView.month,
-        todayHighlightColor: ColorConstants.lightPurple,
-      ),
+      body: getCalendar(),
       floatingActionButton: CreateAddEventButton(onButtonPress: () {
         Navigator.pushNamed(context, "/addEvent").then((value) {
           setState(() {});
@@ -29,6 +39,53 @@ class _CalendarScreen extends State<CalendarScreen> {
       }),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+  }
+
+  // FutureBuilder<String> getFutureDataSource() {
+  FutureBuilder<String> getCalendar() {
+  return FutureBuilder<String>(
+        future: calendarEventsLoaded,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot)
+  {
+    List<Widget> children;
+    if (snapshot.hasData) {
+      children = <Widget>[
+        SfCalendar(
+          view: CalendarView.month,
+          dataSource: EventDataSource(currHousehold.calendarEvents),
+          todayHighlightColor: ColorConstants.lightPurple,
+        ),
+      ];
+    } else if (snapshot.hasError) {
+      children = <Widget>[
+        const Icon(
+          Icons.error_outline,
+          color: Colors.red,
+          size: 60,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Text('Error: ${snapshot.error}'),
+        ),
+      ];
+    } else {
+      children = <Widget>[
+        SizedBox(
+          width: 60,
+          height: 60,
+          child:
+          CircularProgressIndicator(color: ColorConstants.lightPurple),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 16),
+          child: Text('Loading chores...'),
+        ),
+      ];
+    }
+    return Column(
+        children: children,
+    );
+  });
   }
 }
 
@@ -46,5 +103,40 @@ class CreateAddEventButton extends StatelessWidget {
         shape: CircleBorder(),
         onPressed: onButtonPress,
         child: const Icon(Icons.add));
+  }
+}
+
+class EventDataSource extends CalendarDataSource {
+  EventDataSource(List<Event> source){
+    appointments = source;
+  }
+
+  @override
+  DateTime getStartTime(int index) {
+    return DateTime.parse(appointments![index].startTime);
+  }
+
+  @override
+  DateTime getEndTime(int index) {
+    return DateTime.parse(appointments![index].endTime);
+  }
+
+  @override
+  String getSubject(int index) {
+    return appointments![index].name;
+  }
+
+  @override
+  Color getColor(int index) {
+    // TODO: Add if statement to set colour based on event type
+    // return appointments![index].background;
+    return ColorConstants.lightPurple;
+  }
+
+  @override
+  bool isAllDay(int index) {
+    // TODO: isAllDay is not implemented yet
+    // return appointments![index].isAllDay;
+    return false;
   }
 }

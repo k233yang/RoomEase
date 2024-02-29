@@ -10,6 +10,7 @@ import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
 import 'User.dart';
+import 'calendar/Event.dart';
 import 'chores/Chore.dart';
 import 'chores/ChoreStatus.dart';
 import 'package:roomease/chores/Chore.dart';
@@ -686,5 +687,28 @@ class DatabaseManager {
       throw Exception('Could not add event');
     });
   }
-  // ------------------------ END CHORE OPERATIONS ------------------------
+
+  static Future<List<Event>> getCalendarEventsFromDB(String householdId) async {
+    final eventListRef =
+    _databaseInstance.ref("households/$householdId/events");
+    DatabaseEvent event = await eventListRef.once();
+    final eventsJson = event.snapshot.children;
+
+    List<Event> eventsList = <Event>[];
+
+    for (final event in eventsJson) {
+      eventsList.add( Event(
+        event.child("id").value.toString(),
+        event.child("name").value.toString(),
+        event.child("details").value.toString(),
+        event.child("startTime").value.toString(),
+        event.child("endTime").value.toString(),
+        event.child("dateCreated").value.toString(),
+        event.child("type").value.toString(),
+        event.child("createdByUserId").value.toString()
+      ));
+    }
+    return eventsList;
+  }
+  // ------------------------ END CALENDAR OPERATIONS ------------------------
 }
