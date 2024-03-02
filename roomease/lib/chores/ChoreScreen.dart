@@ -476,50 +476,79 @@ List<Widget> getChoreTile(
                 ),
                 child: Align(
                   alignment: Alignment.center,
-                  child: Text(choreItem.points.toString(),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 3),
+                        child:
+                        Text('${choreItem.points}',
+                        style: TextStyle(
+                            height: 1.0,
+                            fontSize: 20,
+                            fontWeight: FontWeight.normal,
+                            color: ColorConstants.black)),
+                      ),
+                      Text('points',
                       style: TextStyle(
-                          fontSize: 20,
+                          height: 1.0,
+                          fontSize: 11,
                           fontWeight: FontWeight.normal,
                           color: ColorConstants.black)),
+                    ],
+                    
+                  )
                 )),
             children: <Widget>[
-              ListTile(
-                visualDensity: VisualDensity.compact,
-                title: Text("Details",
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  child:Text("Details",
+                    textAlign: TextAlign.left,
                     style: TextStyle(
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
-                    )),
+                  )),
+                ),
               ),
-              ListTile(
-                  visualDensity: VisualDensity.compact,
-                  title: Text(choreItem.details)),
-              ListTile(
-                  visualDensity: VisualDensity.compact,
-                  title: Text("Deadline",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                      ))),
-              ListTile(
-                  visualDensity: VisualDensity.compact,
-                  title: Text(choreItem.deadline)),
-              /*
-                   if (choreItem.status == ChoreStatus.toDo.value) Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 0, vertical: 8),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          try {
-                            DatabaseManager.assignChoreToUser(CurrentUser.getCurrentUserId(), choreItem.id);
-                          } catch (e) {
-                            print('Failed to assign chore: $e');
-                          }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar( content: Text('Chore successfully assigned!'))
-                          );
-                        },
-                        child: const Text('Assign to me'),
-                      )
-                    )*/
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child:Text(
+                    choreItem.details,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                  )),
+                ),
+              ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  child:Text("Deadline",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                  )),
+                ),
+              ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 10),
+                  child:Text(
+                    choreItem.deadline,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                  )),
+                ),
+              ),
             ],
             onExpansionChanged: (bool expanded) {
               // Do nothing for now
