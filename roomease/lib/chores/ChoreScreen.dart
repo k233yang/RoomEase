@@ -514,7 +514,7 @@ List<Widget> getChoreTile(
               Align(
                 alignment: Alignment.topLeft,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 10),
                   child:Text(
                     choreItem.details,
                     textAlign: TextAlign.left,
