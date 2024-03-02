@@ -3,7 +3,10 @@ import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Roomeo/ChatBoxGeneric.dart';
+import 'package:roomease/Roomeo/EmbedVector.dart';
+import 'package:roomease/Roomeo/PineconeAPI.dart';
 import 'package:roomease/Roomeo/RoomeoUser.dart';
+import 'package:roomease/chores/ChooseChoreScreen.dart';
 import 'package:roomease/chores/ChoreStatus.dart';
 import '../Message.dart';
 import '../colors/ColorConstants.dart';
@@ -72,127 +75,7 @@ class _ChatScreen extends State<ChatScreen> {
     return TextField(
         focusNode: textFieldFocusNode,
         controller: _controller,
-        onSubmitted: (String message) async {
-          if (message != "") {
-            // add the user message to the database
-            DateTime dateTime = DateTime.now();
-            messageList.add(Message(message, CurrentUser.getCurrentUserId(),
-                CurrentUser.getCurrentUserName(), dateTime));
-            _controller.clear();
-            textFieldFocusNode.requestFocus();
-            setState(() {});
-            // add user + Roomeo response to the DB. Get the gptResponse message
-
-            // TODO: PLEASE REFACTOR TO SCHEMATIC
-
-            // below operations can be performed concurrently:
-            late String userMessageKey;
-            late String category;
-            try {
-              var results = await Future.wait([
-                addUserInput(message,
-                    dateTime), // add message to FB, get the key/ID for that message
-                getCommandCategory(
-                    message), // get the command category of the message
-              ]);
-              userMessageKey = results[0];
-              // do some precautionary cleaning
-              final pattern = RegExp(r'[a-zA-Z0-9 ]');
-              category = results[1]
-                  .split('')
-                  .where((char) => pattern.hasMatch(char))
-                  .join('');
-              print('CATEGORY IS: $category');
-            } catch (e) {
-              print(
-                  'Error occured adding message to Firebase or getting command category: $e');
-            }
-
-            if (isCommand(category)) {
-              if (isParseableCommand(category)) {
-                Map<String, String> commandParams =
-                    await getCommandParameters(category, message);
-                print("PARAMETERS ARE: $commandParams");
-                // if there are missing params, navigate to UserCommandParamInputScreen
-                // to prompt the user for the missing params
-                if (commandParams.containsValue("Missing")) {
-                  if (mounted) {
-                    // Check if the widget is still in the tree
-                    final result = await Navigator.of(context).push(
-                      // Directly use context if it's valid
-                      MaterialPageRoute(
-                        builder: (context) => UserCommandParamInputScreen(
-                          category: category,
-                          commandParams: commandParams,
-                          onParamsUpdated: (updatedParams) {
-                            setState(() {
-                              commandParams = updatedParams;
-                            });
-                          },
-                        ),
-                      ),
-                    );
-                    // if the user exited the UserCommandParamInputScreen, delete
-                    // the most recent message, and we are done. It is no longer useful
-                    if (result != null && result['exited'] == true) {
-                      await DatabaseManager.removeMessageFromID(
-                        CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-                        userMessageKey,
-                      );
-                      return;
-                    }
-                  }
-                }
-                // replace the old message with this correct input:
-                String fullCommandInput =
-                    generateFullCommandInput(commandParams);
-                await DatabaseManager.replaceMessage(
-                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-                  userMessageKey,
-                  fullCommandInput,
-                );
-
-                if (category == 'Add Chore') {
-                  print('ADDING CHORE');
-                  Future roomeoResponse = getRoomeoResponse(
-                      fullCommandInput, userMessageKey,
-                      isChore: true);
-                  Future addChoreFuture = DatabaseManager.addChore(
-                      CurrentHousehold.getCurrentHouseholdId(),
-                      commandParams['ChoreTitle']!,
-                      commandParams['ChoreDescription']! == 'Missing'
-                          ? ''
-                          : commandParams['ChoreDescription']!,
-                      commandParams['ChoreDate']!,
-                      DateFormat('yyyy-MM-dd hh:mm:ss a').format(dateTime),
-                      DateFormat('yyyy-MM-dd hh:mm:ss a').format(dateTime),
-                      int.parse(commandParams['ChorePoints']!),
-                      int.parse(commandParams['ChorePointsThreshold']!),
-                      0,
-                      0,
-                      CurrentUser.getCurrentUserId(),
-                      await DatabaseManager.getUserIdByName(
-                          commandParams['ChorePerson']!),
-                      ChoreStatus.toDo.value);
-                  await Future.wait([roomeoResponse, addChoreFuture]);
-                } else {
-                  await getRoomeoResponse(fullCommandInput, userMessageKey);
-                }
-              }
-              // view schedule doesn't need parameters, so we can just show it
-              else if (category == 'View Schedule') {
-                final localContext = context;
-                if (mounted) {
-                  Navigator.pushNamed(localContext, '/calendar');
-                }
-                // get Roomeo's response to the command
-                await getRoomeoResponse(message, userMessageKey);
-              }
-            } else {
-              await getRoomeoResponse(message, userMessageKey);
-            }
-          }
-        },
+        onSubmitted: handleMessageSubmit,
         decoration: InputDecoration(
             filled: true,
             fillColor: ColorConstants.lightGray,
@@ -203,14 +86,138 @@ class _ChatScreen extends State<ChatScreen> {
             hintText: 'What would you like to ask Roomeo today?'),
         cursorColor: ColorConstants.lightPurple);
   }
+
+  Future<void> handleMessageSubmit(String message) async {
+    if (message != "") {
+      // add the user message to the database
+      DateTime dateTime = DateTime.now();
+      messageList.add(Message(message, CurrentUser.getCurrentUserId(),
+          CurrentUser.getCurrentUserName(), dateTime));
+      _controller.clear();
+      textFieldFocusNode.requestFocus();
+      setState(() {});
+      // The rest of your existing onSubmitted logic...
+      late String userMessageKey;
+      late String category;
+      try {
+        var results = await Future.wait([
+          addUserInput(message,
+              dateTime), // add message to FB, get the key/ID for that message
+          getCommandCategory(
+              message), // get the command category of the message
+        ]);
+        userMessageKey = results[0];
+        // do some precautionary cleaning
+        final pattern = RegExp(r'[a-zA-Z0-9 ]');
+        category = results[1]
+            .split('')
+            .where((char) => pattern.hasMatch(char))
+            .join('');
+        print('CATEGORY IS: $category');
+      } catch (e) {
+        print(
+            'Error occured adding message to Firebase or getting command category: $e');
+      }
+
+      if (isCommand(category)) {
+        if (isParseableCommand(category)) {
+          Map<String, String> commandParams =
+              await getCommandParameters(category, message);
+          print("PARAMETERS ARE: $commandParams");
+          // if there are missing params, navigate to UserCommandParamInputScreen
+          // to prompt the user for the missing params
+          if (commandParams.containsValue("Missing")) {
+            if (mounted) {
+              // Check if the widget is still in the tree
+              final result = await Navigator.of(context).push(
+                // Directly use context if it's valid
+                MaterialPageRoute(
+                  builder: (context) => UserCommandParamInputScreen(
+                    category: category,
+                    commandParams: commandParams,
+                    onParamsUpdated: (updatedParams) {
+                      setState(() {
+                        commandParams = updatedParams;
+                      });
+                    },
+                  ),
+                ),
+              );
+              // if the user exited the UserCommandParamInputScreen, delete
+              // the most recent message, and we are done. It is no longer useful
+              if (result != null && result['exited'] == true) {
+                await DatabaseManager.removeMessageFromID(
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  userMessageKey,
+                );
+                return;
+              }
+            }
+          }
+
+          if (category == 'Add Chore') {
+            print('ADDING CHORE');
+            // replace the old message with this correct input:
+            String fullCommandInput = generateFullCommandInput(commandParams);
+            await DatabaseManager.replaceMessage(
+              CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+              userMessageKey,
+              fullCommandInput,
+            );
+            // add the chore to the chore DB in FB
+            String choreId = await DatabaseManager.addChore(
+                CurrentHousehold.getCurrentHouseholdId(),
+                commandParams['ChoreTitle']!,
+                commandParams['ChoreDescription']! == 'Missing'
+                    ? ''
+                    : commandParams['ChoreDescription']!,
+                commandParams['ChoreDate']!,
+                DateFormat('yyyy-MM-dd hh:mm:ss a').format(dateTime),
+                DateFormat('yyyy-MM-dd hh:mm:ss a').format(dateTime),
+                int.parse(commandParams['ChorePoints']!),
+                int.parse(commandParams['ChorePointsThreshold']!),
+                0,
+                0,
+                CurrentUser.getCurrentUserId(),
+                await DatabaseManager.getUserIdByName(
+                    commandParams['ChorePerson']!),
+                ChoreStatus.toDo.value);
+            // add the chore message to the chatroom in FB, as well as the
+            // chatroom and chore indices in the VDB
+            await getRoomeoResponse(fullCommandInput, userMessageKey,
+                isChore: true, choreId: choreId);
+          } else if (category == 'Update Chore') {
+            // The title of the chore to be updated should be found
+            List<String> topChores =
+                await queryChores(commandParams['ChoreTitle']!);
+            print('IDS OF TOP CHORES: $topChores');
+            if (!mounted) return; // Check if the widget is still in the tree
+            Navigator.push(
+              context, // Directly use context if it's valid
+              MaterialPageRoute(
+                builder: (context) => ChooseChoreScreen(choreIds: topChores),
+              ),
+            );
+          }
+          // view schedule doesn't need parameters, so we can just show it
+          else if (category == 'View Schedule') {
+            final localContext = context;
+            if (mounted) {
+              Navigator.pushNamed(localContext, '/calendar');
+            }
+            // get Roomeo's response to the command
+            await getRoomeoResponse(message, userMessageKey);
+          }
+        } else {
+          await getRoomeoResponse(message, userMessageKey);
+        }
+      }
+    }
+  }
 }
 
 // this thing gets the stream of messages
 Widget buildListMessage(List<Message> messages) {
-  print("START");
-  for (var message in messages) {
-    print(message.text);
-  }
   return GroupedListView<Message, DateTime>(
     padding: const EdgeInsets.all(8),
     reverse: true,

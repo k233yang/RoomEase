@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class MissingDateInput extends StatefulWidget {
-  const MissingDateInput({super.key, required this.onDateSelect});
+  const MissingDateInput(
+      {super.key, required this.onDateSelect, required this.placeHolder});
 
   final Function(DateTime) onDateSelect;
+  final String placeHolder;
 
   @override
   State<MissingDateInput> createState() => _MissingDateInputState();
@@ -17,8 +19,8 @@ class _MissingDateInputState extends State<MissingDateInput> {
   void initState() {
     super.initState();
     // Pass the default selectedDate back to the parent widget
-    widget.onDateSelect(DateTime(selectedDate.year, selectedDate.month,
-        selectedDate.day, selectedDate.hour, selectedDate.minute));
+    // widget.onDateSelect(DateTime(selectedDate.year, selectedDate.month,
+    //     selectedDate.day, selectedDate.hour, selectedDate.minute));
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -79,6 +81,7 @@ class _MissingDateInputState extends State<MissingDateInput> {
     return Center(
       child: Column(
         children: [
+          Text(widget.placeHolder),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [

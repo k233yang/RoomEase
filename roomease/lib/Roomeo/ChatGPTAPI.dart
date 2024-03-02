@@ -22,9 +22,9 @@ Future<String> getChatGPTResponse(String message, List<Message> context) async {
   ];
 
   List<Map<String, String>> contextMessages = [];
-  print("YOO-HOOO");
+  //print("YOO-HOOO");
   for (var i = 0; i < context.length; i++) {
-    print(context[i].text);
+    //print(context[i].text);
     contextMessages.add({
       "role": context[i].senderName == "chatgpt" ? "system" : "user",
       "content": context[i].text
@@ -33,7 +33,7 @@ Future<String> getChatGPTResponse(String message, List<Message> context) async {
   requestDataMessage.addAll(contextMessages);
   requestDataMessage.add({"role": "user", "content": message});
 
-  print(context.length);
+  //print(context.length);
 
   final Map<String, dynamic> requestData = {
     "model": "gpt-3.5-turbo",

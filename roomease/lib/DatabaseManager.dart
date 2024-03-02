@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/widgets.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
+import 'package:roomease/Roomeo/Roomeo.dart';
 import 'package:roomease/HomeScreen.dart';
 import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
@@ -211,7 +212,8 @@ class DatabaseManager {
 
   // ------------------------ MESSAGE OPERATIONS ------------------------
 
-  static void addMessageRoom(MessageRoom messageRoom) {
+  /// Create a message room, with a vector database index
+  static void addMessageRoom(MessageRoom messageRoom) async {
     List<String> userIds = [];
     for (User u in messageRoom.users) {
       userIds.add(u.userId);
@@ -221,7 +223,7 @@ class DatabaseManager {
     messageRoomsRef.update({"users": userIds, "messages": <String>[]});
     // create a vector DB index for the new message room
     // each index will represent one messageroom
-    createRoomIndex(messageRoom.messageRoomId);
+    await createRoomIndex(messageRoom.messageRoomId);
   }
 
   static Future<String> addMessage(
@@ -538,6 +540,31 @@ class DatabaseManager {
       throw Exception('Could not add chore');
     });
     return choreKey;
+  }
+
+  static Future<Chore?> getChoreFromId(
+      String choreId, String householdId) async {
+    Chore? foundChore;
+
+    // Iterate over all possible ChoreStatus values
+    for (ChoreStatus status in ChoreStatus.values) {
+      DatabaseReference choreRef = _databaseInstance
+          .ref("households/$householdId/${status.value}/$choreId");
+
+      // Fetch the chore data
+      DatabaseEvent event = await choreRef.once();
+
+      // Check if the snapshot exists and contains data
+      if (event.snapshot.exists) {
+        // Assuming you have a Chore model with a fromMap constructor
+        Map<String, dynamic> data =
+            Map<String, dynamic>.from(event.snapshot.value as Map);
+        foundChore = Chore.buildChoreFromMap(data);
+        break; // Exit the loop if the chore is found
+      }
+    }
+
+    return foundChore;
   }
 
   static Future<List<Chore>> getChoresFromDB(

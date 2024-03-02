@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
@@ -77,7 +78,7 @@ Future<String> getCommandCategory(String message) async {
     {
       "role": "user",
       "content":
-          "Given the following user input, determine what category this input falls into. The categories are: 'View Schedule', 'Add Chore', 'Remove Chore', 'Update Chore', 'View Status', 'Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized or if the input is irrelevant to the previous categories. Your response ONLY contains the values of these categories, and NOTHING ELSE. The user input is: '$message'"
+          "Given the following user input, determine what category this input falls into. The categories are: 'View Schedule', 'Add Chore', 'Remove Chore', 'Update Chore', 'View Status', 'Set Status', 'Ask for Advice', 'Send a Message'. Categorize the message as 'Unknown' if the user input cannot be categorized or if the input is irrelevant to the previous categories. Your response ONLY contains the values of these categories, and NOTHING ELSE. The user input is: '$message'"
     }
   ];
 
@@ -94,7 +95,7 @@ Future<String> getCommandCategory(String message) async {
     final int lastResponseIndex = decodedRes["choices"].length - 1;
     final chatGPTRes =
         decodedRes["choices"][lastResponseIndex]["message"]["content"];
-    print('CHATGPT RES: $chatGPTRes');
+    //print('CHATGPT RES: $chatGPTRes');
     return chatGPTRes;
   } else {
     throw Exception(
@@ -109,10 +110,11 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
   String parameterJSONFormat = "";
   switch (category) {
     case 'Remove Chore':
+      DateTime now = DateTime.now();
       parameterJSONFormat =
-          "1. ChoreTitle \n 2. ChorePerson \n 3. ChoreDescription";
+          "1. ChoreTitle \n 2. ChorePerson \n 3. ChoreDescription \n 4. ChoreDate";
       parametersToFindAddendum =
-          "1. The title of the chore to remove \n 2. The name of the person assigned to the chore \n 3. The description of the chore to remove";
+          "1. The title of the chore to remove \n 2. The name of the person assigned to the chore \n 3. The description of the chore to remove \n 4. The date of the chore that is to be removed, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing'";
       break;
     case 'Add Chore':
       DateTime now = DateTime.now();
@@ -124,9 +126,9 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
     case 'Update Chore':
       DateTime now = DateTime.now();
       parameterJSONFormat =
-          "1. ChoreTitleOld \n 2. ChoreTitleNew \n 3. ChoreDate \n 4. ChorePerson \n 5. ChoreDescriptionOld\n 6. ChoreDescriptionNew";
+          "1. ChoreTitle \n 2. ChoreDate \n 3. ChorePerson \n 4. ChoreDescription";
       parametersToFindAddendum =
-          "1. The title of the old chore \n 2. The title of the newly updated chore \n 3. The new date of the updated chore, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 4. The name of the person assigned to the chore \n 5. The description of the old chore to be updated \n 6. The description of the new chore that will replace the old chore";
+          "1. The title of the chore to be updated \n 2. The date of the chore to be updated, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't specify a date in their message, use the value 'Missing' for this field \n 3. The person assigned to the chore that is to be updated \n 4. The description of the chore to be updated";
       break;
     case 'Set Status':
       parameterJSONFormat = "1. Status";
@@ -229,14 +231,16 @@ String generateFullCommandInput(Map<String, String> parameters) {
 
 /* Fetches Roomeo's response by querying relvant messages in the VDB and adds it to the chatroom as well.*/
 Future<void> getRoomeoResponse(String message, String messageKey,
-    {bool isChore = false}) async {
+    {bool isChore = false,
+    String choreId = "",
+    bool shouldQueryHouseholdsInstead = false}) async {
   // fetch the user message's generated vector concurrently with other operations:
   final userResVectorFuture = getVectorEmbeddingArray(message);
 
   List<double>? userResVector;
   try {
     userResVector = await userResVectorFuture;
-    print(userResVector);
+    // print(userResVector);
   } catch (e) {
     print('Failed to get user vector for input message: $message.');
     print(': $e');
@@ -260,9 +264,9 @@ Future<void> getRoomeoResponse(String message, String messageKey,
 
       var fetchedMessages = await Future.wait(fetchMessagesFutures);
       contextMessageList.addAll(fetchedMessages);
-      for (var i = 0; i < fetchedMessages.length; i++) {
-        print('message $i: ${fetchedMessages[i].text}');
-      }
+      // for (var i = 0; i < fetchedMessages.length; i++) {
+      //   print('message $i: ${fetchedMessages[i].text}');
+      // }
     } catch (e) {
       print(e);
     }
@@ -271,21 +275,38 @@ Future<void> getRoomeoResponse(String message, String messageKey,
         'Querying vector DB failed: null user response vector!');
   }
 
-  // Put user message vector to vector DB
-  final insertVectorFuture = isChore
-      ? insertVector(
+  if (isChore) {
+    try {
+      // add the chore vectors to both chore and message room indexes
+      // in the VDB
+      await Future.wait([
+        insertVector(
+          userResVector,
+          CurrentHousehold.getCurrentHouseholdId(),
+          messageKey,
+          metadata: {'isChore': isChore, 'choreId': choreId},
+        ),
+        insertVector(
           userResVector,
           CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
           messageKey,
-          metadata: {'isChore': isChore},
-        )
-      : insertVector(userResVector,
-          CurrentUser.getCurrentUserId() + RoomeoUser.user.userId, messageKey);
-
-  try {
-    await insertVectorFuture;
-  } catch (e) {
-    print(e);
+          metadata: {'isChore': isChore, 'choreId': choreId},
+        ),
+      ]);
+    } catch (e) {
+      print(e);
+    }
+  } else {
+    Future insertVectorFuture = insertVector(
+      userResVector,
+      CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+      messageKey,
+    );
+    try {
+      await insertVectorFuture;
+    } catch (e) {
+      print(e);
+    }
   }
 
   // Get chatGPT's response to user's message, add response to firebase as well as get response's message key
@@ -309,7 +330,7 @@ Future<void> getRoomeoResponse(String message, String messageKey,
     List<double>? chatGPTResVector;
     try {
       chatGPTResVector = await chatGPTResVectorFuture;
-      print(chatGPTResVector);
+      // print(chatGPTResVector);
       if (chatGPTMessageKey != null) {
         await insertVector(
             chatGPTResVector,
@@ -326,4 +347,27 @@ Future<void> getRoomeoResponse(String message, String messageKey,
   } catch (e) {
     print('failed to get chatGPT response: $e');
   }
+}
+
+Future<List<String>> queryChores(String choreTitle,
+    {DateTime? choreDate,
+    String? chorePerson,
+    String? choreDescription,
+    int choresToFind = 5}) async {
+  String queryString = "Find the $choreTitle chore.";
+  if (chorePerson != null) {
+    queryString += " It is assigned to $chorePerson.";
+  }
+  if (choreDate != null) {
+    queryString += " It is due on ${choreDate.toString()}.";
+  }
+  if (choreDescription != null) {
+    queryString += " It has the description '$choreDescription'.";
+  }
+  // vectorize the query string
+  List<double> queryStringVector = await getVectorEmbeddingArray(queryString);
+  // use the query vector to find most similar chores
+  List<String> topChores = await searchChoreFromChat(queryStringVector,
+      CurrentHousehold.getCurrentHouseholdId().toLowerCase());
+  return topChores;
 }

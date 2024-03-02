@@ -4,13 +4,13 @@ class MissingTextInput extends StatefulWidget {
   const MissingTextInput({
     super.key,
     this.isInputSingleLine = true,
-    this.isMessageInput = false,
     required this.onTextInput,
+    required this.placeHolder,
   });
 
   final Function(String) onTextInput;
   final bool isInputSingleLine;
-  final bool isMessageInput;
+  final String placeHolder;
 
   @override
   MissingTextInputState createState() => MissingTextInputState();
@@ -40,21 +40,11 @@ class MissingTextInputState extends State<MissingTextInput> {
     widget.onTextInput(textInput);
   }
 
-  String determinePlaceholder() {
-    if (widget.isMessageInput) {
-      return 'Message';
-    }
-    if (widget.isInputSingleLine) {
-      return 'Chore Title';
-    }
-    return 'Chore Details/Desctiption (Optional)';
-  }
-
   @override
   Widget build(BuildContext context) {
     return TextField(
       decoration: InputDecoration(
-        labelText: determinePlaceholder(),
+        labelText: widget.placeHolder,
       ),
       controller: _controller,
       maxLines: widget.isInputSingleLine ? 1 : null,

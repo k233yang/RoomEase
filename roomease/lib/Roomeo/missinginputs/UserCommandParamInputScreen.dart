@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
-import 'package:roomease/Roomeo/missinginputs/MissingStatusInput.dart';
-import 'package:roomease/Roomeo/missinginputs/MissingUserInput.dart';
-import 'package:roomease/Roomeo/missinginputs/MissingTextInput.dart';
-import 'package:roomease/Roomeo/missinginputs/MissingPointInput.dart';
+import 'package:roomease/Roomeo/missinginputs/MissingCommandHandlers.dart';
 import '../../colors/ColorConstants.dart';
 
 /// A custom widget that renders if the user has not provided sufficient information
@@ -33,6 +29,72 @@ class _UserCommandParamInputScreenState
   late List<String> missingParams;
   int currentIndex = 0;
 
+  bool hasMissingMandatoryParameters() {
+    switch (widget.category) {
+      case "Add Chore":
+        List<String> requiredKeys = [
+          "ChoreTitle",
+          "ChoreDate",
+          "ChorePerson",
+          "ChorePoints",
+          "ChorePointsThreshold"
+        ];
+        for (String key in requiredKeys) {
+          if (!widget.commandParams.containsKey(key) ||
+              widget.commandParams[key] == "Missing") {
+            return true;
+          }
+        }
+        return false;
+      case "Remove Chore":
+        List<String> requiredKeys = [
+          "ChoreTitle",
+        ];
+        for (String key in requiredKeys) {
+          if (!widget.commandParams.containsKey(key) ||
+              widget.commandParams[key] == "Missing") {
+            return true;
+          }
+        }
+        return false;
+      case "Update Chore":
+        List<String> requiredKeys = [
+          "ChoreTitle",
+        ];
+        for (String key in requiredKeys) {
+          if (!widget.commandParams.containsKey(key) ||
+              widget.commandParams[key] == "Missing") {
+            return true;
+          }
+        }
+        return false;
+      case "Set Status":
+        List<String> requiredKeys = [
+          "Status",
+        ];
+        for (String key in requiredKeys) {
+          if (!widget.commandParams.containsKey(key) ||
+              widget.commandParams[key] == "Missing") {
+            return true;
+          }
+        }
+        return false;
+      case "Send a Message":
+        List<String> requiredKeys = [
+          "SendPerson",
+          "Message",
+        ];
+        for (String key in requiredKeys) {
+          if (!widget.commandParams.containsKey(key) ||
+              widget.commandParams[key] == "Missing") {
+            return true;
+          }
+        }
+        return false;
+    }
+    return false;
+  }
+
   List<String> generateMissingParamList(Map<String, String> currentParams) {
     List<String> missingParams = [];
     currentParams.forEach((key, value) {
@@ -43,88 +105,38 @@ class _UserCommandParamInputScreenState
     return missingParams;
   }
 
-  Widget generateMissingInputWidgets(String commandCategory) {
-    if (commandCategory.contains('Title')) {
-      return MissingTextInput(onTextInput: (String userInput) {
-        // just update widget.
-        widget.commandParams[commandCategory] = userInput;
-      });
-    } else if (commandCategory.contains('Date')) {
-      return MissingDateInput(onDateSelect: (DateTime userInput) {
-        widget.commandParams[commandCategory] = userInput.toString();
-      });
-    } else if (commandCategory.contains('Description')) {
-      return MissingTextInput(
-        isInputSingleLine: false,
-        onTextInput: (String userInput) {
-          widget.commandParams[commandCategory] = userInput;
-        },
-      );
-    } else if (commandCategory.contains('Message')) {
-      return MissingTextInput(
-        isInputSingleLine: false,
-        isMessageInput: true,
-        onTextInput: (String userInput) {
-          widget.commandParams[commandCategory] = userInput;
-        },
-      );
-    } else if (commandCategory.contains('ChorePerson')) {
-      return MissingUserInput(
-        onUserSelect: (String userInput) {
-          widget.commandParams[commandCategory] = userInput;
-        },
-        placeholder: 'Select a person to assign this chore to:',
-      );
-    } else if (commandCategory.contains('ViewPerson')) {
-      return MissingUserInput(
-        onUserSelect: (String userInput) {
-          widget.commandParams[commandCategory] = userInput;
-        },
-        placeholder: "Select a person's status to view:",
-      );
-    } else if (commandCategory.contains('SendPerson')) {
-      return MissingUserInput(
-        onUserSelect: (String userInput) {
-          widget.commandParams[commandCategory] = userInput;
-        },
-        placeholder: "Who would you like to message? :",
-      );
-    } else if (commandCategory.contains('Status')) {
-      return MissingStatusInput(onStatusInput: (String userInput) {
-        widget.commandParams[commandCategory] = userInput;
-      });
-    } else if (commandCategory == 'ChorePointsThreshold') {
-      return MissingPointInput(
-        onPointInput: (int userInput) {
-          widget.commandParams[commandCategory] = userInput.toString();
-        },
-        placeholder: 'Points Threshold',
-      );
-    } else if (commandCategory == 'ChorePoints') {
-      return MissingPointInput(
-        onPointInput: (int userInput) {
-          widget.commandParams[commandCategory] = userInput.toString();
-        },
-        placeholder: 'Points',
-      );
-    } else {
-      return Text('You fucked up');
+  void updateCommandParams(String key, String value) {
+    setState(() {
+      widget.commandParams[key] = value;
+    });
+  }
+
+  Widget generateMissingInputWidgets(
+      String missingParameter, String commandCategory) {
+    switch (commandCategory) {
+      case "Add Chore":
+        return handleAddChoreMissingParams(
+            missingParameter, updateCommandParams);
+      case "Update Chore":
+        return handleUpdateChoreMissingParams(
+            missingParameter, updateCommandParams);
+      case "Remove Chore":
+        return handleRemoveChoreMissingParams(
+            missingParameter, updateCommandParams);
+      default:
+        return SizedBox.shrink();
     }
   }
 
   void onSubmitMissingParams() {
-    bool hasMissingNonDescription = widget.commandParams.entries.any(
-      (entry) => entry.value == "Missing" && !entry.key.contains("Description"),
-    );
-
-    if (hasMissingNonDescription) {
+    if (hasMissingMandatoryParameters()) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Incomplete Information"),
             content:
-                Text("Please fill out the missing values before proceeding."),
+                Text("Please fill out the necessary values before proceeding."),
             actions: <Widget>[
               TextButton(
                 child: Text("OK"),
@@ -137,8 +149,6 @@ class _UserCommandParamInputScreenState
         },
       );
     } else {
-      // TODO: go back to chat screen and do shit with the newly updated params
-      print(widget.commandParams);
       Navigator.of(context).pop({
         'exited': false,
         'data': widget.commandParams,
@@ -146,11 +156,20 @@ class _UserCommandParamInputScreenState
     }
   }
 
+  String determineHeaderText(String category) {
+    if (category == "Update Chore") {
+      return "Tell me the details about the chore you wish to update";
+    }
+    if (category == "Remove Chore") {
+      return "Tell me the details about the chore you wish to remove";
+    }
+    return "I need more information to ${category.toLowerCase()}";
+  }
+
   @override
   void initState() {
     super.initState();
     missingParams = generateMissingParamList(widget.commandParams);
-    print("MISSING PARAMS: $missingParams");
   }
 
   @override
@@ -177,7 +196,7 @@ class _UserCommandParamInputScreenState
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'More information needed to ${widget.category.toLowerCase()}:',
+              determineHeaderText(widget.category),
               style: TextStyle(
                 color: Color.fromARGB(255, 160, 160, 160),
                 fontSize: 18,
@@ -188,7 +207,8 @@ class _UserCommandParamInputScreenState
                 shrinkWrap: true, // Make ListView as tall as its children
                 itemCount: missingParams.length,
                 itemBuilder: (context, index) {
-                  return generateMissingInputWidgets(missingParams[index]);
+                  return generateMissingInputWidgets(
+                      missingParams[index], widget.category);
                 },
               ),
             ),

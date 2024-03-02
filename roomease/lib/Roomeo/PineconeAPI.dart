@@ -37,7 +37,7 @@ Future<void> createRoomIndex(String roomID,
   }
 }
 
-// add a message's vector to a given room's index. Note: message's firebase ID is needed
+/// add a message's vector to a given room's index. Note: message's firebase ID is needed
 Future<void> insertVector(List<double> vector, String roomID, String vectorID,
     {Map<String, dynamic> metadata = const {}}) async {
   // get the index of the room
@@ -81,7 +81,7 @@ Future<void> insertVector(List<double> vector, String roomID, String vectorID,
   }
 }
 
-// fetch the most relevant messages given an input vector. Returns the identifiers for each message
+/// fetch the most relevant messages given an input vector. Returns the identifiers for each message
 Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
     {int messagesToFetch = 10}) async {
   // get the index of the room
@@ -113,11 +113,64 @@ Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
         res.add(queryVectorResArray[i]['id']);
         res.sort();
       }
-      print("RES: $res");
+      // print("RES: $res");
       return res;
     } else {
       throw Exception(
           'Failed to insert vector into index: ${queryVectorRes.statusCode}');
+    }
+  } else {
+    throw Exception(
+        'Failed to fetch index info. Status code: ${fetchIndexRes.statusCode}');
+  }
+}
+
+/// given a pre-made chat string, find IDs the most relevant
+/// of the most relevant chores in the chore index in the VDB
+Future<List<String>> searchChoreFromChat(
+    List<double> queryVector, String householdId,
+    {int choresToFind = 5}) async {
+  // get the index of the room
+  var fetchIndexUrl =
+      Uri.parse('https://api.pinecone.io/indexes/${householdId.toLowerCase()}');
+  var fetchIndexRes = await http.get(fetchIndexUrl, headers: <String, String>{
+    'Accept': 'application/json',
+    'Api-Key': PineConeAPIKey
+  });
+
+  if (fetchIndexRes.statusCode == 200) {
+    final decodedFetchIndexRes = jsonDecode(fetchIndexRes.body);
+    final String indexEndpoint = decodedFetchIndexRes['host'];
+    var queryVectorUrl = Uri.parse('https://$indexEndpoint/query');
+    var queryVectorRes = await http.post(queryVectorUrl,
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Api-Key': PineConeAPIKey
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'topK': choresToFind,
+            'vector': queryVector,
+            'filter': {
+              'isChore': {'\$eq': true}
+            },
+            'includeMetadata': true
+          },
+        ));
+    if (queryVectorRes.statusCode == 200) {
+      var decodedQueryVectorRes = jsonDecode(queryVectorRes.body);
+      List<dynamic> queryVectorResArray = decodedQueryVectorRes['matches'];
+      List<String> res = [];
+      for (var match in queryVectorResArray) {
+        if (match['metadata'] != null) {
+          res.add(match['metadata']['choreId']);
+        }
+      }
+      return res;
+    } else {
+      throw Exception(
+          'Failed to query vector into index: ${queryVectorRes.statusCode}');
     }
   } else {
     throw Exception(
