@@ -34,7 +34,9 @@ class _CalendarScreen extends State<CalendarScreen> {
       body: getCalendar(),
       floatingActionButton: CreateAddEventButton(onButtonPress: () {
         Navigator.pushNamed(context, "/addEvent").then((value) {
-          setState(() {});
+          setState(() {
+            calendarEventsLoaded = currHousehold.updateCalendarEventsList();
+          });
         });
       }),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -49,13 +51,25 @@ class _CalendarScreen extends State<CalendarScreen> {
   {
     List<Widget> children;
     if (snapshot.hasData) {
-      children = <Widget>[
-        SfCalendar(
+      return Scaffold(
+        body: SfCalendar(
           view: CalendarView.month,
+          allowedViews: [
+            CalendarView.day,
+            CalendarView.week,
+            CalendarView.month,
+          ],
           dataSource: EventDataSource(currHousehold.calendarEvents),
           todayHighlightColor: ColorConstants.lightPurple,
-        ),
-      ];
+          monthViewSettings: MonthViewSettings(showAgenda: true),
+          onTap: (CalendarTapDetails details) {
+            if (details.targetElement == CalendarElement.appointment) {
+              // TODO: Implement pop up
+              // Navigator.pushNamed(context, "/addEvent");
+              }
+            },
+        )
+      );
     } else if (snapshot.hasError) {
       children = <Widget>[
         const Icon(
@@ -78,12 +92,15 @@ class _CalendarScreen extends State<CalendarScreen> {
         ),
         Padding(
           padding: EdgeInsets.only(top: 16),
-          child: Text('Loading chores...'),
+          child: Text('Loading calendar...'),
         ),
       ];
     }
-    return Column(
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: children,
+      )
     );
   });
   }
