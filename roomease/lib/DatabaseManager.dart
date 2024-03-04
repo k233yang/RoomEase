@@ -542,6 +542,72 @@ class DatabaseManager {
     return choreKey;
   }
 
+  static Future<void> updateChore({
+    required String householdCode,
+    required String choreId,
+    String? name,
+    String? details,
+    String? deadline,
+    String? dateCreated,
+    String? dateLastIncremented,
+    int? points,
+    int? threshold,
+    int? timesIncremented,
+    int? daysSinceLastIncremented,
+    String? createdByUserId,
+    String? assignedUserId,
+    String? status,
+  }) async {
+    DatabaseReference choreRef =
+        _databaseInstance.ref("households/$householdCode/$status/$choreId");
+
+    // Build the update map with only the fields that are not null
+    Map<String, dynamic> updateMap = {};
+    if (name != null) {
+      updateMap['name'] = name;
+    }
+    if (details != null) {
+      updateMap['details'] = details;
+    }
+    if (deadline != null) {
+      updateMap['deadline'] = deadline;
+    }
+    if (dateCreated != null) {
+      updateMap['dateCreated'] = dateCreated;
+    }
+    if (dateLastIncremented != null) {
+      updateMap['dateLastIncremented'] = dateLastIncremented;
+    }
+    if (points != null) {
+      updateMap['points'] = points;
+    }
+    if (threshold != null) {
+      updateMap['threshold'] = threshold;
+    }
+    if (timesIncremented != null) {
+      updateMap['timesIncremented'] = timesIncremented;
+    }
+    if (daysSinceLastIncremented != null) {
+      updateMap['daysSinceLastIncremented'] = daysSinceLastIncremented;
+    }
+    if (createdByUserId != null) {
+      updateMap['createdByUserId'] = createdByUserId;
+    }
+    if (assignedUserId != null) {
+      updateMap['assignedUserId'] = assignedUserId;
+    }
+    if (status != null) {
+      updateMap['status'] = status;
+    }
+
+    await choreRef.update(updateMap).then((value) {
+      print("Successfully updated chore!");
+    }).catchError((error) {
+      print(error);
+      throw Exception('Could not update chore');
+    });
+  }
+
   static Future<Chore?> getChoreFromId(
       String choreId, String householdId) async {
     Chore? foundChore;
