@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentUser.dart';
+import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/HomeScreen.dart';
 import 'package:roomease/Roomeo/ChatListScreen.dart';
 import 'package:roomease/Roomeo/ChatScreen.dart';
@@ -27,11 +29,20 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await SharedPreferencesUtility.init();
-  runApp(MyApp());
+  bool noHousehold = false;
+  if (SharedPreferencesUtility.getBool("isLoggedIn")) {
+    String? householdId =
+        await DatabaseManager.getUsersHousehold(CurrentUser.getCurrentUserId());
+    if (householdId == null) {
+      noHousehold = true;
+    }
+  }
+  runApp(MyApp(noHousehold: noHousehold));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.noHousehold});
+  final bool noHousehold;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +54,7 @@ class MyApp extends StatelessWidget {
         colorScheme:
             ColorScheme.fromSeed(seedColor: ColorConstants.lightPurple),
       ),
-      initialRoute: initialScreen(),
+      initialRoute: initialScreen(noHousehold),
       routes: {
         '/welcome': (_) => WelcomeScreen(),
         '/login': (_) => Login(),
@@ -64,9 +75,13 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  String initialScreen() {
+  String initialScreen(bool noHousehold) {
     if (SharedPreferencesUtility.getBool("isLoggedIn")) {
-      return '/home';
+      if (noHousehold) {
+        return '/createJoinHousehold';
+      } else {
+        return '/home';
+      }
     } else {
       return '/welcome';
     }
