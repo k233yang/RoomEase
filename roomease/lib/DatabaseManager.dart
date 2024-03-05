@@ -568,6 +568,12 @@ class DatabaseManager {
     });
   }
 
+  static Future<void> deleteCurrentHousehold() async {
+    String householdCode = CurrentHousehold.getCurrentHouseholdId();
+    DatabaseReference householdRef = _databaseInstance
+        .ref("households/$householdCode");
+    await householdRef.remove();
+  }
   // ------------------------ END HOUSEHOLD OPERATIONS ------------------------
 
   // ------------------------ CHORE OPERATIONS ------------------------
