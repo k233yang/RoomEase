@@ -85,13 +85,22 @@ class _LoginState extends State<Login> {
                                 await DatabaseManager.getUsersHousehold(
                                     user.user!.uid);
                             if (householdId != null) {
-                              // Part of household, go to home screen
-                              await updateUserInformation(
-                                  householdId, user.user!.uid);
-                              SharedPreferencesUtility.setValue(
-                                  "isLoggedIn", true);
-                              Navigator.pushNamedAndRemoveUntil(
-                                  context, "/home", (_) => false);
+                              bool householdExists =
+                                  await DatabaseManager.checkHouseholdExists(
+                                      householdId);
+                              if (householdExists) {
+                                // Part of household, go to home screen
+                                await updateUserInformation(
+                                    householdId, user.user!.uid);
+                                SharedPreferencesUtility.setValue(
+                                    "isLoggedIn", true);
+                                Navigator.pushNamedAndRemoveUntil(
+                                    context, "/home", (_) => false);
+                              } else {
+                                // Not part of household, go to create/join household screen
+                                Navigator.pushNamedAndRemoveUntil(context,
+                                    "/createJoinHousehold", (_) => false);
+                              }
                             } else {
                               // Not part of household, go to create/join household screen
                               Navigator.pushNamedAndRemoveUntil(context,
