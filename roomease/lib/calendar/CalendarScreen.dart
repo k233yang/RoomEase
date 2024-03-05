@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '../CurrentHousehold.dart';
+import '../DatabaseManager.dart';
 import '../Household.dart';
 import '../colors/ColorConstants.dart';
 import 'Event.dart';
@@ -64,10 +66,59 @@ class _CalendarScreen extends State<CalendarScreen> {
           monthViewSettings: MonthViewSettings(showAgenda: true),
           onTap: (CalendarTapDetails details) {
             if (details.targetElement == CalendarElement.appointment) {
-              // TODO: Implement pop up
-              // Navigator.pushNamed(context, "/addEvent");
-              }
-            },
+              dynamic appointments = details.appointments;
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return Expanded( child: AlertDialog(
+                      title: Text(appointments[0].name),
+                      content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text("Details", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text(appointments[0].details),
+                            Text("Event Type", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text(appointments[0].type),
+                            Text("Begins", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text(DateFormat('yyyy-mm-dd hh:mm a').format(DateTime.parse(appointments[0].startTime))),
+                            Text("Ends", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text(DateFormat('yyyy-mm-dd hh:mm a').format(DateTime.parse(appointments[0].endTime))),
+                            Text(""),
+                            Text("Created By", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text(appointments[0].createdByUserId),
+                          ]),
+                      actions: [TextButton(onPressed: () {
+                        // Delete event confirmation message
+                        showDialog(context: context, builder: (BuildContext context) {
+                          return AlertDialog(title: Text(appointments[0].name),
+                              content: Text("Are you sure you would like to delete this event?"),
+                              actions: [TextButton(onPressed: () {
+                                try{
+                                  DatabaseManager.deleteCalendarEvent(appointments[0].id).then((value) {
+                                    setState(() { calendarEventsLoaded = currHousehold.updateCalendarEventsList(); });
+                                  });
+                                } catch (e) { print("Failed to move chore: $e"); }
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(duration: const Duration(seconds: 1), content: Text('Event deleted!')));
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                                },
+                                  child: Text("Yes, delete", style: TextStyle(color: Colors.red))
+                              ),
+                              TextButton(onPressed: () { Navigator.pop(context); },
+                                  child: Text("No, return"))
+                              ]);
+                        });},
+                          child: Text("DELETE", style: TextStyle(color: Colors.red))
+                      ),
+                        TextButton(onPressed: () { Navigator.pop(context); },
+                            child: Text('CLOSE')),
+                      ]
+                  ));
+                }
+              );
+            }
+          }
         )
       );
     } else if (snapshot.hasError) {
@@ -145,15 +196,15 @@ class EventDataSource extends CalendarDataSource {
 
   @override
   Color getColor(int index) {
-    // TODO: Add if statement to set colour based on event type
-    // return appointments![index].background;
-    return ColorConstants.lightPurple;
-  }
-
-  @override
-  bool isAllDay(int index) {
-    // TODO: isAllDay is not implemented yet
-    // return appointments![index].isAllDay;
-    return false;
+    if (appointments![index].type == "Location Status") {
+      return Colors.blue;
+    } else if (appointments![index].type == "Common Area Reservation") {
+      return Colors.orange;
+    } else if (appointments![index].type == "Quiet Time Request") {
+      return Colors.yellow;
+    }
+    else {
+      return Colors.purple;
+    }
   }
 }

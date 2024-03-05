@@ -12,7 +12,7 @@ class AddEventScreen extends StatefulWidget {
   State<AddEventScreen> createState() => _AddEventScreen();
 }
 
-const List<String> typeList = <String>["Location Status", "Common Area Reservation", "Custom Event"];
+const List<String> typeList = <String>["Common Area Reservation", "Location Status", "Quiet Time Request", "Other"];
 
 class _AddEventScreen extends State<AddEventScreen> {
   final _formKey = GlobalKey<FormState>();
