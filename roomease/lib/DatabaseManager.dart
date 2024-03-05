@@ -11,6 +11,7 @@ import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
 import 'User.dart';
+import 'calendar/Event.dart';
 import 'chores/Chore.dart';
 import 'chores/ChoreStatus.dart';
 import 'package:roomease/chores/Chore.dart';
@@ -265,6 +266,7 @@ class DatabaseManager {
         .ref()
         .child("messageRooms/$messageRoomID/messages/$messageID");
     try {
+      await Future.delayed(const Duration(seconds: 2));
       await messageRef.update({'text': newMessage});
     } catch (e) {
       return Future.error('Failed to remove message: $e');
@@ -542,6 +544,72 @@ class DatabaseManager {
     return choreKey;
   }
 
+  static Future<void> updateChore({
+    required String householdCode,
+    required String choreId,
+    String? name,
+    String? details,
+    String? deadline,
+    String? dateCreated,
+    String? dateLastIncremented,
+    int? points,
+    int? threshold,
+    int? timesIncremented,
+    int? daysSinceLastIncremented,
+    String? createdByUserId,
+    String? assignedUserId,
+    String? status,
+  }) async {
+    DatabaseReference choreRef =
+        _databaseInstance.ref("households/$householdCode/$status/$choreId");
+
+    // Build the update map with only the fields that are not null
+    Map<String, dynamic> updateMap = {};
+    if (name != null) {
+      updateMap['name'] = name;
+    }
+    if (details != null) {
+      updateMap['details'] = details;
+    }
+    if (deadline != null) {
+      updateMap['deadline'] = deadline;
+    }
+    if (dateCreated != null) {
+      updateMap['dateCreated'] = dateCreated;
+    }
+    if (dateLastIncremented != null) {
+      updateMap['dateLastIncremented'] = dateLastIncremented;
+    }
+    if (points != null) {
+      updateMap['points'] = points;
+    }
+    if (threshold != null) {
+      updateMap['threshold'] = threshold;
+    }
+    if (timesIncremented != null) {
+      updateMap['timesIncremented'] = timesIncremented;
+    }
+    if (daysSinceLastIncremented != null) {
+      updateMap['daysSinceLastIncremented'] = daysSinceLastIncremented;
+    }
+    if (createdByUserId != null) {
+      updateMap['createdByUserId'] = createdByUserId;
+    }
+    if (assignedUserId != null) {
+      updateMap['assignedUserId'] = assignedUserId;
+    }
+    if (status != null) {
+      updateMap['status'] = status;
+    }
+
+    await choreRef.update(updateMap).then((value) {
+      print("Successfully updated chore!");
+    }).catchError((error) {
+      print(error);
+      throw Exception('Could not update chore');
+    });
+  }
+
   static Future<Chore?> getChoreFromId(
       String choreId, String householdId) async {
     Chore? foundChore;
@@ -664,6 +732,14 @@ class DatabaseManager {
     await choreRef.remove();
   }
 
+  static Future<void> deleteChoreFromStringStatus(
+      String choreId, String status) async {
+    String householdCode = CurrentHousehold.getCurrentHouseholdId();
+    DatabaseReference choreRef =
+        _databaseInstance.ref("households/$householdCode/$status/$choreId");
+    await choreRef.remove();
+  }
+
   static Future<void> updateChoreStatus(String? assignedUserId, String choreId,
       ChoreStatus choreStatus, ChoreStatus newChoreStatus) async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
@@ -738,5 +814,28 @@ class DatabaseManager {
       throw Exception('Could not add event');
     });
   }
-  // ------------------------ END CHORE OPERATIONS ------------------------
+
+  static Future<List<Event>> getCalendarEventsFromDB(String householdId) async {
+    final eventListRef =
+    _databaseInstance.ref("households/$householdId/events");
+    DatabaseEvent event = await eventListRef.once();
+    final eventsJson = event.snapshot.children;
+
+    List<Event> eventsList = <Event>[];
+
+    for (final event in eventsJson) {
+      eventsList.add( Event(
+        event.child("id").value.toString(),
+        event.child("name").value.toString(),
+        event.child("details").value.toString(),
+        event.child("startTime").value.toString(),
+        event.child("endTime").value.toString(),
+        event.child("dateCreated").value.toString(),
+        event.child("type").value.toString(),
+        event.child("createdByUserId").value.toString()
+      ));
+    }
+    return eventsList;
+  }
+  // ------------------------ END CALENDAR OPERATIONS ------------------------
 }

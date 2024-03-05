@@ -6,8 +6,10 @@ import 'package:roomease/Roomeo/ChatBoxGeneric.dart';
 import 'package:roomease/Roomeo/EmbedVector.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
 import 'package:roomease/Roomeo/RoomeoUser.dart';
-import 'package:roomease/chores/ChooseChoreScreen.dart';
+import 'package:roomease/Roomeo/ChooseChoreScreen.dart';
+import 'package:roomease/chores/Chore.dart';
 import 'package:roomease/chores/ChoreStatus.dart';
+import 'package:roomease/chores/EditChoreScreen.dart';
 import '../Message.dart';
 import '../colors/ColorConstants.dart';
 import 'package:roomease/Roomeo/Roomeo.dart';
@@ -96,7 +98,6 @@ class _ChatScreen extends State<ChatScreen> {
       _controller.clear();
       textFieldFocusNode.requestFocus();
       setState(() {});
-      // The rest of your existing onSubmitted logic...
       late String userMessageKey;
       late String category;
       try {
@@ -190,14 +191,53 @@ class _ChatScreen extends State<ChatScreen> {
             // The title of the chore to be updated should be found
             List<String> topChores =
                 await queryChores(commandParams['ChoreTitle']!);
-            print('IDS OF TOP CHORES: $topChores');
-            if (!mounted) return; // Check if the widget is still in the tree
-            Navigator.push(
-              context, // Directly use context if it's valid
-              MaterialPageRoute(
-                builder: (context) => ChooseChoreScreen(choreIds: topChores),
-              ),
-            );
+            if (mounted) {
+              final result = await Navigator.of(context).push(
+                // Directly use context if it's valid
+                MaterialPageRoute(
+                  builder: (context) => ChooseChoreScreen(
+                    choreIds: topChores,
+                    placeholder: "Select a chore to update",
+                    onChoreSelect: (String selectedChore) {},
+                    messageId: userMessageKey,
+                    shouldUpdate: true,
+                  ),
+                ),
+              );
+              // if the user backed out of the select chore screen, delete their message
+              if (result != null && result['exited'] == true) {
+                await DatabaseManager.removeMessageFromID(
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  userMessageKey,
+                );
+                return;
+              }
+            } // Check if the widget is still in the tree
+          } else if (category == 'Remove Chore') {
+            List<String> topChores =
+                await queryChores(commandParams['ChoreTitle']!);
+            if (mounted) {
+              final result = await Navigator.of(context).push(
+                // Directly use context if it's valid
+                MaterialPageRoute(
+                  builder: (context) => ChooseChoreScreen(
+                    choreIds: topChores,
+                    placeholder: "Select a chore to remove",
+                    onChoreSelect: (String selectedChore) {},
+                    messageId: userMessageKey,
+                    shouldRemove: true,
+                  ),
+                ),
+              );
+              // if the user backed out of the select chore screen, delete their message
+              if (result != null && result['exited'] == true) {
+                await DatabaseManager.removeMessageFromID(
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  userMessageKey,
+                );
+                return;
+              }
+            }
           }
           // view schedule doesn't need parameters, so we can just show it
           else if (category == 'View Schedule') {
@@ -208,9 +248,9 @@ class _ChatScreen extends State<ChatScreen> {
             // get Roomeo's response to the command
             await getRoomeoResponse(message, userMessageKey);
           }
-        } else {
-          await getRoomeoResponse(message, userMessageKey);
         }
+      } else {
+        await getRoomeoResponse(message, userMessageKey);
       }
     }
   }

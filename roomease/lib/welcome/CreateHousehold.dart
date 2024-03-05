@@ -3,6 +3,7 @@ import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/MessageRoom.dart';
+import 'package:roomease/Roomeo/EmbedVector.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
 import 'package:roomease/Roomeo/RoomeoUser.dart';
 
@@ -104,6 +105,14 @@ class _CreateHousehold extends State<CreateHousehold> {
     DatabaseManager.setUserCurrentIconNumber(userId, 1);
 
     // create a vector DB index for the shared household (i.e. for querying shared chores)
+    // create a vector DB index for the shared household (i.e. for querying shared chores)
     await createRoomIndex(CurrentHousehold.getCurrentHouseholdId());
+    // add the user's name as a vector for the household
+    await Future.delayed(Duration(seconds: 20));
+    await insertVector(
+        await getVectorEmbeddingArray(CurrentUser.getCurrentUserName()),
+        CurrentHousehold.getCurrentHouseholdId(),
+        CurrentUser.getCurrentUserId(),
+        metadata: {'isPerson': true});
   }
 }

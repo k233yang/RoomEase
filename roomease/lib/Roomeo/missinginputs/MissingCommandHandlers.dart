@@ -6,8 +6,11 @@ import 'package:roomease/Roomeo/missinginputs/MissingTextInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingPointInput.dart';
 import '../../colors/ColorConstants.dart';
 
+// TODO: search for a person based on a user input
+
 Widget handleAddChoreMissingParams(
-    String missingParameter, Function(String, String) updateCallback) {
+    String missingParameter, Function(String, String) updateCallback,
+    {String? searchPerson}) {
   switch (missingParameter) {
     case "ChoreTitle":
       return MissingTextInput(
@@ -35,12 +38,23 @@ Widget handleAddChoreMissingParams(
       );
     // return Text("Hello");
     case "ChorePerson":
-      return MissingUserInput(
-        onUserSelect: (String userInput) {
-          updateCallback("ChorePerson", userInput);
-        },
-        placeholder: "Who is responsible for the chore?",
-      );
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
+          },
+          placeholder: "Who is responsible for the chore?",
+        );
+      } else {
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
+          },
+          placeholder: "Who is responsible for the chore?",
+          searchPerson: searchPerson,
+        );
+      }
     // return Text("Hello");
     case "ChorePoints":
       return MissingPointInput(
@@ -64,7 +78,8 @@ Widget handleAddChoreMissingParams(
 }
 
 Widget handleUpdateChoreMissingParams(
-    String missingParameter, Function(String, String) updateCallback) {
+    String missingParameter, Function(String, String) updateCallback,
+    {String? searchPerson}) {
   switch (missingParameter) {
     case "ChoreTitle":
       return MissingTextInput(
@@ -101,7 +116,8 @@ Widget handleUpdateChoreMissingParams(
 }
 
 Widget handleRemoveChoreMissingParams(
-    String missingParameter, Function(String, String) updateCallback) {
+    String missingParameter, Function(String, String) updateCallback,
+    {String? searchPerson}) {
   switch (missingParameter) {
     case "ChoreTitle":
       return MissingTextInput(

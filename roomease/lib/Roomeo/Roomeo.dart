@@ -209,14 +209,13 @@ Future<Map<String, String>> getCommandParameters(
 String generateFullCommandInput(Map<String, String> parameters) {
   switch (parameters['category']) {
     case 'Remove Chore':
-      return 'Remove the chore "${parameters['ChoreTitle']}" assigned by ${parameters['ChorePerson']} from the schedule.';
+      return 'Remove the chore "${parameters['ChoreTitle']}"';
     case 'Add Chore':
       if (parameters['ChoreDescription'] != 'Missing') {
         return 'Add the chore "${parameters['ChoreTitle']}" with the details "${parameters['ChoreDescription']}" to the schedule. The chore is due on ${parameters['ChoreDate']}, and assigned to ${parameters['ChorePerson']}.';
       }
       return 'Add the chore "${parameters['ChoreTitle']}" to the schedule. The chore is due on ${parameters['ChoreDate']}, and assigned to ${parameters['ChorePerson']}.';
     case 'Update Chore':
-      // TODO
       return "";
     case 'Set Status':
       return 'Set my status to ${parameters['Status']}';
@@ -235,78 +234,53 @@ Future<void> getRoomeoResponse(String message, String messageKey,
     String choreId = "",
     bool shouldQueryHouseholdsInstead = false}) async {
   // fetch the user message's generated vector concurrently with other operations:
-  final userResVectorFuture = getVectorEmbeddingArray(message);
 
-  List<double>? userResVector;
-  try {
-    userResVector = await userResVectorFuture;
-    // print(userResVector);
-  } catch (e) {
-    print('Failed to get user vector for input message: $message.');
-    print(': $e');
-  }
+  List<double> userResVector = await getVectorEmbeddingArray(message);
 
   // Query the vDB, then firebase for most relevant convos, and feed that info to chatGPT as context
   List<Message> contextMessageList = [];
   List<String>? messageIDList;
-  if (userResVector != null) {
-    final fetchTopMessagesFuture = fetchTopMessages(
-        userResVector, CurrentUser.getCurrentUserId() + RoomeoUser.user.userId);
+  final fetchTopMessagesFuture = shouldQueryHouseholdsInstead
+      ? fetchTopMessages(userResVector,
+          CurrentUser.getCurrentUserId() + RoomeoUser.user.userId)
+      : fetchTopMessages(
+          userResVector, CurrentHousehold.getCurrentHouseholdId());
+  try {
+    messageIDList = await fetchTopMessagesFuture;
+    messageIDList.sort((a, b) => a.compareTo(b));
+    var fetchMessagesFutures = messageIDList
+        .map((messageID) => DatabaseManager.getMessageFromID(
+            CurrentUser.getCurrentUserId() + RoomeoUser.user.userId, messageID))
+        .toList();
 
-    try {
-      messageIDList = await fetchTopMessagesFuture;
-      messageIDList.sort((a, b) => a.compareTo(b));
-      var fetchMessagesFutures = messageIDList
-          .map((messageID) => DatabaseManager.getMessageFromID(
-              CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-              messageID))
-          .toList();
-
-      var fetchedMessages = await Future.wait(fetchMessagesFutures);
-      contextMessageList.addAll(fetchedMessages);
-      // for (var i = 0; i < fetchedMessages.length; i++) {
-      //   print('message $i: ${fetchedMessages[i].text}');
-      // }
-    } catch (e) {
-      print(e);
+    var fetchedMessages = await Future.wait(fetchMessagesFutures);
+    contextMessageList.addAll(fetchedMessages);
+    for (var i = 0; i < fetchedMessages.length; i++) {
+      print('message $i: ${fetchedMessages[i].text}');
     }
-  } else {
-    throw NullObjectError(
-        'Querying vector DB failed: null user response vector!');
+  } catch (e) {
+    print(e);
   }
 
   if (isChore) {
-    try {
-      // add the chore vectors to both chore and message room indexes
-      // in the VDB
-      await Future.wait([
-        insertVector(
-          userResVector,
-          CurrentHousehold.getCurrentHouseholdId(),
-          messageKey,
-          metadata: {'isChore': isChore, 'choreId': choreId},
-        ),
-        insertVector(
-          userResVector,
-          CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-          messageKey,
-          metadata: {'isChore': isChore, 'choreId': choreId},
-        ),
-      ]);
-    } catch (e) {
-      print(e);
-    }
+    await insertVector(
+      userResVector,
+      CurrentHousehold.getCurrentHouseholdId(),
+      choreId,
+      metadata: {'isChore': isChore},
+    );
+    await insertVector(
+      userResVector,
+      CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+      choreId,
+      metadata: {'isChore': isChore},
+    );
   } else {
-    Future insertVectorFuture = insertVector(
+    await insertVector(
       userResVector,
       CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
       messageKey,
     );
-    try {
-      await insertVectorFuture;
-    } catch (e) {
-      print(e);
-    }
   }
 
   // Get chatGPT's response to user's message, add response to firebase as well as get response's message key
@@ -330,7 +304,7 @@ Future<void> getRoomeoResponse(String message, String messageKey,
     List<double>? chatGPTResVector;
     try {
       chatGPTResVector = await chatGPTResVectorFuture;
-      // print(chatGPTResVector);
+      print("GPT VECTOR: $chatGPTResVector");
       if (chatGPTMessageKey != null) {
         await insertVector(
             chatGPTResVector,
@@ -367,7 +341,35 @@ Future<List<String>> queryChores(String choreTitle,
   // vectorize the query string
   List<double> queryStringVector = await getVectorEmbeddingArray(queryString);
   // use the query vector to find most similar chores
-  List<String> topChores = await searchChoreFromChat(queryStringVector,
+  List<String> topChores = await searchChoresFromChat(queryStringVector,
       CurrentHousehold.getCurrentHouseholdId().toLowerCase());
   return topChores;
+}
+
+String generateUpdateCommandInput(
+    Map<String, String> oldParameters, Map<String, String> newParameters) {
+  String res =
+      "Update the chore ${oldParameters['ChoreTitle']} to the following: ";
+
+  newParameters.forEach((key, value) {
+    if (key == "ChoreTitle") {
+      res +=
+          "\n - Change the name of the chore from ${oldParameters['ChoreTitle']} to ${newParameters['ChoreTitle']}";
+    } else if (key == "ChorePerson") {
+      res +=
+          "\n - The chore is now assigned to ${newParameters['ChorePerson']}";
+    } else if (key == "ChoreDescription") {
+      res +=
+          "\n - Change the description of the chore to ${newParameters['ChoreDescription']}";
+    } else if (key == "ChoreDate") {
+      res += "\n - The chore is now due on ${newParameters['ChoreDate']}";
+    } else if (key == "ChorePoints") {
+      res +=
+          "\n - Change the chore points from ${oldParameters['ChorePoints']} to ${newParameters['ChorePoints']}";
+    } else if (key == "ChorePointsThreshold") {
+      res +=
+          "\n - Change the chore points threshold from ${oldParameters['ChorePointsThreshold']} to ${newParameters['ChorePointsThreshold']}";
+    }
+  });
+  return res;
 }

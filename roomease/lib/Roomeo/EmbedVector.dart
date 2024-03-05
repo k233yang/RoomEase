@@ -6,6 +6,7 @@ const embeddingAPIURL = "https://api.openai.com/v1/embeddings";
 
 // generate the vector embedding of an input using OpenAI ada 2
 Future<List<double>> getVectorEmbeddingArray(String input) async {
+  print("EMBEDDING THIS STRING: $input");
   final Map<String, String> vectorRequestHeaders = {
     "Content-Type": "application/json",
     "Authorization": "Bearer $OpenAIApiKey"

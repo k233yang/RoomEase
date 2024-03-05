@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
         '/editProfile': (_) => EditProfile(),
         '/addCustomStatus': (_) => AddCustomStatus(),
         '/chatList': (_) => ChatListScreen(),
-        '/calendar': (context) => CalendarScreen()
+        '/calendar': (context) => CalendarScreen(),
       },
     );
   }

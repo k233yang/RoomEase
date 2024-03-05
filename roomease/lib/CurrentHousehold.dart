@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'Household.dart';
+import 'calendar/Event.dart';
 import 'chores/Chore.dart';
 
 class CurrentHousehold {
@@ -19,8 +20,9 @@ class CurrentHousehold {
     List<Chore> choresInProgress = <Chore>[];
     List<Chore> choresCompleted = <Chore>[];
     List<Chore> choresArchived = <Chore>[];
+    List<Event> calendarEvents = <Event>[];
     return Household(householdName, householdId, List.empty(), choresToDo,
-        choresInProgress, choresCompleted, choresArchived);
+        choresInProgress, choresCompleted, choresArchived, calendarEvents);
   }
 
   static String getCurrentHouseholdId() {

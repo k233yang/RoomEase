@@ -3,6 +3,8 @@ import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/MessageRoom.dart';
+import 'package:roomease/Roomeo/EmbedVector.dart';
+import 'package:roomease/Roomeo/PineconeAPI.dart';
 import 'package:roomease/Roomeo/RoomeoUser.dart';
 import '../User.dart' as RUser;
 
@@ -108,5 +110,12 @@ class _JoinHousehold extends State<JoinHousehold> {
     // User icon
     CurrentUser.setCurrentUserIconNumber(1);
     DatabaseManager.setUserCurrentIconNumber(userId, 1);
+
+    // add the new user in the shared household DB
+    await insertVector(
+        await getVectorEmbeddingArray(CurrentUser.getCurrentUserName()),
+        CurrentHousehold.getCurrentHouseholdId(),
+        CurrentUser.getCurrentUserId(),
+        metadata: {"isPerson": true});
   }
 }

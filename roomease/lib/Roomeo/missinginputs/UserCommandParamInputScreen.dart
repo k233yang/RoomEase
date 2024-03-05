@@ -98,7 +98,7 @@ class _UserCommandParamInputScreenState
   List<String> generateMissingParamList(Map<String, String> currentParams) {
     List<String> missingParams = [];
     currentParams.forEach((key, value) {
-      if (value == 'Missing') {
+      if (value == 'Missing' || key.contains("Person")) {
         missingParams.add(key);
       }
     });
@@ -112,17 +112,21 @@ class _UserCommandParamInputScreenState
   }
 
   Widget generateMissingInputWidgets(
-      String missingParameter, String commandCategory) {
+      String missingParameter, String commandCategory,
+      {String? chorePerson}) {
     switch (commandCategory) {
       case "Add Chore":
         return handleAddChoreMissingParams(
-            missingParameter, updateCommandParams);
+            missingParameter, updateCommandParams,
+            searchPerson: chorePerson);
       case "Update Chore":
         return handleUpdateChoreMissingParams(
-            missingParameter, updateCommandParams);
+            missingParameter, updateCommandParams,
+            searchPerson: chorePerson);
       case "Remove Chore":
         return handleRemoveChoreMissingParams(
-            missingParameter, updateCommandParams);
+            missingParameter, updateCommandParams,
+            searchPerson: chorePerson);
       default:
         return SizedBox.shrink();
     }
@@ -207,8 +211,21 @@ class _UserCommandParamInputScreenState
                 shrinkWrap: true, // Make ListView as tall as its children
                 itemCount: missingParams.length,
                 itemBuilder: (context, index) {
-                  return generateMissingInputWidgets(
-                      missingParams[index], widget.category);
+                  if (missingParams[index].contains("Person")) {
+                    return generateMissingInputWidgets(
+                      missingParams[index],
+                      widget.category,
+                      chorePerson: widget.commandParams[missingParams[index]] ==
+                              'Missing'
+                          ? null
+                          : widget.commandParams[missingParams[index]],
+                    );
+                  } else {
+                    return generateMissingInputWidgets(
+                      missingParams[index],
+                      widget.category,
+                    );
+                  }
                 },
               ),
             ),
