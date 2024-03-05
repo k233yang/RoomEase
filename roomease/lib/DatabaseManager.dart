@@ -102,7 +102,7 @@ class DatabaseManager {
     return messageRoomIds;
   }
 
-  static void addMessageRoomIdToUser(
+  static Future<void> addMessageRoomIdToUser(
       String userId, String messageRoomId) async {
     DatabaseReference usersRef =
         _databaseInstance.ref("users/$userId/messageRoomIds");
@@ -214,7 +214,7 @@ class DatabaseManager {
 
   // ------------------------ MESSAGE OPERATIONS ------------------------
 
-  /// Create a message room, with a vector database index
+  // Create a message room, with a vector database index
   static void addMessageRoom(MessageRoom messageRoom) async {
     List<String> userIds = [];
     for (User u in messageRoom.users) {
@@ -226,6 +226,13 @@ class DatabaseManager {
     // create a vector DB index for the new message room
     // each index will represent one messageroom
     await createRoomIndex(messageRoom.messageRoomId);
+  }
+
+  // Alternative method for adding message room that doesn't require entire User objects
+  static Future<void> addMessageRoomWithList(List<String> userIds) async {
+    DatabaseReference messageRoomsRef =
+        _databaseInstance.ref("messageRooms/${userIds.join()}");
+    messageRoomsRef.update({"users": userIds, "messages": <String>[]});
   }
 
   static Future<String> addMessage(
@@ -441,7 +448,8 @@ class DatabaseManager {
     householdRef.update({"name": name});
     DatabaseReference householdUserRef =
         _databaseInstance.ref("households/$householdCode/users/${user.userId}");
-    householdUserRef.update({"name": user.name, "status": "Home", "totalPoints": 0});
+    householdUserRef
+        .update({"name": user.name, "status": "Home", "totalPoints": 0});
     CurrentHousehold.setCurrentHouseholdId(householdCode);
   }
 
@@ -449,7 +457,8 @@ class DatabaseManager {
     DatabaseReference householdRef =
         _databaseInstance.ref("households/$householdCode/users/${user.userId}");
 
-    householdRef.update({"name": user.name, "status": "Home", "totalPoints": 0});
+    householdRef
+        .update({"name": user.name, "status": "Home", "totalPoints": 0});
   }
 
   static Future<bool> checkHouseholdExists(String householdCode) async {
@@ -519,7 +528,11 @@ class DatabaseManager {
           String name = userInfo['name'];
           String status = userInfo['status'];
           int totalPoints = userInfo['totalPoints'] ?? 0;
-          users[userId] = {"name": name, "status": status, "totalPoints": totalPoints.toString()};
+          users[userId] = {
+            "name": name,
+            "status": status,
+            "totalPoints": totalPoints.toString()
+          };
         }
       }
 
@@ -769,45 +782,41 @@ class DatabaseManager {
     await choreRef.remove();
   }
 
-
   static Future<void> updateUserPoints(int points, bool increase) async {
     String userId = CurrentUser.getCurrentUserId();
 
     DatabaseReference userRef = _databaseInstance.ref("users/${userId}");
-    DatabaseReference userPointsRef = _databaseInstance.ref("users/${userId}/totalPoints");
+    DatabaseReference userPointsRef =
+        _databaseInstance.ref("users/${userId}/totalPoints");
 
     DatabaseReference householdRef = _databaseInstance.ref(
         "households/${CurrentHousehold.getCurrentHouseholdId()}/users/$userId");
 
     DatabaseEvent userPointsEvent = await userPointsRef.once();
-    
-    if (userPointsEvent.snapshot.exists ) {
+
+    if (userPointsEvent.snapshot.exists) {
       int userPoints = userPointsEvent.snapshot.value as int;
-      if( increase == true ) {
-        await userRef.update({"totalPoints": userPoints + points });
+      if (increase == true) {
+        await userRef.update({"totalPoints": userPoints + points});
         await householdRef.update({"totalPoints": userPoints + points});
-        CurrentUser.setCurrentUserTotalPoints(userPoints + points );
-      }
-      else {
-        await userRef.update({"totalPoints": userPoints - points });
+        CurrentUser.setCurrentUserTotalPoints(userPoints + points);
+      } else {
+        await userRef.update({"totalPoints": userPoints - points});
         await householdRef.update({"totalPoints": userPoints - points});
-        CurrentUser.setCurrentUserTotalPoints(userPoints - points );
+        CurrentUser.setCurrentUserTotalPoints(userPoints - points);
       }
-    }
-    else {
-      if( increase == true ) {
-        await userRef.update({"totalPoints": points });
+    } else {
+      if (increase == true) {
+        await userRef.update({"totalPoints": points});
         await householdRef.update({"totalPoints": points});
         CurrentUser.setCurrentUserTotalPoints(points);
-      }
-      else {
-        await userRef.update({"totalPoints": 0 });
+      } else {
+        await userRef.update({"totalPoints": 0});
         await householdRef.update({"totalPoints": 0});
         CurrentUser.setCurrentUserTotalPoints(0);
       }
     }
   }
-
 
   static Future<void> deleteChoreFromStringStatus(
       String choreId, String status) async {
@@ -848,10 +857,10 @@ class DatabaseManager {
       newChoreStatus.value,
     );
 
-    if ( newChoreStatus == ChoreStatus.completed ) {
+    if (newChoreStatus == ChoreStatus.completed) {
       updateUserPoints(int.parse(choreJson("points").value.toString()), true);
-    }
-    else if ( choreStatus == ChoreStatus.completed && newChoreStatus == ChoreStatus.inProgress ) {
+    } else if (choreStatus == ChoreStatus.completed &&
+        newChoreStatus == ChoreStatus.inProgress) {
       updateUserPoints(int.parse(choreJson("points").value.toString()), false);
     }
 

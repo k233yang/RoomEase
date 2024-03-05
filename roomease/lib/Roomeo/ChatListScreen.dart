@@ -51,20 +51,18 @@ class _ChatListScreen extends State<ChatListScreen> {
                           children: messageRoomList,
                         );
                       } else {
-                        return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 60,
-                                height: 60,
-                                child: CircularProgressIndicator(
-                                    color: ColorConstants.lightPurple),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(top: 16),
-                                child: Text('Loading Chats...'),
-                              ),
-                            ]);
+                        return Column(children: [
+                          SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: CircularProgressIndicator(
+                                color: ColorConstants.lightPurple),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 16),
+                            child: Text('Loading Chats...'),
+                          ),
+                        ]);
                       }
                     })
               ],
@@ -90,7 +88,10 @@ class _ChatListScreen extends State<ChatListScreen> {
                     roommateUserNames: userNames,
                   ),
                 ),
-              );
+              ).then((value) => setState(() {
+                    DatabaseManager.userMessageRoomSubscription(
+                        CurrentUser.getCurrentUserId());
+                  }));
             },
             child: const Icon(Icons.add)));
   }
@@ -100,15 +101,17 @@ class _ChatListScreen extends State<ChatListScreen> {
     if (entry.length == 1) {
       userid = entry[0]["id"] as String;
     }
-
+    List<String> userNames = [];
+    entry.forEach((element) {
+      userNames.add(element["name"] as String);
+    });
     return InkWell(
         onTap: () async {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ChatScreen(
-                messageRoomId: messageRoomId,
-              ),
+                  messageRoomId: messageRoomId, userNames: userNames),
             ),
           );
         },

@@ -48,12 +48,19 @@ class _NewMessageRoomScreen extends State<NewMessageRoomScreen> {
                 if (isRoommateSelected)
                   TextButton(
                       onPressed: () async {
-                        // DatabaseManager.addMessageRoom(MessageRoom(
-                        //     "${CurrentUser.getCurrentUserId()}" +
-                        //         "${roommateUserIds.elementAt(selectedIndex)}",
-                        //     [],
-                        //     []));
-                        Navigator.pop(context);
+                        await DatabaseManager.addMessageRoomWithList([
+                          CurrentUser.getCurrentUserId(),
+                          roommateUserIds.elementAt(selectedIndex)
+                        ]);
+                        await DatabaseManager.addMessageRoomIdToUser(
+                            CurrentUser.getCurrentUserId(),
+                            CurrentUser.getCurrentUserId() +
+                                roommateUserIds.elementAt(selectedIndex));
+                        await DatabaseManager.addMessageRoomIdToUser(
+                            roommateUserIds.elementAt(selectedIndex),
+                            CurrentUser.getCurrentUserId() +
+                                roommateUserIds.elementAt(selectedIndex));
+                        Navigator.pop(context, true);
                       },
                       child: Text("Continue"))
               ],
