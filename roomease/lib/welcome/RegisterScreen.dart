@@ -118,6 +118,8 @@ class _RegisterState extends State<Register> {
                             );
                             SharedPreferencesUtility.setValue(
                                 "isLoggedIn", true);
+                            SharedPreferencesUtility.setValue(
+                                "isDoneOnboarding", false);
                             Navigator.pushNamedAndRemoveUntil(
                                 context, "/createJoinHousehold", (_) => false);
                           }

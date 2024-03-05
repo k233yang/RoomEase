@@ -40,6 +40,7 @@ class DatabaseManager {
     DatabaseReference usersRef =
         _databaseInstance.ref("users/$userId/householdId");
     DatabaseEvent event = await usersRef.once();
+    if (event.snapshot.value == null) return null;
     return event.snapshot.value as String;
   }
 
