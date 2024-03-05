@@ -74,7 +74,7 @@ class _EditProfileState extends State<EditProfile> {
                                   smallIcon(
                                       'assets/user_avatar_C_red.png', 0),
                                   smallIcon(
-                                      'assets/user_avatar_C_orange.png', 1),
+                                      'assets/user_avatar_C_orange.png', 6),
                                   smallIcon(
                                       'assets/user_avatar_D_yellow.png', 2),
                                   smallIcon(
@@ -84,7 +84,7 @@ class _EditProfileState extends State<EditProfile> {
                                   smallIcon(
                                       'assets/user_avatar_B_pink.png', 5),
                                   smallIcon(
-                                      'assets/user_avatar_A_grey.png', 6),
+                                      'assets/user_avatar_A_grey.png', 1),
                                 ],
                               ))
                           : Container()
@@ -201,7 +201,7 @@ String iconNumberMapping(int iconNumber) {
     case 0:
       return 'assets/user_avatar_C_red.png';
     case 1:
-      return 'assets/user_avatar_C_orange.png';
+      return 'assets/user_avatar_A_grey.png';
     case 2:
       return 'assets/user_avatar_D_yellow.png';
     case 3:
@@ -211,7 +211,7 @@ String iconNumberMapping(int iconNumber) {
     case 5:
       return 'assets/user_avatar_B_pink.png';
     case 6:
-      return 'assets/user_avatar_A_grey.png';
+      return 'assets/user_avatar_C_orange.png';
     case 100:
       return 'assets/roomeo_user_icon.png';
     default:
