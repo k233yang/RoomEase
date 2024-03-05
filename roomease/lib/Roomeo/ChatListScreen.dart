@@ -145,33 +145,18 @@ class _ChatListScreen extends State<ChatListScreen> {
                   FutureBuilder<int>(
                     future: DatabaseManager.getUserCurrentIconNumber(userid),
                     builder: (context, snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.none:
-                          return Image(
-                              image: AssetImage(
-                                  'assets/user_profile_icon_purple.png'),
-                              width: 40,
-                              height: 40);
-                        case ConnectionState.waiting:
-                          return Image(
-                              image: AssetImage(
-                                  'assets/user_profile_icon_purple.png'),
-                              width: 40,
-                              height: 40);
-                        default:
-                          if (snapshot.hasData) {
-                            return Image(
-                                image: AssetImage(
-                                    iconNumberMapping(snapshot.data!)),
-                                width: 40,
-                                height: 40);
-                          } else {
-                            return Image(
-                                image: AssetImage(
-                                    'assets/user_profile_icon_purple.png'),
-                                width: 40,
-                                height: 40);
-                          }
+                      if (snapshot.hasData) {
+                        return Image(
+                            image:
+                                AssetImage(iconNumberMapping(snapshot.data!)),
+                            width: 40,
+                            height: 40);
+                      } else {
+                        return Image(
+                            image: AssetImage(
+                                'assets/user_profile_icon_purple.png'),
+                            width: 40,
+                            height: 40);
                       }
                     },
                   ),

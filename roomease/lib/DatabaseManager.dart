@@ -116,7 +116,11 @@ class DatabaseManager {
       }
 
       List<String> _messageRoomIds = List<String>.from(messageRoomIds as List);
-      _messageRoomIds.add(messageRoomId);
+      if (_messageRoomIds.contains(messageRoomId)) {
+        return Transaction.success(_messageRoomIds);
+      } else {
+        _messageRoomIds.add(messageRoomId);
+      }
       CurrentUser.setCurrentMessageRoomIds(_messageRoomIds);
       // Return the new data.
       return Transaction.success(_messageRoomIds);
@@ -138,7 +142,11 @@ class DatabaseManager {
       }
 
       List<String> _userStatusList = List<String>.from(userStatusList as List);
-      _userStatusList.add(status);
+      if (_userStatusList.contains(status)) {
+        return Transaction.success(_userStatusList);
+      } else {
+        _userStatusList.add(status);
+      }
       // Return the new data.
       return Transaction.success(_userStatusList);
     });
@@ -208,6 +216,17 @@ class DatabaseManager {
       return 1;
     }
     return event.snapshot.value as int;
+  }
+
+  static Future<int> getUserTotalPoints(String userId) async {
+    DatabaseReference userPointsRef =
+        _databaseInstance.ref("users/$userId/totalPoints");
+    DatabaseEvent event = await userPointsRef.once();
+    if (event.snapshot.value == null) {
+      return 0;
+    } else {
+      return event.snapshot.value as int;
+    }
   }
 
   // ------------------------ END USER OPERATIONS ------------------------
