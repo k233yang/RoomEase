@@ -42,7 +42,8 @@ class _ProfileState extends State<Profile> {
                 userStatusSection(context),
                 Divider(indent: 20, endIndent: 20)
               ])),
-              logOutButton(context)
+              logOutButton(context),
+              deleteHouseholdButton(context)
             ])));
   }
 
@@ -118,6 +119,43 @@ class _ProfileState extends State<Profile> {
                   context, "/welcome", (_) => false);
             },
             child: Text("Log Out")));
+  }
+
+  Widget deleteHouseholdButton(BuildContext context) {
+    return Center(
+        child: TextButton(
+            onPressed: () {
+              showDialog(context: context, builder: (BuildContext context) {
+                return AlertDialog(title: Text("Delete Household"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("Are you sure you would like to delete this household?", textAlign: TextAlign.center),
+                        Text(""),
+                        Text("This action cannot be undone.", textAlign: TextAlign.center),
+                      ]c
+                    ),
+                    actions: [TextButton(onPressed: () {
+                      try{
+                        DatabaseManager.deleteCurrentHousehold();
+                      } catch (e) { print("Failed to delete household: $e"); }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(duration: const Duration(seconds: 1), content: Text('Household deleted!')));
+                      Navigator.pop(context);
+                      SharedPreferencesUtility.clear();
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, "/welcome", (_) => false);
+                    },
+                        child: Text("Yes, delete", style: TextStyle(color: Colors.red))
+                    ),
+                      TextButton(
+                          onPressed: () { Navigator.pop(context); },
+                          child: Text("No, return"))
+                    ]);
+              });
+            },
+            child: Text("Delete Household", style: TextStyle(color: Colors.red))));
   }
 
   Widget userStatusSection(BuildContext context) {
