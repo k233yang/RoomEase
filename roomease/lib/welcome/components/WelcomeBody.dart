@@ -75,6 +75,11 @@ class WelcomeBody extends StatelessWidget {
     int iconNumber =
         await DatabaseManager.getUserCurrentIconNumber(user.user!.uid);
     CurrentUser.setCurrentUserIconNumber(iconNumber);
+
+    // Update user points
+    int userTotalPoints =
+        await DatabaseManager.getUserTotalPoints(user.user!.uid);
+    CurrentUser.setCurrentUserTotalPoints(userTotalPoints);
   }
 }
 

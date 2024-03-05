@@ -158,5 +158,9 @@ class _LoginState extends State<Login> {
     // User icon
     int iconNumber = await DatabaseManager.getUserCurrentIconNumber(userId);
     CurrentUser.setCurrentUserIconNumber(iconNumber);
+
+    // Update user points
+    int userTotalPoints = await DatabaseManager.getUserTotalPoints(userId);
+    CurrentUser.setCurrentUserTotalPoints(userTotalPoints);
   }
 }
