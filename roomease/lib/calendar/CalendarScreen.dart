@@ -45,7 +45,6 @@ class _CalendarScreen extends State<CalendarScreen> {
     );
   }
 
-  // FutureBuilder<String> getFutureDataSource() {
   FutureBuilder<String> getCalendar() {
   return FutureBuilder<String>(
         future: calendarEventsLoaded,
@@ -70,56 +69,10 @@ class _CalendarScreen extends State<CalendarScreen> {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return Expanded( child: AlertDialog(
-                      title: Text(appointments[0].name),
-                      content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text("Details", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(appointments[0].details),
-                            Text("Event Type", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(appointments[0].type),
-                            Text("Begins", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(DateFormat('yyyy-mm-dd hh:mm a').format(DateTime.parse(appointments[0].startTime))),
-                            Text("Ends", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(DateFormat('yyyy-mm-dd hh:mm a').format(DateTime.parse(appointments[0].endTime))),
-                            Text(""),
-                            Text("Created By", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(appointments[0].createdByUserId),
-                          ]),
-                      actions: [TextButton(onPressed: () {
-                        // Delete event confirmation message
-                        showDialog(context: context, builder: (BuildContext context) {
-                          return AlertDialog(title: Text(appointments[0].name),
-                              content: Text("Are you sure you would like to delete this event?"),
-                              actions: [TextButton(onPressed: () {
-                                try{
-                                  DatabaseManager.deleteCalendarEvent(appointments[0].id).then((value) {
-                                    setState(() { calendarEventsLoaded = currHousehold.updateCalendarEventsList(); });
-                                  });
-                                } catch (e) { print("Failed to move chore: $e"); }
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(duration: const Duration(seconds: 1), content: Text('Event deleted!')));
-                                Navigator.pop(context);
-                                Navigator.pop(context);
-                                },
-                                  child: Text("Yes, delete", style: TextStyle(color: Colors.red))
-                              ),
-                              TextButton(onPressed: () { Navigator.pop(context); },
-                                  child: Text("No, return"))
-                              ]);
-                        });},
-                          child: Text("DELETE", style: TextStyle(color: Colors.red))
-                      ),
-                        TextButton(onPressed: () { Navigator.pop(context); },
-                            child: Text('CLOSE')),
-                      ]
-                  ));
-                }
-              );
+                  return getEventDialogs(appointments[0]);
+                });
             }
-          }
-        )
+          })
       );
     } else if (snapshot.hasError) {
       children = <Widget>[
@@ -154,6 +107,104 @@ class _CalendarScreen extends State<CalendarScreen> {
       )
     );
   });
+  }
+
+  Widget getEventDialogs(Event appointment) {
+    late Future<String> userName = DatabaseManager.getUserName(appointment.createdByUserId);
+
+    return FutureBuilder<String>(
+        future: userName,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          List<Widget> children;
+          if(snapshot.hasData) {
+            return Expanded( child: AlertDialog(
+                title: Text(appointment.name),
+                content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("Details", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(appointment.details),
+                      Text(""),
+                      Text("Event Type", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(appointment.type),
+                      Text(""),
+                      Row(mainAxisAlignment: MainAxisAlignment.center,
+                        children: [Text("Begins: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text(DateFormat('yyyy-mm-dd hh:mm a').format(DateTime.parse(appointment.startTime))),
+                        ]),
+                      Row(mainAxisAlignment: MainAxisAlignment.center,
+                          children: [Text("Ends: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text(DateFormat('yyyy-mm-dd hh:mm a').format(DateTime.parse(appointment.endTime))),
+                        ]),
+                      Text(""),
+                      Row(mainAxisAlignment: MainAxisAlignment.center,
+                        children: [Text("Created By: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text(snapshot.data as String),
+                        ]),
+                    ]),
+                actions: [TextButton(onPressed: () {
+                  // Delete event confirmation message
+                  showDialog(context: context, builder: (BuildContext context) {
+                    return AlertDialog(title: Text(appointment.name),
+                        content: Text("Are you sure you would like to delete this event?"),
+                        actions: [TextButton(onPressed: () {
+                          try{
+                            DatabaseManager.deleteCalendarEvent(appointment.id).then((value) {
+                              setState(() { calendarEventsLoaded = currHousehold.updateCalendarEventsList(); });
+                            });
+                          } catch (e) { print("Failed to move chore: $e"); }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(duration: const Duration(seconds: 1), content: Text('Event deleted!')));
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        },
+                            child: Text("Yes, delete", style: TextStyle(color: Colors.red))
+                        ),
+                          TextButton(
+                              onPressed: () { Navigator.pop(context); },
+                              child: Text("No, return"))
+                        ]);
+                  });},
+                    child: Text("DELETE", style: TextStyle(color: Colors.red))
+                ),
+                  TextButton(onPressed: () { Navigator.pop(context); },
+                      child: Text('CLOSE')),
+                ]
+            ));
+          } else if (snapshot.hasError) {
+            children = <Widget>[
+              const Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 60,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text('Error: ${snapshot.error}'),
+              ),
+            ];
+          } else {
+            children = <Widget>[
+              SizedBox(
+                width: 60,
+                height: 60,
+                child:
+                CircularProgressIndicator(color: ColorConstants.lightPurple),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text('Loading user name...'),
+              ),
+            ];
+          }
+          return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: children,
+              )
+          );
+        }
+    );
   }
 }
 
@@ -201,7 +252,7 @@ class EventDataSource extends CalendarDataSource {
     } else if (appointments![index].type == "Common Area Reservation") {
       return Colors.orange;
     } else if (appointments![index].type == "Quiet Time Request") {
-      return Colors.yellow;
+      return Colors.lightGreen;
     }
     else {
       return Colors.purple;
