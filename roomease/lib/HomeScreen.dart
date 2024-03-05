@@ -6,6 +6,7 @@ import 'package:roomease/Roomeo/ChatScreen.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/colors/ColorConstants.dart';
+import 'package:roomease/profile/EditProfileScreen.dart';
 import 'package:roomease/profile/ProfileScreen.dart';
 
 import 'calendar/CalendarScreen.dart';
@@ -124,6 +125,14 @@ class HomeCards extends StatelessWidget {
     return Center(
         child: Column(
       children: [
+        Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: Image(
+              image: AssetImage(iconNumberMapping(
+                  CurrentUser.getCurrentUserIconNumber())),
+              height: 150,
+              width: 150,
+            )),
         Padding(
             padding: EdgeInsets.only(top: 20),
             child: DatabaseManager.userNameStreamBuilder(
