@@ -209,7 +209,7 @@ Future<Map<String, String>> getCommandParameters(
 String generateFullCommandInput(Map<String, String> parameters) {
   switch (parameters['category']) {
     case 'Remove Chore':
-      return 'Remove the chore "${parameters['ChoreTitle']}" assigned by ${parameters['ChorePerson']} from the schedule.';
+      return 'Remove the chore "${parameters['ChoreTitle']}"';
     case 'Add Chore':
       if (parameters['ChoreDescription'] != 'Missing') {
         return 'Add the chore "${parameters['ChoreTitle']}" with the details "${parameters['ChoreDescription']}" to the schedule. The chore is due on ${parameters['ChoreDate']}, and assigned to ${parameters['ChorePerson']}.';
@@ -266,18 +266,16 @@ Future<void> getRoomeoResponse(String message, String messageKey,
     await insertVector(
       userResVector,
       CurrentHousehold.getCurrentHouseholdId(),
-      messageKey,
-      metadata: {'isChore': isChore, 'choreId': choreId},
+      choreId,
+      metadata: {'isChore': isChore},
     );
     await insertVector(
       userResVector,
       CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-      messageKey,
-      metadata: {'isChore': isChore, 'choreId': choreId},
+      choreId,
+      metadata: {'isChore': isChore},
     );
   } else {
-    print("getting in here");
-    print(CurrentUser.getCurrentUserId() + RoomeoUser.user.userId);
     await insertVector(
       userResVector,
       CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
@@ -343,7 +341,7 @@ Future<List<String>> queryChores(String choreTitle,
   // vectorize the query string
   List<double> queryStringVector = await getVectorEmbeddingArray(queryString);
   // use the query vector to find most similar chores
-  List<String> topChores = await searchChoreFromChat(queryStringVector,
+  List<String> topChores = await searchChoresFromChat(queryStringVector,
       CurrentHousehold.getCurrentHouseholdId().toLowerCase());
   return topChores;
 }

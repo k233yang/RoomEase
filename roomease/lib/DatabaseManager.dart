@@ -265,6 +265,7 @@ class DatabaseManager {
         .ref()
         .child("messageRooms/$messageRoomID/messages/$messageID");
     try {
+      await Future.delayed(const Duration(seconds: 2));
       await messageRef.update({'text': newMessage});
     } catch (e) {
       return Future.error('Failed to remove message: $e');
@@ -702,6 +703,14 @@ class DatabaseManager {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
     DatabaseReference choreRef = _databaseInstance
         .ref("households/$householdCode/${status.value}/$choreId");
+    await choreRef.remove();
+  }
+
+  static Future<void> deleteChoreFromStringStatus(
+      String choreId, String status) async {
+    String householdCode = CurrentHousehold.getCurrentHouseholdId();
+    DatabaseReference choreRef =
+        _databaseInstance.ref("households/$householdCode/$status/$choreId");
     await choreRef.remove();
   }
 

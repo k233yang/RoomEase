@@ -87,11 +87,11 @@ Future<void> insertVector(List<double> vector, String roomID, String vectorID,
 }
 
 /// fetch the most relevant messages given an input vector. Returns the identifiers for each message
-Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
+Future<List<String>> fetchTopMessages(List<double> vector, String indexID,
     {int messagesToFetch = 10}) async {
   // get the index of the room
   var fetchIndexUrl =
-      Uri.parse('https://api.pinecone.io/indexes/${roomID.toLowerCase()}');
+      Uri.parse('https://api.pinecone.io/indexes/${indexID.toLowerCase()}');
   var fetchIndexRes = await http.get(fetchIndexUrl, headers: <String, String>{
     'Accept': 'application/json',
     'Api-Key': PineConeAPIKey
@@ -131,8 +131,8 @@ Future<List<String>> fetchTopMessages(List<double> vector, String roomID,
 }
 
 /// given a pre-made chat string, find IDs the most relevant
-/// of the most relevant chores in the chore index in the VDB
-Future<List<String>> searchChoreFromChat(
+/// of the most relevant chores in the household index in the VDB
+Future<List<String>> searchChoresFromChat(
     List<double> queryVector, String householdId,
     {int choresToFind = 5}) async {
   // get the index of the room
@@ -167,10 +167,9 @@ Future<List<String>> searchChoreFromChat(
       var decodedQueryVectorRes = jsonDecode(queryVectorRes.body);
       List<dynamic> queryVectorResArray = decodedQueryVectorRes['matches'];
       List<String> res = [];
-      for (var match in queryVectorResArray) {
-        if (match['metadata'] != null) {
-          res.add(match['metadata']['choreId']);
-        }
+      for (int i = 0; i < queryVectorResArray.length; i++) {
+        res.add(queryVectorResArray[i]['id']);
+        res.sort();
       }
       return res;
     } else {
@@ -184,7 +183,7 @@ Future<List<String>> searchChoreFromChat(
 }
 
 /// given the query vector of a user's name, finds the most similar user
-/// and gives us their ID
+/// in the household and gives us their ID
 Future<String> searchUserFromChat(
   List<double> queryVector,
   String householdId,
@@ -237,13 +236,13 @@ Future<String> searchUserFromChat(
 /// replace a vector in the DB with another vector, and any updated metadata
 Future<void> updateVector(
   List<double> vector,
-  String roomID,
+  String indexID,
   String vectorID, {
   Map<String, dynamic> metadata = const {},
 }) async {
   // get the index of the room
   var fetchIndexUrl =
-      Uri.parse('https://api.pinecone.io/indexes/${roomID.toLowerCase()}');
+      Uri.parse('https://api.pinecone.io/indexes/${indexID.toLowerCase()}');
   var fetchIndexRes = await http.get(fetchIndexUrl, headers: <String, String>{
     'Accept': 'application/json',
     'Api-Key': PineConeAPIKey
@@ -262,6 +261,46 @@ Future<void> updateVector(
     if (metadata.isNotEmpty) {
       requestBody['setMetadata'] = metadata;
     }
+
+    var insertVectorRes = await http.post(
+      insertVectorUrl,
+      headers: <String, String>{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Api-Key': PineConeAPIKey
+      },
+      body: jsonEncode(requestBody),
+    );
+    if (insertVectorRes.statusCode != 200) {
+      throw Exception(
+          'Failed to insert vector into index: ${insertVectorRes.statusCode}');
+    }
+    return;
+  } else {
+    throw Exception(
+        'Failed to fetch index info. Status code: ${fetchIndexRes.statusCode}');
+  }
+}
+
+/// delete a vector in the DB
+Future<void> deleteVector(String indexID, String vectorID) async {
+// get the index of the room
+  var fetchIndexUrl =
+      Uri.parse('https://api.pinecone.io/indexes/${indexID.toLowerCase()}');
+  var fetchIndexRes = await http.get(fetchIndexUrl, headers: <String, String>{
+    'Accept': 'application/json',
+    'Api-Key': PineConeAPIKey
+  });
+
+  if (fetchIndexRes.statusCode == 200) {
+    final decodedFetchIndexRes = jsonDecode(fetchIndexRes.body);
+    final String indexEndpoint = decodedFetchIndexRes['host'];
+    //print("INDEX ENDPOINT: $indexEndpoint");
+    var insertVectorUrl = Uri.parse('https://$indexEndpoint/vectors/delete');
+
+    Map<String, dynamic> requestBody = {
+      'ids': [vectorID]
+    };
 
     var insertVectorRes = await http.post(
       insertVectorUrl,
