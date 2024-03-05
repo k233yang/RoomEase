@@ -118,8 +118,9 @@ class _CalendarScreen extends State<CalendarScreen> {
           List<Widget> children;
           if(snapshot.hasData) {
             return Expanded( child: AlertDialog(
-                title: Text(appointment.name),
-                content: Column(
+                title: Text(appointment.name,
+                    overflow: TextOverflow.ellipsis),
+                content: SingleChildScrollView(child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text("Details", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -141,7 +142,7 @@ class _CalendarScreen extends State<CalendarScreen> {
                         children: [Text("Created By: ", style: TextStyle(fontWeight: FontWeight.bold)),
                           Text(snapshot.data as String),
                         ]),
-                    ]),
+                    ]),),
                 actions: [TextButton(onPressed: () {
                   // Delete event confirmation message
                   showDialog(context: context, builder: (BuildContext context) {
