@@ -431,6 +431,7 @@ class _ChoreScreen extends State<ChoreScreen> {
                 else {
                   return Text(
                       choreItem.name,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.w500, 
                         fontSize: 20

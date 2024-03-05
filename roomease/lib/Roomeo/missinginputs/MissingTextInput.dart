@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
 
 class MissingTextInput extends StatefulWidget {
-  const MissingTextInput({
-    super.key,
-    this.isInputSingleLine = true,
-    required this.onTextInput,
-    required this.placeHolder,
-  });
+  const MissingTextInput(
+      {super.key,
+      this.isInputSingleLine = true,
+      required this.onTextInput,
+      required this.placeHolder,
+      this.message = ""});
 
   final Function(String) onTextInput;
   final bool isInputSingleLine;
   final String placeHolder;
+  final String message;
 
   @override
   MissingTextInputState createState() => MissingTextInputState();
 }
 
 class MissingTextInputState extends State<MissingTextInput> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    // Add listener to the controller
+    _controller = TextEditingController(text: widget.message);
     _controller.addListener(_handleTextInputChange);
   }
 

@@ -6,8 +6,8 @@ import 'package:roomease/Roomeo/missinginputs/MissingTextInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingPointInput.dart';
 import '../../colors/ColorConstants.dart';
 
-// TODO: search for a person based on a user input
-
+// Search person is used to find another household member, if the user
+// specified one in their message
 Widget handleAddChoreMissingParams(
     String missingParameter, Function(String, String) updateCallback,
     {String? searchPerson}) {
@@ -22,8 +22,8 @@ Widget handleAddChoreMissingParams(
       );
     case "ChoreDate":
       return MissingDateInput(
-        onDateSelect: (DateTime userInput) {
-          updateCallback("ChoreDate", userInput.toString());
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
         },
         placeHolder: "When should the chore be completed by?",
       );
@@ -90,18 +90,29 @@ Widget handleUpdateChoreMissingParams(
       );
     case "ChoreDate":
       return MissingDateInput(
-        onDateSelect: (DateTime userInput) {
-          updateCallback("ChoreDate", userInput.toString());
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
         },
         placeHolder: "Search by date (optional)",
       );
     case "ChorePerson":
-      return MissingUserInput(
-        onUserSelect: (String userInput) {
-          updateCallback("ChorePerson", userInput);
-        },
-        placeholder: "Who was this chore assigned to? (optional)",
-      );
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
+          },
+          placeholder: "Who is responsible for the chore?",
+        );
+      } else {
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
+          },
+          placeholder: "Who is responsible for the chore?",
+          searchPerson: searchPerson,
+        );
+      }
     case "ChoreDescription":
       return MissingTextInput(
         onTextInput: (String userInput) {
@@ -110,6 +121,93 @@ Widget handleUpdateChoreMissingParams(
         placeHolder: "Description of the chore to be updated (optional)",
         isInputSingleLine: false,
       );
+    default:
+      return SizedBox.shrink();
+  }
+}
+
+Widget handleSetStatusMissingParams(
+  String missingParameter,
+  Function(String, String) updateCallback,
+) {
+  switch (missingParameter) {
+    case "Status":
+      return MissingStatusInput(
+        onStatusInput: (String userInput) {
+          updateCallback("Status", userInput);
+        },
+      );
+    default:
+      return SizedBox.shrink();
+  }
+}
+
+Widget handleSendMessageMissingParams(
+    String missingParameter, Function(String, String) updateCallback,
+    {String? searchPerson, String? message}) {
+  switch (missingParameter) {
+    case "SendPerson":
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("SendPerson", userInput);
+          },
+          placeholder: "Who do you want to message?",
+        );
+      } else {
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("SendPerson", userInput);
+          },
+          placeholder: "Who Who do you want to message?",
+          searchPerson: searchPerson,
+        );
+      }
+    case "Message":
+      if (message == null) {
+        return MissingTextInput(
+          onTextInput: (String userInput) {
+            updateCallback("Message", userInput);
+          },
+          placeHolder: "What do you want to send?",
+        );
+      } else {
+        return MissingTextInput(
+          onTextInput: (String userInput) {
+            updateCallback("Message", userInput);
+          },
+          placeHolder: "What do you want to send?",
+          message: message,
+        );
+      }
+    default:
+      return SizedBox.shrink();
+  }
+}
+
+Widget handleViewStatusMissingParams(
+    String missingParameter, Function(String, String) updateCallback,
+    {String? searchPerson}) {
+  switch (missingParameter) {
+    case "ViewPerson":
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ViewPerson", userInput);
+          },
+          placeholder: "Whose status do you want to view?",
+        );
+      } else {
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ViewPerson", userInput);
+          },
+          placeholder: "Whose status do you want to view?",
+          searchPerson: searchPerson,
+        );
+      }
     default:
       return SizedBox.shrink();
   }
@@ -127,12 +225,23 @@ Widget handleRemoveChoreMissingParams(
         placeHolder: "Name of the chore to remove",
       );
     case "ChorePerson":
-      return MissingUserInput(
-        onUserSelect: (String userInput) {
-          updateCallback("ChorePerson", userInput);
-        },
-        placeholder: "Who was this chore assigned to? (optional)",
-      );
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
+          },
+          placeholder: "Who is responsible for the chore?",
+        );
+      } else {
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
+          },
+          placeholder: "Who is responsible for the chore?",
+          searchPerson: searchPerson,
+        );
+      }
     case "ChoreDescription":
       return MissingTextInput(
         onTextInput: (String userInput) {
@@ -143,8 +252,8 @@ Widget handleRemoveChoreMissingParams(
       );
     case "ChoreDate":
       return MissingDateInput(
-        onDateSelect: (DateTime userInput) {
-          updateCallback("ChoreDate", userInput.toString());
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
         },
         placeHolder: "Search by date (optional)",
       );

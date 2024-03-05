@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:roomease/Roomeo/RoomeoUser.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'User.dart';
@@ -7,6 +8,8 @@ import 'User.dart';
 class CurrentUser {
   static var userNameSubscription =
       Stream<DatabaseEvent>.empty().listen((DatabaseEvent event) {});
+  static var userMessageRoomValueListener =
+      ValueNotifier<Map<String, List<Map<String, String>>>>({});
 
   static User getCurrentUser() {
     String userId = SharedPreferencesUtility.getString("userId");
