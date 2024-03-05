@@ -133,7 +133,7 @@ class _ProfileState extends State<Profile> {
                         Text("Are you sure you would like to delete this household?", textAlign: TextAlign.center),
                         Text(""),
                         Text("This action cannot be undone.", textAlign: TextAlign.center),
-                      ]c
+                      ]
                     ),
                     actions: [TextButton(onPressed: () {
                       try{
