@@ -16,8 +16,8 @@ class AddChoreScreen extends StatefulWidget {
   State<AddChoreScreen> createState() => _AddChoreScreen();
 }
 
-const List<int> pointsList = <int>[1, 2, 3, 4, 5];
-const List<int> thresholdList = <int>[1, 2, 3, 4, 5];
+const List<int> pointsList = <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const List<int> thresholdList = <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 class _AddChoreScreen extends State<AddChoreScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -69,12 +69,6 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                   keyboardType: TextInputType.multiline,
                   minLines: 5,
                   maxLines: 5,
-                  // validator: (value) {
-                  //   if (value == null || value.isEmpty) {
-                  //     return 'Please enter details for the chore';
-                  //   }
-                  //   return null;
-                  // },
                 ),
               ),
               Padding(

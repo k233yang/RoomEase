@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
+import 'package:roomease/chores/EditChoreFromChoreScreen.dart';
 import '../CurrentHousehold.dart';
 import '../Household.dart';
 import '../colors/ColorConstants.dart';
@@ -354,26 +355,8 @@ class _ChoreScreen extends State<ChoreScreen> {
         currHousehold.updateChoresList(ChoreStatus.inProgress);
     completedListLoaded = currHousehold.updateChoresList(ChoreStatus.completed);
   }
-}
 
-class CreateAddChoreButton extends StatelessWidget {
-  final VoidCallback onButtonPress;
-
-  CreateAddChoreButton({Key? key, required this.onButtonPress})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-        foregroundColor: ColorConstants.white,
-        backgroundColor: ColorConstants.lightPurple,
-        shape: CircleBorder(),
-        onPressed: onButtonPress,
-        child: const Icon(Icons.add));
-  }
-}
-
-List<Widget> getChoreTile(
+  List<Widget> getChoreTile(
   BuildContext context,
   Household currHousehold,
   ChoreStatus status,
@@ -422,8 +405,6 @@ List<Widget> getChoreTile(
   for (final choreItem in list) {
     final Future<String> assignedUserName =
         DatabaseManager.getUserName(choreItem.assignedUserId);
-
-
     choreTileList.add(Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: ClipRRect(
@@ -653,7 +634,7 @@ List<Widget> getChoreTile(
                 alignment: Alignment.topLeft,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 10),
-                  child:Text(
+                  child: Text(
                     choreItem.timesIncremented.toString(),
                     textAlign: TextAlign.left,
                     style: TextStyle(
@@ -661,6 +642,26 @@ List<Widget> getChoreTile(
                       fontWeight: FontWeight.normal,
                   )),
                 ),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 100, right: 100, top: 0, bottom: 10),
+                  child: CreateEditChoreButton(onButtonPress: () {
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => EditChoreFromChoreScreen(
+                        choreId: choreItem.id,
+                        onChoreUpdate: () async {
+                          Navigator.of(context).pop();
+                          
+                        },),
+                    )).then((value) {
+                      setState(() {
+                        refreshTiles();
+                      });
+                  });
+                }),
+              ),
               ),
             ],
             onExpansionChanged: (bool expanded) {
@@ -671,4 +672,44 @@ List<Widget> getChoreTile(
   }
 
   return choreTileList;
+}
+}
+
+class CreateAddChoreButton extends StatelessWidget {
+  final VoidCallback onButtonPress;
+
+  CreateAddChoreButton({Key? key, required this.onButtonPress})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+        foregroundColor: ColorConstants.white,
+        backgroundColor: ColorConstants.lightPurple,
+        shape: CircleBorder(),
+        onPressed: onButtonPress,
+        child: const Icon(Icons.add));
+  }
+}
+
+class CreateEditChoreButton extends StatelessWidget {
+  final VoidCallback onButtonPress;
+
+  CreateEditChoreButton({Key? key, required this.onButtonPress})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onButtonPress,
+      child: Row(children: [
+        Text("Edit Chore"),
+        Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: Image(
+                image: AssetImage('assets/edit_icon.png'),
+                height: 30,
+                width: 30)),
+      ]));
+  }
 }

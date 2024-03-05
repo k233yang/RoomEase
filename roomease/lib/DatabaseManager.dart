@@ -735,41 +735,38 @@ class DatabaseManager {
   }
 
 
-  static Future<void> updateUserPoints(int points, bool increase) async {
-    String userId = CurrentUser.getCurrentUserId();
+  static Future<void> updateUserPoints(int points, String assignedUserId, bool increase) async {
 
-    DatabaseReference userRef = _databaseInstance.ref("users/${userId}");
-    DatabaseReference userPointsRef = _databaseInstance.ref("users/${userId}/totalPoints");
+    DatabaseReference userRef = _databaseInstance.ref("users/${assignedUserId}");
+    DatabaseReference userPointsRef = _databaseInstance.ref("users/${assignedUserId}/totalPoints");
 
     DatabaseReference householdRef = _databaseInstance.ref(
-        "households/${CurrentHousehold.getCurrentHouseholdId()}/users/$userId");
+        "households/${CurrentHousehold.getCurrentHouseholdId()}/users/$assignedUserId");
 
     DatabaseEvent userPointsEvent = await userPointsRef.once();
     
+    int totalPoints = 0;
+
     if (userPointsEvent.snapshot.exists ) {
       int userPoints = userPointsEvent.snapshot.value as int;
       if( increase == true ) {
-        await userRef.update({"totalPoints": userPoints + points });
-        await householdRef.update({"totalPoints": userPoints + points});
-        CurrentUser.setCurrentUserTotalPoints(userPoints + points );
+        totalPoints = userPoints + points;
       }
       else {
-        await userRef.update({"totalPoints": userPoints - points });
-        await householdRef.update({"totalPoints": userPoints - points});
-        CurrentUser.setCurrentUserTotalPoints(userPoints - points );
+        totalPoints = userPoints - points;
       }
     }
     else {
-      if( increase == true ) {
-        await userRef.update({"totalPoints": points });
-        await householdRef.update({"totalPoints": points});
-        CurrentUser.setCurrentUserTotalPoints(points);
+      if( increase == true ) {        
+        totalPoints = points;
       }
-      else {
-        await userRef.update({"totalPoints": 0 });
-        await householdRef.update({"totalPoints": 0});
-        CurrentUser.setCurrentUserTotalPoints(0);
-      }
+    }
+    
+    await userRef.update({"totalPoints": totalPoints });
+    await householdRef.update({"totalPoints": totalPoints });
+    
+    if ( assignedUserId == CurrentUser.getCurrentUserId() ) {
+      CurrentUser.setCurrentUserTotalPoints(totalPoints);
     }
   }
 
@@ -814,10 +811,10 @@ class DatabaseManager {
     );
 
     if ( newChoreStatus == ChoreStatus.completed ) {
-      updateUserPoints(int.parse(choreJson("points").value.toString()), true);
+      updateUserPoints(int.parse(choreJson("points").value.toString()), assignedUserId!, true);
     }
     else if ( choreStatus == ChoreStatus.completed && newChoreStatus == ChoreStatus.inProgress ) {
-      updateUserPoints(int.parse(choreJson("points").value.toString()), false);
+      updateUserPoints(int.parse(choreJson("points").value.toString()), assignedUserId!, false);
     }
 
     await choreRef.remove();
