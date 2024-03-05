@@ -341,11 +341,51 @@ class _ChatScreen extends State<ChatScreen> {
                   gptMessageKey,
                 ),
               ]);
-            } else if (category == 'Send Message') {
+            } else if (category == 'Send a Message') {
               // send the actual message to the user
               String? sendPersonId = await DatabaseManager.getUserIdByName(
                   commandParams["SendPerson"]!);
               String message = commandParams["Message"]!;
+              String messageRoomId = "";
+              String possibleMessageRoomId_1 =
+                  sendPersonId! + CurrentUser.getCurrentUserId();
+              String possibleMessageRoomId_2 =
+                  CurrentUser.getCurrentUserId() + sendPersonId;
+              if (await DatabaseManager.doesMessageRoomExist(
+                  possibleMessageRoomId_1)) {
+                messageRoomId = possibleMessageRoomId_1;
+              } else if (await DatabaseManager.doesMessageRoomExist(
+                  possibleMessageRoomId_2)) {
+                messageRoomId = possibleMessageRoomId_2;
+              } else {
+                // create the new message room for the user and recipient
+                // if the room does not exist
+                messageRoomId = CurrentUser.getCurrentUserId() + sendPersonId;
+                await DatabaseManager.addMessageRoomWithList(
+                    [CurrentUser.getCurrentUserId(), sendPersonId]);
+                await DatabaseManager.addMessageRoomIdToUser(
+                    CurrentUser.getCurrentUserId(), messageRoomId);
+                await DatabaseManager.addMessageRoomIdToUser(
+                    sendPersonId, messageRoomId);
+              }
+              await DatabaseManager.addMessage(
+                messageRoomId,
+                Message(
+                  message,
+                  CurrentUser.getCurrentUserId(),
+                  CurrentUser.getCurrentUserName(),
+                  DateTime.now(),
+                ),
+              );
+              await getRoomeoResponse(
+                  "Send the message: '$message' to ${commandParams["SendPerson"]}",
+                  userMessageKey,
+                  shouldQueryHouseholdsInstead: true);
+              await DatabaseManager.replaceMessage(
+                CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                userMessageKey,
+                "Send the message: '$message' to ${commandParams["SendPerson"]}",
+              );
             }
           } else if (category == 'View Schedule') {
             final localContext = context;
