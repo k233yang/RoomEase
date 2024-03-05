@@ -20,6 +20,8 @@ class _AddEventScreen extends State<AddEventScreen> {
   TextEditingController detailsController = TextEditingController();
   TextEditingController startTimeController = TextEditingController();
   TextEditingController endTimeController = TextEditingController();
+  String startTimeFormattedForParsing = "";
+  String endTimeFormattedForParsing = "";
 
   String type = typeList.first;
 
@@ -101,6 +103,7 @@ class _AddEventScreen extends State<AddEventScreen> {
                                     startTime.hour,
                                     startTime.minute,
                                   );
+                                  startTimeFormattedForParsing = startDateTime.toString();
                                   String formattedDateTime =
                                   DateFormat('yyyy-MM-dd')
                                       .add_jm()
@@ -151,6 +154,7 @@ class _AddEventScreen extends State<AddEventScreen> {
                                     endTime.hour,
                                     endTime.minute,
                                   );
+                                  endTimeFormattedForParsing = endDateTime.toString();
                                   String formattedDateTime =
                                   DateFormat('yyyy-MM-dd')
                                       .add_jm()
@@ -209,8 +213,8 @@ class _AddEventScreen extends State<AddEventScreen> {
                                 CurrentHousehold.getCurrentHouseholdId(),
                                 nameController.text,
                                 detailsController.text,
-                                startTimeController.text,
-                                endTimeController.text,
+                                startTimeFormattedForParsing,
+                                endTimeFormattedForParsing,
                                 DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
                                 type,
                                 CurrentUser.getCurrentUserId(),
