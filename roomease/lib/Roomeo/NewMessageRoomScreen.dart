@@ -43,8 +43,11 @@ class _NewMessageRoomScreen extends State<NewMessageRoomScreen> {
                       "Select one of your roommates to start messaging",
                       style: TextStyle(fontSize: 15),
                     )),
-                for (var i = 0; i < roommateUserNames.length; i++)
-                  roommateRow(roommateUserNames.elementAt(i), i),
+                if (roommateUserNames.isEmpty)
+                  Text("You have no roommates to start a chat with.")
+                else
+                  for (var i = 0; i < roommateUserNames.length; i++)
+                    roommateRow(roommateUserNames.elementAt(i), i),
                 if (isRoommateSelected)
                   TextButton(
                       onPressed: () async {

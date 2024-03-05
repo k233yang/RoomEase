@@ -427,6 +427,13 @@ class DatabaseManager {
     CurrentUser.userMessageRoomValueListener.value = messageRoomMapping;
   }
 
+  static Future<bool> doesMessageRoomExist(String messageRoomID) async {
+    DatabaseReference messageRef =
+        _databaseInstance.ref().child("messageRooms/$messageRoomID");
+    DatabaseEvent event = await messageRef.once();
+    return event.snapshot.value != null;
+  }
+
   // ------------------------ END MESSAGE OPERATIONS ------------------------
 
   // ------------------------ HOUSEHOLD OPERATIONS ------------------------
@@ -932,8 +939,8 @@ class DatabaseManager {
 
   static Future<void> deleteCalendarEvent(String eventId) async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
-    DatabaseReference choreRef = _databaseInstance
-        .ref("households/$householdCode/events/$eventId");
+    DatabaseReference choreRef =
+        _databaseInstance.ref("households/$householdCode/events/$eventId");
     await choreRef.remove();
   }
   // ------------------------ END CALENDAR OPERATIONS ------------------------

@@ -80,6 +80,11 @@ class _ChatListScreen extends State<ChatListScreen> {
               userIds.remove(CurrentUser.getCurrentUserId());
               userNames.remove(CurrentUser.getCurrentUserName());
 
+              // Need to remove names that already have a chat room
+              List userIdsToRemove =
+                  await getExistingUserIdsAndRemoveNames(userIds, userNames);
+              userIds.remove(userIdsToRemove);
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -94,6 +99,22 @@ class _ChatListScreen extends State<ChatListScreen> {
                   }));
             },
             child: const Icon(Icons.add)));
+  }
+
+  Future<List<String>> getExistingUserIdsAndRemoveNames(
+      List<String> userIds, List<String> userNames) async {
+    List<String> userIdsToRemove = [];
+    for (var i = 0; i < userIds.length; i++) {
+      bool cond1 = await DatabaseManager.doesMessageRoomExist(
+          CurrentUser.getCurrentUserId() + userIds[i]);
+      bool cond2 = await DatabaseManager.doesMessageRoomExist(
+          userIds[i] + CurrentUser.getCurrentUserId());
+      if (cond1 || cond2) {
+        userIdsToRemove.add(userIds[i]);
+        userNames.removeAt(i);
+      }
+    }
+    return userIdsToRemove;
   }
 
   Widget chatRow(List<Map<String, String>> entry, String messageRoomId) {
