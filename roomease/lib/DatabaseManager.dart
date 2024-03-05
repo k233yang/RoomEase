@@ -494,7 +494,7 @@ class DatabaseManager {
   // ------------------------ END HOUSEHOLD OPERATIONS ------------------------
 
   // ------------------------ CHORE OPERATIONS ------------------------
-
+  /// adds a chore to firebase, and returns the chore's ID
   static Future<String> addChore(
       String householdCode,
       String name,
@@ -792,23 +792,22 @@ class DatabaseManager {
 
   static Future<List<Event>> getCalendarEventsFromDB(String householdId) async {
     final eventListRef =
-    _databaseInstance.ref("households/$householdId/events");
+        _databaseInstance.ref("households/$householdId/events");
     DatabaseEvent event = await eventListRef.once();
     final eventsJson = event.snapshot.children;
 
     List<Event> eventsList = <Event>[];
 
     for (final event in eventsJson) {
-      eventsList.add( Event(
-        event.child("id").value.toString(),
-        event.child("name").value.toString(),
-        event.child("details").value.toString(),
-        event.child("startTime").value.toString(),
-        event.child("endTime").value.toString(),
-        event.child("dateCreated").value.toString(),
-        event.child("type").value.toString(),
-        event.child("createdByUserId").value.toString()
-      ));
+      eventsList.add(Event(
+          event.child("id").value.toString(),
+          event.child("name").value.toString(),
+          event.child("details").value.toString(),
+          event.child("startTime").value.toString(),
+          event.child("endTime").value.toString(),
+          event.child("dateCreated").value.toString(),
+          event.child("type").value.toString(),
+          event.child("createdByUserId").value.toString()));
     }
     return eventsList;
   }
