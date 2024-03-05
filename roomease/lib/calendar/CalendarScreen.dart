@@ -146,7 +146,7 @@ class _CalendarScreen extends State<CalendarScreen> {
                 actions: [TextButton(onPressed: () {
                   // Delete event confirmation message
                   showDialog(context: context, builder: (BuildContext context) {
-                    return AlertDialog(title: Text(appointment.name),
+                    return AlertDialog(title: Text(appointment.name, overflow: TextOverflow.ellipsis),
                         content: Text("Are you sure you would like to delete this event?"),
                         actions: [TextButton(onPressed: () {
                           try{
