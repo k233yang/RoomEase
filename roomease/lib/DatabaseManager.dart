@@ -40,6 +40,7 @@ class DatabaseManager {
     DatabaseReference usersRef =
         _databaseInstance.ref("users/$userId/householdId");
     DatabaseEvent event = await usersRef.once();
+    if (event.snapshot.value == null) return null;
     return event.snapshot.value as String;
   }
 
@@ -569,8 +570,8 @@ class DatabaseManager {
 
   static Future<void> deleteCurrentHousehold() async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
-    DatabaseReference householdRef = _databaseInstance
-        .ref("households/$householdCode");
+    DatabaseReference householdRef =
+        _databaseInstance.ref("households/$householdCode");
     await householdRef.remove();
   }
   // ------------------------ END HOUSEHOLD OPERATIONS ------------------------
@@ -815,38 +816,37 @@ class DatabaseManager {
     await choreRef.remove();
   }
 
-
-  static Future<void> updateUserPoints(int points, String assignedUserId, bool increase) async {
-
-    DatabaseReference userRef = _databaseInstance.ref("users/${assignedUserId}");
-    DatabaseReference userPointsRef = _databaseInstance.ref("users/${assignedUserId}/totalPoints");
+  static Future<void> updateUserPoints(
+      int points, String assignedUserId, bool increase) async {
+    DatabaseReference userRef =
+        _databaseInstance.ref("users/${assignedUserId}");
+    DatabaseReference userPointsRef =
+        _databaseInstance.ref("users/${assignedUserId}/totalPoints");
 
     DatabaseReference householdRef = _databaseInstance.ref(
         "households/${CurrentHousehold.getCurrentHouseholdId()}/users/$assignedUserId");
 
     DatabaseEvent userPointsEvent = await userPointsRef.once();
-    
+
     int totalPoints = 0;
 
-    if (userPointsEvent.snapshot.exists ) {
+    if (userPointsEvent.snapshot.exists) {
       int userPoints = userPointsEvent.snapshot.value as int;
-      if( increase == true ) {
+      if (increase == true) {
         totalPoints = userPoints + points;
-      }
-      else {
+      } else {
         totalPoints = userPoints - points;
       }
-    }
-    else {
-      if( increase == true ) {        
+    } else {
+      if (increase == true) {
         totalPoints = points;
       }
     }
-    
-    await userRef.update({"totalPoints": totalPoints });
-    await householdRef.update({"totalPoints": totalPoints });
-    
-    if ( assignedUserId == CurrentUser.getCurrentUserId() ) {
+
+    await userRef.update({"totalPoints": totalPoints});
+    await householdRef.update({"totalPoints": totalPoints});
+
+    if (assignedUserId == CurrentUser.getCurrentUserId()) {
       CurrentUser.setCurrentUserTotalPoints(totalPoints);
     }
   }
@@ -890,11 +890,13 @@ class DatabaseManager {
       newChoreStatus.value,
     );
 
-    if ( newChoreStatus == ChoreStatus.completed ) {
-      updateUserPoints(int.parse(choreJson("points").value.toString()), assignedUserId!, true);
-    }
-    else if ( choreStatus == ChoreStatus.completed && newChoreStatus == ChoreStatus.inProgress ) {
-      updateUserPoints(int.parse(choreJson("points").value.toString()), assignedUserId!, false);
+    if (newChoreStatus == ChoreStatus.completed) {
+      updateUserPoints(int.parse(choreJson("points").value.toString()),
+          assignedUserId!, true);
+    } else if (choreStatus == ChoreStatus.completed &&
+        newChoreStatus == ChoreStatus.inProgress) {
+      updateUserPoints(int.parse(choreJson("points").value.toString()),
+          assignedUserId!, false);
     }
 
     await choreRef.remove();
