@@ -144,7 +144,8 @@ class _ChatScreen extends State<ChatScreen> {
             print("PARAMETERS ARE: $commandParams");
             // if there are missing params, navigate to UserCommandParamInputScreen
             // to prompt the user for the missing params
-            if (commandParams.containsValue("Missing")) {
+            if (commandParams.containsValue("Missing") ||
+                commandParams.containsKey("ViewPerson")) {
               if (mounted) {
                 // Check if the widget is still in the tree
                 final result = await Navigator.of(context).push(
@@ -255,8 +256,50 @@ class _ChatScreen extends State<ChatScreen> {
                   return;
                 }
               }
+            } else if (category == 'View Status') {
+              print("VIEW STATUS PARAMS ARE: $commandParams");
+              String viewPerson = commandParams['ViewPerson']!;
+              String? viewPersonId =
+                  await DatabaseManager.getUserIdByName(viewPerson);
+              String viewPersonStatus =
+                  await DatabaseManager.getUserCurrentStatus(viewPersonId!);
+              String viewStatusMessage = "What's $viewPerson's status?";
+              String roomeoMessage =
+                  "$viewPerson's status is currently '$viewPersonStatus'";
+              var results = await Future.wait([
+                getVectorEmbeddingArray(viewStatusMessage),
+                getVectorEmbeddingArray(roomeoMessage),
+              ]);
+              List<double> viewStatusMessageVector = results[0];
+              List<double> roomeoMessageVector = results[1];
+              await DatabaseManager.replaceMessage(
+                CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                userMessageKey,
+                viewStatusMessage,
+              );
+              String gptMessageKey = await DatabaseManager.addMessage(
+                messageRoomId,
+                Message(
+                  roomeoMessage,
+                  RoomeoUser.user.userId,
+                  RoomeoUser.user.name,
+                  DateTime.now(),
+                ),
+              );
+              await Future.wait([
+                insertVector(
+                  viewStatusMessageVector,
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  userMessageKey,
+                ),
+                insertVector(
+                  roomeoMessageVector,
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  gptMessageKey,
+                ),
+              ]);
             }
-            // view schedule doesn't need parameters, so we can just show it
+            // view schedule doesn't need parameters, so we can just go to the calendar page
             else if (category == 'View Schedule') {
               final localContext = context;
               if (mounted) {

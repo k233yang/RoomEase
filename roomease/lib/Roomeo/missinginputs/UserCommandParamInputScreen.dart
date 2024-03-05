@@ -127,6 +127,10 @@ class _UserCommandParamInputScreenState
         return handleRemoveChoreMissingParams(
             missingParameter, updateCommandParams,
             searchPerson: chorePerson);
+      case "View Status":
+        return handleViewStatusMissingParams(
+            missingParameter, updateCommandParams,
+            searchPerson: chorePerson);
       default:
         return SizedBox.shrink();
     }
@@ -248,11 +252,11 @@ class _UserCommandParamInputScreenState
 }
 
 // categories are: 'View Schedule', 'Add to Schedule, 'Remove from Schedule', 'Update Schedule',
-//'View Status', 'Set Status', 'Chore Delegation', 'Ask for Advice', 'Send a Message'.
+//'View Status', 'Set Status', 'Ask for Advice', 'Send a Message'.
 // Categorize the message as 'Unknown' if the user input cannot be categorized or if the input
 // is irrelevant to the previous categories. Give me only the category of the message, and
 // nothing else. The user input is: '$message'"
 
 // checklist:
-// done (on my end): add to schedule, view schedule, set status, view status
-// total done: (4/9)
+// done (on my end): add chore, view schedule, set status, view status, remove chore, update chore
+// total done: (6/8)
