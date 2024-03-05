@@ -126,6 +126,22 @@ Widget handleUpdateChoreMissingParams(
   }
 }
 
+Widget handleSetStatusMissingParams(
+  String missingParameter,
+  Function(String, String) updateCallback,
+) {
+  switch (missingParameter) {
+    case "Status":
+      return MissingStatusInput(
+        onStatusInput: (String userInput) {
+          updateCallback("Status", userInput);
+        },
+      );
+    default:
+      return SizedBox.shrink();
+  }
+}
+
 Widget handleViewStatusMissingParams(
     String missingParameter, Function(String, String) updateCallback,
     {String? searchPerson}) {

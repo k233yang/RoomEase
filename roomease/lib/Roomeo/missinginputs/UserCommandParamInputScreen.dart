@@ -131,6 +131,11 @@ class _UserCommandParamInputScreenState
         return handleViewStatusMissingParams(
             missingParameter, updateCommandParams,
             searchPerson: chorePerson);
+      case "Set Status":
+        return handleSetStatusMissingParams(
+          missingParameter,
+          updateCommandParams,
+        );
       default:
         return SizedBox.shrink();
     }
