@@ -200,6 +200,7 @@ class DatabaseManager {
   static Future<int> getUserCurrentIconNumber(String userId) async {
     DatabaseReference usersRef =
         _databaseInstance.ref("users/$userId/iconNumber");
+    if (userId == "RoomeoId") return 100;
     DatabaseEvent event = await usersRef.once();
     if (event.snapshot.value == null) {
       DatabaseReference updateRef = _databaseInstance.ref("users/$userId");
@@ -383,6 +384,40 @@ class DatabaseManager {
     } else {
       return Future.error('Snapshot value is null');
     }
+  }
+
+  static void userMessageRoomSubscription(String currentUserId) async {
+    // Excludes current user by default since this is used for displaying
+    // all message rooms in the chatListScreen
+    DatabaseReference userRef =
+        _databaseInstance.ref().child("users/$currentUserId/messageRoomIds");
+    List<String> messageRoomIdList = [];
+    DatabaseEvent userEvent = await userRef.once();
+    for (DataSnapshot d in userEvent.snapshot.children) {
+      messageRoomIdList.add(d.value as String);
+    }
+    Map<String, List<Map<String, String>>> messageRoomMapping = {};
+    // Format is messageRoomid: List<Map<userid:username>>
+    for (String messageRoomID in messageRoomIdList) {
+      DatabaseReference messageRef =
+          _databaseInstance.ref().child("messageRooms/$messageRoomID/users");
+      DatabaseEvent event = await messageRef.once();
+      if (event.snapshot.value != null) {
+        // event.snapshot.value is a list of the users in this specific msg room
+        //[EZ5ZkiFsVZMySudqICUIhmskgXw1, RoomeoId]
+        List<Map<String, String>> userNameIdMapping = [];
+        for (DataSnapshot d in event.snapshot.children) {
+          String userid = d.value as String;
+          if (CurrentUser.getCurrentUserId() != userid) {
+            String username = await DatabaseManager.getUserName(userid);
+            if (userid == "RoomeoId") username = "Roomeo";
+            userNameIdMapping.add({"id": userid, "name": username});
+          }
+        }
+        messageRoomMapping[messageRoomID] = userNameIdMapping;
+      }
+    }
+    CurrentUser.userMessageRoomValueListener.value = messageRoomMapping;
   }
 
   // ------------------------ END MESSAGE OPERATIONS ------------------------
@@ -673,7 +708,7 @@ class DatabaseManager {
         ChoreStatus.inProgress, CurrentHousehold.getCurrentHouseholdId());
     List<Chore> choresCompleted = await getChoresFromDB(
         ChoreStatus.completed, CurrentHousehold.getCurrentHouseholdId());
-    
+
     String choreId;
     DatabaseReference choreRef;
     int daysSinceLastIncremented = 0;
@@ -684,7 +719,7 @@ class DatabaseManager {
           .ref("households/$householdCode/choresToDo/$choreId");
       daysSinceLastIncremented = DateTime.now()
               .difference(DateFormat('yyyy-MM-dd hh:mm:ss a')
-              .parse(chore.dateLastIncremented))
+                  .parse(chore.dateLastIncremented))
               .inDays +
           chore.daysSinceLastIncremented;
       choreRef.update({
@@ -710,7 +745,7 @@ class DatabaseManager {
       choreRef.update({
         "daysSinceLastIncremented": 0,
         "dateLastIncremented":
-          DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
+            DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
       });
     }
 
@@ -721,10 +756,11 @@ class DatabaseManager {
       choreRef.update({
         "daysSinceLastIncremented": 0,
         "dateLastIncremented":
-          DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
+            DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
       });
     }
   }
+
   static Future<void> deleteChore(String choreId, ChoreStatus status) async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
     DatabaseReference choreRef = _databaseInstance
@@ -817,23 +853,22 @@ class DatabaseManager {
 
   static Future<List<Event>> getCalendarEventsFromDB(String householdId) async {
     final eventListRef =
-    _databaseInstance.ref("households/$householdId/events");
+        _databaseInstance.ref("households/$householdId/events");
     DatabaseEvent event = await eventListRef.once();
     final eventsJson = event.snapshot.children;
 
     List<Event> eventsList = <Event>[];
 
     for (final event in eventsJson) {
-      eventsList.add( Event(
-        event.child("id").value.toString(),
-        event.child("name").value.toString(),
-        event.child("details").value.toString(),
-        event.child("startTime").value.toString(),
-        event.child("endTime").value.toString(),
-        event.child("dateCreated").value.toString(),
-        event.child("type").value.toString(),
-        event.child("createdByUserId").value.toString()
-      ));
+      eventsList.add(Event(
+          event.child("id").value.toString(),
+          event.child("name").value.toString(),
+          event.child("details").value.toString(),
+          event.child("startTime").value.toString(),
+          event.child("endTime").value.toString(),
+          event.child("dateCreated").value.toString(),
+          event.child("type").value.toString(),
+          event.child("createdByUserId").value.toString()));
     }
     return eventsList;
   }

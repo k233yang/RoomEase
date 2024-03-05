@@ -19,18 +19,20 @@ import 'package:roomease/Roomeo/missinginputs/UserCommandParamInputScreen.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key, required this.chatRoomId});
+  const ChatScreen({super.key, required this.messageRoomId});
 
-  final String chatRoomId;
+  final String messageRoomId;
 
   @override
-  State<ChatScreen> createState() => _ChatScreen();
+  State<ChatScreen> createState() => _ChatScreen(messageRoomId);
 }
 
 class _ChatScreen extends State<ChatScreen> {
+  _ChatScreen(this.messageRoomId);
   late TextEditingController _controller;
   final messageList = <Message>[];
   late FocusNode textFieldFocusNode;
+  final String messageRoomId;
 
   @override
   void initState() {
@@ -61,8 +63,7 @@ class _ChatScreen extends State<ChatScreen> {
         body: Column(
           children: [
             Expanded(
-                child: DatabaseManager.messagesStreamBuilder(
-                    CurrentUser.getCurrentUserId() + RoomeoUser.user.userId)),
+                child: DatabaseManager.messagesStreamBuilder(messageRoomId)),
             Container(
               color: ColorConstants.white,
               child: chatTextField(),
