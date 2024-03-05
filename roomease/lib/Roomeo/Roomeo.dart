@@ -21,7 +21,6 @@ const List<String> commandCatList = [
   'Set Status',
   'View Schedule',
   'View Status',
-  'Chore Delegation',
   //'Ask for Advice',
   'Send a Message',
 ];
@@ -32,7 +31,6 @@ const List<String> parseableCommands = [
   'Add Chore',
   'Update Chore',
   'Set Status',
-  'Chore Delegation',
   'Send a Message',
   'View Status'
 ];
@@ -125,10 +123,8 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
       break;
     case 'Update Chore':
       DateTime now = DateTime.now();
-      parameterJSONFormat =
-          "1. ChoreTitle \n 2. ChoreDate \n 3. ChorePerson \n 4. ChoreDescription";
-      parametersToFindAddendum =
-          "1. The title of the chore to be updated \n 2. The date of the chore to be updated, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't specify a date in their message, use the value 'Missing' for this field \n 3. The person assigned to the chore that is to be updated \n 4. The description of the chore to be updated";
+      parameterJSONFormat = "1. ChoreTitle";
+      parametersToFindAddendum = "1. The title of the chore to be updated";
       break;
     case 'Set Status':
       parameterJSONFormat = "1. Status";
@@ -262,6 +258,7 @@ Future<void> getRoomeoResponse(String message, String messageKey,
     print(e);
   }
 
+  // put user message vector inside VDB
   if (isChore) {
     await insertVector(
       userResVector,

@@ -144,7 +144,10 @@ class _ChatScreen extends State<ChatScreen> {
             print("PARAMETERS ARE: $commandParams");
             // if there are missing params, navigate to UserCommandParamInputScreen
             // to prompt the user for the missing params
-            if (commandParams.containsValue("Missing")) {
+            if (commandParams.containsValue("Missing") ||
+                commandParams.containsKey("ViewPerson") ||
+                commandParams.containsKey("Status") ||
+                commandParams.containsKey("SendPerson")) {
               if (mounted) {
                 // Check if the widget is still in the tree
                 final result = await Navigator.of(context).push(
@@ -255,18 +258,106 @@ class _ChatScreen extends State<ChatScreen> {
                   return;
                 }
               }
+            } else if (category == 'View Status') {
+              print("VIEW STATUS PARAMS ARE: $commandParams");
+              String viewPerson = commandParams['ViewPerson']!;
+              String? viewPersonId =
+                  await DatabaseManager.getUserIdByName(viewPerson);
+              String viewPersonStatus =
+                  await DatabaseManager.getUserCurrentStatus(viewPersonId!);
+              String viewStatusMessage = "What's $viewPerson's status?";
+              String roomeoMessage =
+                  "$viewPerson's status is currently '$viewPersonStatus'";
+              var results = await Future.wait([
+                getVectorEmbeddingArray(viewStatusMessage),
+                getVectorEmbeddingArray(roomeoMessage),
+              ]);
+              List<double> viewStatusMessageVector = results[0];
+              List<double> roomeoMessageVector = results[1];
+              await DatabaseManager.replaceMessage(
+                CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                userMessageKey,
+                viewStatusMessage,
+              );
+              String gptMessageKey = await DatabaseManager.addMessage(
+                messageRoomId,
+                Message(
+                  roomeoMessage,
+                  RoomeoUser.user.userId,
+                  RoomeoUser.user.name,
+                  DateTime.now(),
+                ),
+              );
+              await Future.wait([
+                insertVector(
+                  viewStatusMessageVector,
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  userMessageKey,
+                ),
+                insertVector(
+                  roomeoMessageVector,
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  gptMessageKey,
+                ),
+              ]);
+            } else if (category == 'Set Status') {
+              String status = commandParams["Status"]!;
+              print('ROOMEO SETTING STATUS TO: $status');
+              // set the actual status
+              CurrentUser.setCurrentUserStatus(status);
+              // message room stuff:
+              String setStatusMessage = "Set my status to '$status'";
+              String roomeoMessage =
+                  "Got it, I've set your current status to '$status'";
+              var results = await Future.wait([
+                getVectorEmbeddingArray(setStatusMessage),
+                getVectorEmbeddingArray(roomeoMessage),
+              ]);
+              List<double> setStatusMessageVector = results[0];
+              List<double> roomeoMessageVector = results[1];
+              await DatabaseManager.replaceMessage(
+                CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                userMessageKey,
+                setStatusMessage,
+              );
+              String gptMessageKey = await DatabaseManager.addMessage(
+                messageRoomId,
+                Message(
+                  roomeoMessage,
+                  RoomeoUser.user.userId,
+                  RoomeoUser.user.name,
+                  DateTime.now(),
+                ),
+              );
+              await Future.wait([
+                insertVector(
+                  setStatusMessageVector,
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  userMessageKey,
+                ),
+                insertVector(
+                  roomeoMessageVector,
+                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                  gptMessageKey,
+                ),
+              ]);
+            } else if (category == 'Send Message') {
+              // send the actual message to the user
+              String? sendPersonId = await DatabaseManager.getUserIdByName(
+                  commandParams["SendPerson"]!);
+              String message = commandParams["Message"]!;
             }
-            // view schedule doesn't need parameters, so we can just show it
-            else if (category == 'View Schedule') {
-              final localContext = context;
-              if (mounted) {
-                Navigator.pushNamed(localContext, '/calendar');
-              }
-              // get Roomeo's response to the command
-              await getRoomeoResponse(message, userMessageKey);
+          } else if (category == 'View Schedule') {
+            final localContext = context;
+            if (mounted) {
+              Navigator.pushNamed(localContext, '/calendar');
             }
+            // get Roomeo's response to the command
+            await getRoomeoResponse(message, userMessageKey);
           }
-        } else {
+        }
+        // view schedule doesn't need parameters, so we can just go to the calendar page
+        else {
           await getRoomeoResponse(message, userMessageKey);
         }
       }

@@ -235,6 +235,7 @@ class DatabaseManager {
     messageRoomsRef.update({"users": userIds, "messages": <String>[]});
   }
 
+  /// adds a message to FB, and gives us its key
   static Future<String> addMessage(
       String messageRoomId, Message message) async {
     DatabaseReference messagesRef =
