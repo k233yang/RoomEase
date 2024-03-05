@@ -574,6 +574,15 @@ class DatabaseManager {
         _databaseInstance.ref("households/$householdCode");
     await householdRef.remove();
   }
+
+  static Future<void> editUserNameInHousehold(
+      String userId, String newName) async {
+    String householdCode = CurrentHousehold.getCurrentHouseholdId();
+    DatabaseReference householdUserRef =
+        _databaseInstance.ref("households/$householdCode/$userId");
+    await householdUserRef.update({"name": newName});
+    householdUserIdSubscription(CurrentHousehold.getCurrentHouseholdId());
+  }
   // ------------------------ END HOUSEHOLD OPERATIONS ------------------------
 
   // ------------------------ CHORE OPERATIONS ------------------------

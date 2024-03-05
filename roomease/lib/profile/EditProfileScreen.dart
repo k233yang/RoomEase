@@ -122,6 +122,9 @@ class _EditProfileState extends State<EditProfile> {
                                       nameController.text);
                                   CurrentUser.setCurrentUserName(
                                       nameController.text);
+                                  DatabaseManager.editUserNameInHousehold(
+                                      CurrentUser.getCurrentUserId(),
+                                      nameController.text);
                                 }
                                 if (emailController.text != initialEmail) {
                                   user.verifyBeforeUpdateEmail(
