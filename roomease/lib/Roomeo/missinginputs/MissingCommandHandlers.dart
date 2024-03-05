@@ -22,8 +22,8 @@ Widget handleAddChoreMissingParams(
       );
     case "ChoreDate":
       return MissingDateInput(
-        onDateSelect: (DateTime userInput) {
-          updateCallback("ChoreDate", userInput.toString());
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
         },
         placeHolder: "When should the chore be completed by?",
       );
@@ -90,8 +90,8 @@ Widget handleUpdateChoreMissingParams(
       );
     case "ChoreDate":
       return MissingDateInput(
-        onDateSelect: (DateTime userInput) {
-          updateCallback("ChoreDate", userInput.toString());
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
         },
         placeHolder: "Search by date (optional)",
       );
@@ -143,8 +143,8 @@ Widget handleRemoveChoreMissingParams(
       );
     case "ChoreDate":
       return MissingDateInput(
-        onDateSelect: (DateTime userInput) {
-          updateCallback("ChoreDate", userInput.toString());
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
         },
         placeHolder: "Search by date (optional)",
       );

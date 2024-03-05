@@ -929,5 +929,12 @@ class DatabaseManager {
     }
     return eventsList;
   }
+
+  static Future<void> deleteCalendarEvent(String eventId) async {
+    String householdCode = CurrentHousehold.getCurrentHouseholdId();
+    DatabaseReference choreRef = _databaseInstance
+        .ref("households/$householdCode/events/$eventId");
+    await choreRef.remove();
+  }
   // ------------------------ END CALENDAR OPERATIONS ------------------------
 }
