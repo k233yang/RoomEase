@@ -12,7 +12,7 @@ class AddEventScreen extends StatefulWidget {
   State<AddEventScreen> createState() => _AddEventScreen();
 }
 
-const List<String> typeList = <String>["Location Status", "Common Area Reservation", "Custom Event"];
+const List<String> typeList = <String>["Common Area Reservation", "Location Status", "Quiet Time Request", "Other"];
 
 class _AddEventScreen extends State<AddEventScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -20,8 +20,8 @@ class _AddEventScreen extends State<AddEventScreen> {
   TextEditingController detailsController = TextEditingController();
   TextEditingController startTimeController = TextEditingController();
   TextEditingController endTimeController = TextEditingController();
-  String startTimeFormattedForParsing = "";
-  String endTimeFormattedForParsing = "";
+  late DateTime startTimeInput;
+  late DateTime endTimeInput;
 
   String type = typeList.first;
 
@@ -96,18 +96,18 @@ class _AddEventScreen extends State<AddEventScreen> {
                                 initialTime: TimeOfDay.now(),
                               ).then((startTime) {
                                 if (startTime != null) {
-                                  DateTime startDateTime = DateTime(
-                                    startDate.year,
+                                  startTimeInput = DateTime(
+                                  startDate.year,
                                     startDate.month,
                                     startDate.day,
                                     startTime.hour,
                                     startTime.minute,
                                   );
-                                  startTimeFormattedForParsing = startDateTime.toString();
+
                                   String formattedDateTime =
                                   DateFormat('yyyy-MM-dd')
                                       .add_jm()
-                                      .format(startDateTime);
+                                      .format(startTimeInput);
                                   setState(() {
                                     startTimeController.text =
                                         formattedDateTime; //set output date to TextField value.
@@ -147,18 +147,17 @@ class _AddEventScreen extends State<AddEventScreen> {
                                 initialTime: TimeOfDay.now(),
                               ).then((endTime) {
                                 if (endTime != null) {
-                                  DateTime endDateTime = DateTime(
+                                  endTimeInput = DateTime(
                                     endDate.year,
                                     endDate.month,
                                     endDate.day,
                                     endTime.hour,
                                     endTime.minute,
                                   );
-                                  endTimeFormattedForParsing = endDateTime.toString();
                                   String formattedDateTime =
                                   DateFormat('yyyy-MM-dd')
                                       .add_jm()
-                                      .format(endDateTime);
+                                      .format(endTimeInput);
                                   setState(() {
                                     endTimeController.text =
                                         formattedDateTime; //set output date to TextField value.
@@ -170,7 +169,9 @@ class _AddEventScreen extends State<AddEventScreen> {
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter a end time for the event';
+                            return 'Please enter an end time for the event';
+                          } else if (endTimeInput.isBefore(startTimeInput)) {
+                            return "End time must be later than the start time";
                           }
                           return null;
                         },
@@ -213,8 +214,8 @@ class _AddEventScreen extends State<AddEventScreen> {
                                 CurrentHousehold.getCurrentHouseholdId(),
                                 nameController.text,
                                 detailsController.text,
-                                startTimeFormattedForParsing,
-                                endTimeFormattedForParsing,
+                                startTimeInput.toString(),
+                                endTimeInput.toString(),
                                 DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
                                 type,
                                 CurrentUser.getCurrentUserId(),

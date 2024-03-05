@@ -93,9 +93,10 @@ class _ProfileState extends State<Profile> {
   Widget profileDetails() {
     return Column(
       children: [
-        Text(CurrentUser.getCurrentUserName()),
+        Text(CurrentUser.getCurrentUserName(), style: TextStyle(fontWeight: FontWeight.bold)),
         Text("Member of: ${CurrentHousehold.getCurrentHouseholdName()}"),
-        Text("Household Code: ${CurrentHousehold.getCurrentHouseholdId()}")
+        Text("Total points: ${CurrentUser.getCurrentUserTotalPoints().toString()}"),
+        Text("Household Code: ${CurrentHousehold.getCurrentHouseholdId()}"),
       ],
     );
   }
