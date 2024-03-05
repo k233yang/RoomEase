@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/CurrentHousehold.dart';
+import 'package:roomease/Roomeo/EmbedVector.dart';
+import 'package:roomease/Roomeo/PineconeAPI.dart';
+import 'package:roomease/Roomeo/Roomeo.dart';
 import 'package:roomease/chores/ChoreStatus.dart';
 import '../colors/ColorConstants.dart';
 import 'package:roomease/CurrentUser.dart';
@@ -188,7 +191,7 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       try {
-                        DatabaseManager.addChore(
+                        String choreKey = await DatabaseManager.addChore(
                             CurrentHousehold.getCurrentHouseholdId(),
                             nameController.text,
                             detailsController.text,
@@ -204,6 +207,23 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                             CurrentUser.getCurrentUserId(),
                             null,
                             ChoreStatus.toDo.value);
+                        // add the chore to the VDB, to allow roomeo to query it
+                        // in the future
+                        Map<String, String> addChoreParams = {
+                          'category': 'Add Chore',
+                          'ChoreTitle': nameController.text,
+                          'ChoreDescription': detailsController.text,
+                          'ChoreDate': deadlineController.text,
+                          'ChorePerson': CurrentUser.getCurrentUserName()
+                        };
+                        String addChoreCommandInput =
+                            generateFullCommandInput(addChoreParams);
+                        print("ADD CHORE COMMAND INPUT: $addChoreCommandInput");
+                        List<double> choreInputVector =
+                            await getVectorEmbeddingArray(addChoreCommandInput);
+                        await insertVector(choreInputVector,
+                            CurrentHousehold.getCurrentHouseholdId(), choreKey,
+                            metadata: {'isChore': true});
                       } catch (e) {
                         print('Failed to add chore: $e');
                       }
