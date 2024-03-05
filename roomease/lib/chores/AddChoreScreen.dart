@@ -107,8 +107,7 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                               deadlineTime.hour,
                               deadlineTime.minute,
                             );
-                            String formattedDateTime = DateFormat('yyyy-MM-dd')
-                                .add_jm()
+                            String formattedDateTime = DateFormat('yyyy-MM-dd hh:mm a')
                                 .format(deadlineDateTime);
                             setState(() {
                               deadlineController.text =

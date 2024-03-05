@@ -28,6 +28,7 @@ class ColorConstants {
   static Color lightPink = hexToColor('#ffebfb');
   static Color pink = hexToColor('#ffd4f6');
   static Color lightRed = hexToColor('#ffdbe2');
+  static Color red = hexToColor('#C21807');
 
   static Color lightGreen = hexToColor('#ccffcc');
 }
