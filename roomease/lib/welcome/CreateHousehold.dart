@@ -56,7 +56,28 @@ class _CreateHousehold extends State<CreateHousehold> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
+                        showDialog(
+                          context: context,
+                          barrierDismissible:
+                              false, // Prevents the dialog from closing until we manually do so
+                          builder: (BuildContext context) {
+                            return Dialog(
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(), // Loading indicator
+                                    SizedBox(width: 20),
+                                    Text("Loading..."),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
                         await updateUserInformation();
+                        Navigator.of(context, rootNavigator: true).pop();
                         Navigator.pushNamedAndRemoveUntil(
                             context, "/home", (_) => false);
                       }
@@ -104,7 +125,6 @@ class _CreateHousehold extends State<CreateHousehold> {
     CurrentUser.setCurrentUserIconNumber(1);
     DatabaseManager.setUserCurrentIconNumber(userId, 1);
 
-    // create a vector DB index for the shared household (i.e. for querying shared chores)
     // create a vector DB index for the shared household (i.e. for querying shared chores)
     await createRoomIndex(CurrentHousehold.getCurrentHouseholdId());
     // add the user's name as a vector for the household
