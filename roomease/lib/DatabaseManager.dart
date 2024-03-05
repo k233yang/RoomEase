@@ -601,7 +601,11 @@ class DatabaseManager {
 
     List<Chore> choresToDo = await getChoresFromDB(
         ChoreStatus.toDo, CurrentHousehold.getCurrentHouseholdId());
-
+    List<Chore> choresInProgress = await getChoresFromDB(
+        ChoreStatus.inProgress, CurrentHousehold.getCurrentHouseholdId());
+    List<Chore> choresCompleted = await getChoresFromDB(
+        ChoreStatus.completed, CurrentHousehold.getCurrentHouseholdId());
+    
     String choreId;
     DatabaseReference choreRef;
     int daysSinceLastIncremented = 0;
@@ -612,7 +616,7 @@ class DatabaseManager {
           .ref("households/$householdCode/choresToDo/$choreId");
       daysSinceLastIncremented = DateTime.now()
               .difference(DateFormat('yyyy-MM-dd hh:mm:ss a')
-                  .parse(chore.dateLastIncremented))
+              .parse(chore.dateLastIncremented))
               .inDays +
           chore.daysSinceLastIncremented;
       choreRef.update({
@@ -630,8 +634,29 @@ class DatabaseManager {
         });
       }
     }
-  }
 
+    for (var chore in choresInProgress) {
+      choreId = chore.id;
+      choreRef = _databaseInstance
+          .ref("households/$householdCode/choresInProgress/$choreId");
+      choreRef.update({
+        "daysSinceLastIncremented": 0,
+        "dateLastIncremented":
+          DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
+      });
+    }
+
+    for (var chore in choresCompleted) {
+      choreId = chore.id;
+      choreRef = _databaseInstance
+          .ref("households/$householdCode/choresCompleted/$choreId");
+      choreRef.update({
+        "daysSinceLastIncremented": 0,
+        "dateLastIncremented":
+          DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
+      });
+    }
+  }
   static Future<void> deleteChore(String choreId, ChoreStatus status) async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
     DatabaseReference choreRef = _databaseInstance

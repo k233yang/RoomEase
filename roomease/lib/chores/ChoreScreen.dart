@@ -6,6 +6,7 @@ import '../Household.dart';
 import '../colors/ColorConstants.dart';
 import 'Chore.dart';
 import 'ChoreStatus.dart';
+import 'package:intl/intl.dart';
 
 class ChoreScreen extends StatefulWidget {
   const ChoreScreen({super.key});
@@ -319,7 +320,7 @@ class _ChoreScreen extends State<ChoreScreen> {
                     try {
                       DatabaseManager.updateChoreStatus(
                               currHousehold
-                                  .choresCompleted[index].assignedUserId,
+                              .choresCompleted[index].assignedUserId,
                               currHousehold.choresCompleted[index].id,
                               status,
                               ChoreStatus.inProgress)
@@ -422,16 +423,40 @@ List<Widget> getChoreTile(
     final Future<String> assignedUserName =
         DatabaseManager.getUserName(choreItem.assignedUserId);
 
+
     choreTileList.add(Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
           child: Center(
-              child: ExpansionTile(
+            child: ExpansionTile(
             shape: Border(),
-            title: Text(
-              choreItem.name,
-              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+            title: Builder(
+              builder: (context) {
+                if(choreItem.status != ChoreStatus.completed.value &&
+                  DateTime.now()
+                  .difference(DateFormat('yyyy-MM-dd hh:mm a')
+                  .parse(choreItem.deadline))
+                  .inMinutes > 0) {
+                    return Text(
+                      choreItem.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500, 
+                        fontSize: 20,
+                        color: ColorConstants.red
+                        ),
+                      );
+                  }
+                else {
+                  return Text(
+                      choreItem.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500, 
+                        fontSize: 20
+                        ),
+                  );
+                }
+              },
             ),
             collapsedBackgroundColor: tileColor,
             backgroundColor: backgroundColor,
@@ -466,44 +491,70 @@ List<Widget> getChoreTile(
                 return outputText;
               },
             ),
-            trailing: Container(
-                width: 60,
-                height: 60,
-                // color: pointCircleColor,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: pointCircleColor,
-                ),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Column(
+            trailing: FittedBox(
+            child:
+            Row(
+              children: [
+                if ( choreItem.status == ChoreStatus.toDo.value && 
+                     choreItem.timesIncremented > 0 && 
+                     choreItem.daysSinceLastIncremented < 2 )
+                  Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 10, bottom: 3),
-                        child:
-                        Text('${choreItem.points}',
-                        style: TextStyle(
-                            height: 1.0,
-                            fontSize: 20,
-                            fontWeight: FontWeight.normal,
-                            color: ColorConstants.black)),
-                      ),
-                      Text('points',
-                      style: TextStyle(
-                          height: 1.0,
-                          fontSize: 11,
-                          fontWeight: FontWeight.normal,
-                          color: ColorConstants.black)),
+                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                        child: Image(
+                          image: AssetImage('assets/points_increase.png'),
+                          height: 30,
+                          width: 30,
+                        ),
+                      )
                     ],
-                    
-                  )
-                )),
+                  ),
+                Column(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      // color: pointCircleColor,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: pointCircleColor,
+                      ),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10, bottom: 3),
+                              child:
+                              Text('${choreItem.points}',
+                              style: TextStyle(
+                                  height: 1.0,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.normal,
+                                  color: ColorConstants.black)),
+                            ),
+                            Text('points',
+                            style: TextStyle(
+                              height: 1.0,
+                              fontSize: 11,
+                              fontWeight: FontWeight.normal,
+                              color: ColorConstants.black)),
+                          ],       
+                        )
+                      )
+                    )
+                  ],
+                ),
+                ]
+              ),
+            ),
             children: <Widget>[
               Align(
                 alignment: Alignment.topLeft,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                  child:Text("Details",
+                  child: Text("Details",
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 16,
@@ -528,7 +579,69 @@ List<Widget> getChoreTile(
                 alignment: Alignment.topLeft,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                  child:Text("Deadline",
+                  child: Builder(
+                    builder: (context) {
+                      if(choreItem.status != ChoreStatus.completed.value &&
+                        DateTime.now()
+                        .difference(DateFormat('yyyy-MM-dd hh:mm a')
+                        .parse(choreItem.deadline))
+                        .inMinutes > 0) {
+                          return Text("Deadline",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: ColorConstants.red
+                          ));
+                        }
+                      else {
+                          return Text("Deadline",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ));
+                      }
+                    },
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 10),
+                  child: Builder(
+                    builder: (context) {
+                      if(choreItem.status != ChoreStatus.completed.value &&
+                        DateTime.now()
+                        .difference(DateFormat('yyyy-MM-dd hh:mm a')
+                        .parse(choreItem.deadline))
+                        .inMinutes > 0) {
+                          return Text(choreItem.deadline,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                            color: ColorConstants.red
+                          ));
+                        }
+                      else {
+                          return Text(choreItem.deadline,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                          ));
+                      }
+                    },
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  child:Text("Point Increases",
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 16,
@@ -541,7 +654,7 @@ List<Widget> getChoreTile(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 10),
                   child:Text(
-                    choreItem.deadline,
+                    choreItem.timesIncremented.toString(),
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 14,
