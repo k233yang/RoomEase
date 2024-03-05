@@ -101,7 +101,12 @@ class CurrentUser {
   }
 
   static int getCurrentUserTotalPoints() {
-    return SharedPreferencesUtility.getInt("totalPoints");
+    if ( SharedPreferencesUtility.getInt("totalPoints") == -1 ){
+      return 0;
+    }
+    else {
+      return SharedPreferencesUtility.getInt("totalPoints");
+    }
   }
 
   static void setCurrentUserTotalPoints(int points) {

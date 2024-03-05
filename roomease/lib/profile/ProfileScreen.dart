@@ -149,7 +149,6 @@ class _ProfileState extends State<Profile> {
                                 } catch (e) {
                                   print("Failed to delete household: $e");
                                 }
-
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         duration: const Duration(seconds: 1),

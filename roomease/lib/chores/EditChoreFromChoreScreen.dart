@@ -8,17 +8,17 @@ import 'package:roomease/Roomeo/PineconeAPI.dart';
 import 'package:roomease/Roomeo/Roomeo.dart';
 import 'package:roomease/chores/Chore.dart';
 
-class EditChoreScreen extends StatefulWidget {
-  const EditChoreScreen(
+class EditChoreFromChoreScreen extends StatefulWidget {
+  const EditChoreFromChoreScreen(
       {super.key, required this.choreId, required this.onChoreUpdate});
   final String choreId;
-  final Function(String, Chore) onChoreUpdate;
+  final Function() onChoreUpdate;
 
   @override
-  State<EditChoreScreen> createState() => _EditChoreScreenState();
+  State<EditChoreFromChoreScreen> createState() => _EditChoreFromChoreScreenState();
 }
 
-class _EditChoreScreenState extends State<EditChoreScreen> {
+class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
   late Future<Chore?> _choreDetails;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -43,13 +43,21 @@ class _EditChoreScreenState extends State<EditChoreScreen> {
     // Fetch household members
     _householdMembers = await DatabaseManager.getUserNamesFromHousehold(
         CurrentHousehold.getCurrentHouseholdId());
+    _householdMembers.add('Unassigned');
 
     // Fetch chore details to set the initial selected member
     Chore? choreDetails = await DatabaseManager.getChoreFromId(
         widget.choreId, CurrentHousehold.getCurrentHouseholdId());
+    
+    String selectedMember = '';
     if (choreDetails != null) {
-      String selectedMember =
-          await DatabaseManager.getUserName(choreDetails.assignedUserId ?? 'Unassigned');
+      if (choreDetails.assignedUserId != null ) {
+        selectedMember = await DatabaseManager.getUserName(choreDetails.assignedUserId);
+      }
+      else {
+        selectedMember = 'Unassigned';
+      }
+
       setState(() {
         _selectedMember =
             selectedMember; // Assuming Chore has an 'assignedTo' field with the member's name
@@ -179,28 +187,10 @@ class _EditChoreScreenState extends State<EditChoreScreen> {
                         deadline: _deadlineController.text,
                         points: int.tryParse(_pointsController.text),
                         threshold: int.tryParse(_thresholdController.text),
-                        assignedUserId: await DatabaseManager.getUserIdByName(
-                            _selectedMember!),
-                        status:
-                            chore!.status, //TODO: add option to change status
+                        assignedUserId: await DatabaseManager.getUserIdByName(_selectedMember!),
+                        status: chore!.status,
                       );
-                      // propagate the updated chore to household VDB.
-                      // This is done through modifying the original
-                      // chore vector with a new add chore vector
-                      Map<String, String> newAddChoreParams = {
-                        'category': 'Add Chore',
-                        'ChoreTitle': _nameController.text,
-                        'ChoreDescription': _descriptionController.text,
-                        'ChoreDate': _deadlineController.text,
-                        'ChorePerson': _selectedMember!
-                      };
-                      String newAddChoreString =
-                          generateFullCommandInput(newAddChoreParams);
-                      await updateVector(
-                          await getVectorEmbeddingArray(newAddChoreString),
-                          CurrentHousehold.getCurrentHouseholdId(),
-                          widget.choreId);
-                      widget.onChoreUpdate(chore.id, chore);
+                      widget.onChoreUpdate();
                     },
                     child: const Text('Update Chore'),
                   ),
