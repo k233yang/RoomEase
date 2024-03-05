@@ -159,8 +159,8 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                   value: threshold,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: "Threshold",
-                    labelText: "Threshold",
+                    hintText: "Point increase frequency (days)",
+                    labelText: "Point increase frequency (days)",
                   ),
                   onChanged: (int? thresholdValue) {
                     setState(() {

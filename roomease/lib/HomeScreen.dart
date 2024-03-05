@@ -163,25 +163,51 @@ Widget statusList() {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(
             padding: EdgeInsets.only(left: 50),
-            child: Text(
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                "Roommate Statuses")),
+            child: Row(children: [
+              SizedBox(
+                width: 100,
+                child: Text(style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 'Roommates')
+              ),
+              SizedBox(
+                width: 90,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 30),
+                  child: Text(style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 'Points')
+                )                        ),
+              SizedBox(
+                width: 120,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 50),
+                  child: Text(style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 'Status')
+                )
+              ),
+            ]
+          ),
+        ),
         ValueListenableBuilder(
             valueListenable: CurrentHousehold.householdStatusValueListener,
             builder: (context, value, child) {
               if (value.entries.isNotEmpty) {
                 List<Widget> statusList = value.values
                     .map((entry) => Row(children: [
-                          Text(style: TextStyle(fontSize: 15), entry["name"]!),
-                          Spacer(),
-                          Padding(
+                        SizedBox(
+                          width: 100,
+                          child: Text(style: TextStyle(fontSize: 15), entry["name"]!)
+                        ),
+                        SizedBox(
+                          width: 90,
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 30),
+                            child: Text(style: TextStyle(fontSize: 15), '${entry["totalPoints"]!} points')
+                          )                        ),
+                        SizedBox(
+                          width: 100,
+                          child: Padding(
                             padding: EdgeInsets.only(left: 50),
-                            child: Text(
-                              style: TextStyle(fontSize: 15),
-                              entry["status"]!,
-                            ),
+                            child: Text(style: TextStyle(fontSize: 15), entry["status"]!)
                           )
-                        ]))
+                        ),
+                      ]))
                     .toList();
                 return Padding(
                   padding: EdgeInsets.only(left: 50, right: 50, top: 10),

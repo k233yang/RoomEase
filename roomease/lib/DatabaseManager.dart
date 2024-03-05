@@ -406,7 +406,7 @@ class DatabaseManager {
     householdRef.update({"name": name});
     DatabaseReference householdUserRef =
         _databaseInstance.ref("households/$householdCode/users/${user.userId}");
-    householdUserRef.update({"name": user.name, "status": "Home"});
+    householdUserRef.update({"name": user.name, "status": "Home", "totalPoints": 0});
     CurrentHousehold.setCurrentHouseholdId(householdCode);
   }
 
@@ -414,7 +414,7 @@ class DatabaseManager {
     DatabaseReference householdRef =
         _databaseInstance.ref("households/$householdCode/users/${user.userId}");
 
-    householdRef.update({"name": user.name, "status": "Home"});
+    householdRef.update({"name": user.name, "status": "Home", "totalPoints": 0});
   }
 
   static Future<bool> checkHouseholdExists(String householdCode) async {
@@ -483,7 +483,8 @@ class DatabaseManager {
           Map<dynamic, dynamic> userInfo = e.value as Map<dynamic, dynamic>;
           String name = userInfo['name'];
           String status = userInfo['status'];
-          users[userId] = {"name": name, "status": status};
+          int totalPoints = userInfo['totalPoints'] ?? 0;
+          users[userId] = {"name": name, "status": status, "totalPoints": totalPoints.toString()};
         }
       }
 
@@ -725,12 +726,53 @@ class DatabaseManager {
       });
     }
   }
+
   static Future<void> deleteChore(String choreId, ChoreStatus status) async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
     DatabaseReference choreRef = _databaseInstance
         .ref("households/$householdCode/${status.value}/$choreId");
     await choreRef.remove();
   }
+
+
+  static Future<void> updateUserPoints(int points, bool increase) async {
+    String userId = CurrentUser.getCurrentUserId();
+
+    DatabaseReference userRef = _databaseInstance.ref("users/${userId}");
+    DatabaseReference userPointsRef = _databaseInstance.ref("users/${userId}/totalPoints");
+
+    DatabaseReference householdRef = _databaseInstance.ref(
+        "households/${CurrentHousehold.getCurrentHouseholdId()}/users/$userId");
+
+    DatabaseEvent userPointsEvent = await userPointsRef.once();
+    
+    if (userPointsEvent.snapshot.exists ) {
+      int userPoints = userPointsEvent.snapshot.value as int;
+      if( increase == true ) {
+        await userRef.update({"totalPoints": userPoints + points });
+        await householdRef.update({"totalPoints": userPoints + points});
+        CurrentUser.setCurrentUserTotalPoints(userPoints + points );
+      }
+      else {
+        await userRef.update({"totalPoints": userPoints - points });
+        await householdRef.update({"totalPoints": userPoints - points});
+        CurrentUser.setCurrentUserTotalPoints(userPoints - points );
+      }
+    }
+    else {
+      if( increase == true ) {
+        await userRef.update({"totalPoints": points });
+        await householdRef.update({"totalPoints": points});
+        CurrentUser.setCurrentUserTotalPoints(points);
+      }
+      else {
+        await userRef.update({"totalPoints": 0 });
+        await householdRef.update({"totalPoints": 0});
+        CurrentUser.setCurrentUserTotalPoints(0);
+      }
+    }
+  }
+
 
   static Future<void> deleteChoreFromStringStatus(
       String choreId, String status) async {
@@ -770,6 +812,13 @@ class DatabaseManager {
       assignedUserId,
       newChoreStatus.value,
     );
+
+    if ( newChoreStatus == ChoreStatus.completed ) {
+      updateUserPoints(int.parse(choreJson("points").value.toString()), true);
+    }
+    else if ( choreStatus == ChoreStatus.completed && newChoreStatus == ChoreStatus.inProgress ) {
+      updateUserPoints(int.parse(choreJson("points").value.toString()), false);
+    }
 
     await choreRef.remove();
   }
