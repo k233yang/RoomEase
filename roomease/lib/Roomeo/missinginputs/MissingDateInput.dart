@@ -5,7 +5,7 @@ class MissingDateInput extends StatefulWidget {
   const MissingDateInput(
       {super.key, required this.onDateSelect, required this.placeHolder});
 
-  final Function(DateTime) onDateSelect;
+  final Function(String) onDateSelect;
   final String placeHolder;
 
   @override
@@ -35,8 +35,10 @@ class _MissingDateInputState extends State<MissingDateInput> {
         selectedDate = DateTime(picked.year, picked.month, picked.day,
             selectedDate.hour, selectedDate.minute);
       });
-      widget.onDateSelect(DateTime(selectedDate.year, selectedDate.month,
-          selectedDate.day, selectedDate.hour, selectedDate.minute));
+      widget
+          .onDateSelect(DateFormat('yyyy-MM-dd hh:mm a').format(selectedDate));
+      //widget.onDateSelect(DateTime(selectedDate.year, selectedDate.month,
+      //selectedDate.day, selectedDate.hour, selectedDate.minute));
     }
   }
 
@@ -55,8 +57,8 @@ class _MissingDateInputState extends State<MissingDateInput> {
           picked.minute,
         );
       });
-      widget.onDateSelect(DateTime(selectedDate.year, selectedDate.month,
-          selectedDate.day, picked.hour, picked.minute));
+      widget
+          .onDateSelect(DateFormat('yyyy-MM-dd hh:mm a').format(selectedDate));
     }
   }
 
