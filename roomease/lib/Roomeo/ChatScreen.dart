@@ -146,7 +146,8 @@ class _ChatScreen extends State<ChatScreen> {
             // to prompt the user for the missing params
             if (commandParams.containsValue("Missing") ||
                 commandParams.containsKey("ViewPerson") ||
-                commandParams.containsKey("Status")) {
+                commandParams.containsKey("Status") ||
+                commandParams.containsKey("SendPerson")) {
               if (mounted) {
                 // Check if the widget is still in the tree
                 final result = await Navigator.of(context).push(
@@ -340,6 +341,11 @@ class _ChatScreen extends State<ChatScreen> {
                   gptMessageKey,
                 ),
               ]);
+            } else if (category == 'Send Message') {
+              // send the actual message to the user
+              String? sendPersonId = await DatabaseManager.getUserIdByName(
+                  commandParams["SendPerson"]!);
+              String message = commandParams["Message"]!;
             }
           } else if (category == 'View Schedule') {
             final localContext = context;

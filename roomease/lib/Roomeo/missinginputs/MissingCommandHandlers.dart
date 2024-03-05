@@ -88,39 +88,39 @@ Widget handleUpdateChoreMissingParams(
         },
         placeHolder: "Name of the chore to update",
       );
-    // case "ChoreDate":
-    //   return MissingDateInput(
-    //     onDateSelect: (String userInput) {
-    //       updateCallback("ChoreDate", userInput);
-    //     },
-    //     placeHolder: "Search by date (optional)",
-    //   );
-    // case "ChorePerson":
-    //   if (searchPerson == null) {
-    //     return MissingUserInput(
-    //       onUserSelect: (String userInput) {
-    //         updateCallback("ChorePerson", userInput);
-    //       },
-    //       placeholder: "Who is responsible for the chore?",
-    //     );
-    //   } else {
-    //     print("Got in here. SearchPerson is: $searchPerson");
-    //     return MissingUserInput(
-    //       onUserSelect: (String userInput) {
-    //         updateCallback("ChorePerson", userInput);
-    //       },
-    //       placeholder: "Who is responsible for the chore?",
-    //       searchPerson: searchPerson,
-    //     );
-    //   }
-    // case "ChoreDescription":
-    //   return MissingTextInput(
-    //     onTextInput: (String userInput) {
-    //       updateCallback("ChoreTitle", userInput);
-    //     },
-    //     placeHolder: "Description of the chore to be updated (optional)",
-    //     isInputSingleLine: false,
-    //   );
+    case "ChoreDate":
+      return MissingDateInput(
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
+        },
+        placeHolder: "Search by date (optional)",
+      );
+    case "ChorePerson":
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
+          },
+          placeholder: "Who is responsible for the chore?",
+        );
+      } else {
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
+          },
+          placeholder: "Who is responsible for the chore?",
+          searchPerson: searchPerson,
+        );
+      }
+    case "ChoreDescription":
+      return MissingTextInput(
+        onTextInput: (String userInput) {
+          updateCallback("ChoreTitle", userInput);
+        },
+        placeHolder: "Description of the chore to be updated (optional)",
+        isInputSingleLine: false,
+      );
     default:
       return SizedBox.shrink();
   }
@@ -137,6 +137,50 @@ Widget handleSetStatusMissingParams(
           updateCallback("Status", userInput);
         },
       );
+    default:
+      return SizedBox.shrink();
+  }
+}
+
+Widget handleSendMessageMissingParams(
+    String missingParameter, Function(String, String) updateCallback,
+    {String? searchPerson, String? message}) {
+  switch (missingParameter) {
+    case "SendPerson":
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("SendPerson", userInput);
+          },
+          placeholder: "Who do you want to message?",
+        );
+      } else {
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("SendPerson", userInput);
+          },
+          placeholder: "Who Who do you want to message?",
+          searchPerson: searchPerson,
+        );
+      }
+    case "Message":
+      if (message == null) {
+        return MissingTextInput(
+          onTextInput: (String userInput) {
+            updateCallback("Message", userInput);
+          },
+          placeHolder: "What do you want to send?",
+        );
+      } else {
+        return MissingTextInput(
+          onTextInput: (String userInput) {
+            updateCallback("Message", userInput);
+          },
+          placeHolder: "What do you want to send?",
+          message: message,
+        );
+      }
     default:
       return SizedBox.shrink();
   }
