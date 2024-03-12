@@ -638,7 +638,7 @@ class _ChoreScreen extends State<ChoreScreen> {
                 alignment: Alignment.topLeft,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                  child:Text("Point Increases",
+                  child:Text("Past Point Increases",
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 16,
@@ -651,7 +651,7 @@ class _ChoreScreen extends State<ChoreScreen> {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 10),
                   child: Text(
-                    choreItem.timesIncremented.toString(),
+                    "Points were increased ${choreItem.timesIncremented.toString()} time(s)",
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 14,

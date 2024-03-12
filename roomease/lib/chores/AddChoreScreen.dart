@@ -156,23 +156,30 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                   value: threshold,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: "Point increase frequency (days)",
-                    labelText: "Point increase frequency (days)",
+                    hintText: "How often should the points automatically increase?",
+                    labelText: "How often should the points automatically increase?",
                   ),
                   onChanged: (int? thresholdValue) {
                     setState(() {
                       thresholdValue = thresholdValue!;
                     });
                   },
-                  items: thresholdList.map((int val) {
-                    return DropdownMenuItem(
-                      value: val,
-                      child: Text(val.toString()),
-                    );
+                  items: thresholdList.map((val) {
+                    if (val == 1){
+                      return DropdownMenuItem(
+                        value: val,
+                        child: Text("${val.toString()} day"),
+                      );
+                    } else {
+                      return DropdownMenuItem(
+                        value: val,
+                        child: Text("${val.toString()} days"),
+                      );
+                    }
                   }).toList(),
                   validator: (value) {
                     if (value == null) {
-                      return 'Please enter a threshold value for the chore';
+                      return 'Please enter a frequency value for the chore';
                     }
                     return null;
                   },
