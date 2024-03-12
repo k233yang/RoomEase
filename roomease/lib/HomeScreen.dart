@@ -109,11 +109,12 @@ class HomeScreen extends StatelessWidget {
           title: const Text('Home'),
           backgroundColor: ColorConstants.lightPurple,
         ),
-        body: Column(children: [
+        body: SingleChildScrollView(
+            child: Column(children: [
           HomeCards(updateIndex),
           Divider(indent: 20, endIndent: 20),
           statusList()
-        ]));
+        ])));
   }
 }
 
@@ -128,8 +129,8 @@ class HomeCards extends StatelessWidget {
         Padding(
             padding: EdgeInsets.only(top: 20),
             child: Image(
-              image: AssetImage(iconNumberMapping(
-                  CurrentUser.getCurrentUserIconNumber())),
+              image: AssetImage(
+                  iconNumberMapping(CurrentUser.getCurrentUserIconNumber())),
               height: 150,
               width: 150,
             )),
@@ -169,55 +170,64 @@ class ChatCard extends StatelessWidget {
 Widget statusList() {
   return Padding(
       padding: EdgeInsets.only(top: 30),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(
-            padding: EdgeInsets.only(left: 50),
-            child: Row(children: [
-              SizedBox(
-                width: 100,
-                child: Text(style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 'Roommates')
-              ),
-              SizedBox(
-                width: 90,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 30),
-                  child: Text(style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 'Points')
-                )                        ),
-              SizedBox(
-                width: 120,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 50),
-                  child: Text(style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 'Status')
-                )
-              ),
-            ]
-          ),
-        ),
+      child: Column(children: [
         ValueListenableBuilder(
             valueListenable: CurrentHousehold.householdStatusValueListener,
             builder: (context, value, child) {
               if (value.entries.isNotEmpty) {
                 List<Widget> statusList = value.values
-                    .map((entry) => Row(children: [
-                        SizedBox(
+                    .map((entry) => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                      style: TextStyle(fontSize: 15),
+                                      entry["name"]!)),
+                              SizedBox(
+                                  width: 90,
+                                  child: Padding(
+                                      padding: EdgeInsets.only(left: 20),
+                                      child: Text(
+                                          style: TextStyle(fontSize: 15),
+                                          '${entry["totalPoints"]!} points'))),
+                              SizedBox(
+                                  width: 100,
+                                  child: Padding(
+                                      padding: EdgeInsets.only(left: 20),
+                                      child: Text(
+                                          style: TextStyle(fontSize: 15),
+                                          entry["status"]!))),
+                            ]))
+                    .toList();
+                statusList.insert(
+                    0,
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      SizedBox(
                           width: 100,
-                          child: Text(style: TextStyle(fontSize: 15), entry["name"]!)
-                        ),
-                        SizedBox(
+                          child: Text(
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold),
+                              'Roommates')),
+                      SizedBox(
                           width: 90,
                           child: Padding(
-                            padding: EdgeInsets.only(left: 30),
-                            child: Text(style: TextStyle(fontSize: 15), '${entry["totalPoints"]!} points')
-                          )                        ),
-                        SizedBox(
+                              padding: EdgeInsets.only(left: 20),
+                              child: Text(
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                  'Points'))),
+                      SizedBox(
                           width: 100,
                           child: Padding(
-                            padding: EdgeInsets.only(left: 50),
-                            child: Text(style: TextStyle(fontSize: 15), entry["status"]!)
-                          )
-                        ),
-                      ]))
-                    .toList();
+                              padding: EdgeInsets.only(left: 20),
+                              child: Text(
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                  'Status')))
+                    ]));
                 return Padding(
                   padding: EdgeInsets.only(left: 50, right: 50, top: 10),
                   child: Column(
@@ -226,12 +236,14 @@ Widget statusList() {
                 );
               } else {
                 return Column(children: [
-                  SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: CircularProgressIndicator(
-                        color: ColorConstants.lightPurple),
-                  ),
+                  Padding(
+                      padding: EdgeInsets.only(top: 30),
+                      child: SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: CircularProgressIndicator(
+                            color: ColorConstants.lightPurple),
+                      )),
                   Padding(
                     padding: EdgeInsets.only(top: 16),
                     child: Text('Loading Roommate Statuses...'),

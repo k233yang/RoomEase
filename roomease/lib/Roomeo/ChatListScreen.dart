@@ -30,28 +30,31 @@ class _ChatListScreen extends State<ChatListScreen> {
         ),
         body: Padding(
             padding: EdgeInsets.only(top: 20, bottom: 20),
-            child: Column(
-              children: [
-                ValueListenableBuilder(
-                    valueListenable: CurrentUser.userMessageRoomValueListener,
-                    builder: (context, value, child) {
-                      if (value.entries.isNotEmpty) {
-                        List<String> userIds = [];
-                        List<String> userNames = [];
-                        value.values.map((entry) {
-                          entry.map((e) {
-                            userIds.add(e["id"] as String);
-                            userNames.add(e["name"] as String);
-                          });
-                        });
-                        List<Widget> messageRoomList = value.entries
-                            .map((entry) => chatRow(entry.value, entry.key))
-                            .toList();
-                        return Column(
-                          children: messageRoomList,
-                        );
-                      } else {
-                        return Column(children: [
+            child: ValueListenableBuilder(
+                valueListenable: CurrentUser.userMessageRoomValueListener,
+                builder: (context, value, child) {
+                  if (value.entries.isNotEmpty) {
+                    List<String> userIds = [];
+                    List<String> userNames = [];
+                    value.values.map((entry) {
+                      entry.map((e) {
+                        userIds.add(e["id"] as String);
+                        userNames.add(e["name"] as String);
+                      });
+                    });
+                    List<Widget> messageRoomList = value.entries
+                        .map((entry) => chatRow(entry.value, entry.key))
+                        .toList();
+                    return SingleChildScrollView(
+                        child: Column(
+                      children: messageRoomList,
+                    ));
+                  } else {
+                    return Center(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                           SizedBox(
                             width: 60,
                             height: 60,
@@ -62,11 +65,9 @@ class _ChatListScreen extends State<ChatListScreen> {
                             padding: EdgeInsets.only(top: 16),
                             child: Text('Loading Chats...'),
                           ),
-                        ]);
-                      }
-                    })
-              ],
-            )),
+                        ]));
+                  }
+                })),
         floatingActionButton: FloatingActionButton(
             foregroundColor: ColorConstants.white,
             backgroundColor: ColorConstants.lightPurple,
