@@ -22,10 +22,7 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
   late Future<Chore?> _choreDetails;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _deadlineController = TextEditingController();
-  final TextEditingController _pointsController = TextEditingController();
-  final TextEditingController _thresholdController = TextEditingController();
-  DateTime? _selectedDeadline;
+  TextEditingController _deadlineController = TextEditingController();
   List<String> _householdMembers = [];
   String? _selectedMember;
 
@@ -48,36 +45,38 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
     // Fetch chore details to set the initial selected member
     Chore? choreDetails = await DatabaseManager.getChoreFromId(
         widget.choreId, CurrentHousehold.getCurrentHouseholdId());
-    
-    String selectedMember = '';
-    if (choreDetails != null) {
-      if (choreDetails.assignedUserId != null ) {
-        selectedMember = await DatabaseManager.getUserName(choreDetails.assignedUserId);
-      }
-      else {
-        selectedMember = 'Unassigned';
-      }
-
-      setState(() {
-        _selectedMember =
-            selectedMember; // Assuming Chore has an 'assignedTo' field with the member's name
-      });
-    }
   }
 
   Future<void> _pickDeadline(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    await showDatePicker(
       context: context,
-      initialDate: _selectedDeadline ?? DateTime.now(),
-      firstDate: DateTime(2000),
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2025),
-    );
-    if (picked != null && picked != _selectedDeadline) {
-      setState(() {
-        _selectedDeadline = picked;
-        _deadlineController.text = DateFormat('yyyy-MM-dd').format(picked);
-      });
-    }
+    ).then((deadlineDate) {
+      if (deadlineDate != null) {
+        showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.now(),
+        ).then((deadlineTime) {
+          if (deadlineTime != null) {
+            DateTime deadlineDateTime = DateTime(
+              deadlineDate.year,
+              deadlineDate.month,
+              deadlineDate.day,
+              deadlineTime.hour,
+              deadlineTime.minute,
+            );
+            String formattedDateTime = DateFormat('yyyy-MM-dd hh:mm a')
+                .format(deadlineDateTime);
+            setState(() {
+              _deadlineController.text =
+                  formattedDateTime; //set output date to TextField value.
+            });
+          }
+        });
+      }
+    });
   }
 
   @override
@@ -99,12 +98,18 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
 
           // Pre-fill the form fields if the snapshot has data
           final Chore? chore = snapshot.data;
-          _nameController.text = chore?.name ?? '';
-          _descriptionController.text = chore?.details ?? '';
-          _pointsController.text = chore?.points.toString() ?? '';
-          _thresholdController.text = chore?.threshold.toString() ?? '';
-          _deadlineController.text = chore?.deadline ??
-              ''; // Assume deadline is a String in 'yyyy-MM-dd' format
+          if (_nameController.text == '') {
+            _nameController.text = chore?.name ?? '';
+          } 
+          if (_descriptionController.text == '') {
+            _descriptionController.text = chore?.details ?? '';
+          } 
+          if (_deadlineController.text == '') {
+            _deadlineController.text = chore?.deadline ?? '';
+          } 
+          else {
+
+          }; // Assume deadline is a String in 'yyyy-MM-dd' format
           //print("CHORE DETAILS: ${chore?.status}");
 
           return SingleChildScrollView(
@@ -115,29 +120,11 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Chore Name',
+                    labelText: 'Name',
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 10),
-                Text("Assigned to:"),
-                DropdownButton<String>(
-                  value: _selectedMember,
-                  icon: const Icon(Icons.arrow_downward),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedMember = newValue;
-                    });
-                  },
-                  items: _householdMembers
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: const InputDecoration(
@@ -146,33 +133,45 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                   ),
                   maxLines: 3,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _deadlineController,
                   decoration: const InputDecoration(
                     labelText: 'Deadline',
                     border: OutlineInputBorder(),
                   ),
-                  readOnly: true, // Make this field read-only
-                  onTap: () => _pickDeadline(context),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _pointsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Points',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _thresholdController,
-                  decoration: const InputDecoration(
-                    labelText: 'Point increase frequency (days)',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
+                  readOnly: true,
+                  onTap: () async { 
+                    await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(3000),
+                    ).then((deadlineDate) {
+                      if (deadlineDate != null) {
+                        showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        ).then((deadlineTime) {
+                          if (deadlineTime != null) {
+                            DateTime deadlineDateTime = DateTime(
+                              deadlineDate.year,
+                              deadlineDate.month,
+                              deadlineDate.day,
+                              deadlineTime.hour,
+                              deadlineTime.minute,
+                            );
+                            String formattedDateTime = DateFormat('yyyy-MM-dd hh:mm a')
+                                .format(deadlineDateTime);
+                            setState(() {
+                              _deadlineController.text =
+                                  formattedDateTime; //set output date to TextField value.
+                            });
+                          }
+                        });
+                      }
+                    });
+                  },
                 ),
                 const SizedBox(height: 20),
                 Center(
@@ -185,9 +184,6 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                         name: _nameController.text,
                         details: _descriptionController.text,
                         deadline: _deadlineController.text,
-                        points: int.tryParse(_pointsController.text),
-                        threshold: int.tryParse(_thresholdController.text),
-                        assignedUserId: await DatabaseManager.getUserIdByName(_selectedMember!),
                         status: chore!.status,
                       );
                       widget.onChoreUpdate();
