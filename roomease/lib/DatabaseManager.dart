@@ -418,17 +418,18 @@ class DatabaseManager {
     DatabaseReference userRef =
         _databaseInstance.ref().child("users/$currentUserId/messageRoomIds");
     List<String> messageRoomIdList = [];
-    DatabaseEvent userEvent = await userRef.once();
-    for (DataSnapshot d in userEvent.snapshot.children) {
-      messageRoomIdList.add(d.value as String);
-    }
-    Map<String, List<Map<String, String>>> messageRoomMapping = {};
-    // Format is messageRoomid: List<Map<userid:username>>
-    for (String messageRoomID in messageRoomIdList) {
-      DatabaseReference messageRef =
-          _databaseInstance.ref().child("messageRooms/$messageRoomID/users");
-      //DatabaseEvent event = await messageRef.once();
-      messageRef.onValue.listen((DatabaseEvent event) async {
+    //DatabaseEvent userEvent = await userRef.once();
+    userRef.onValue.listen((DatabaseEvent userEvent) async {
+      for (DataSnapshot d in userEvent.snapshot.children) {
+        messageRoomIdList.add(d.value as String);
+      }
+      Map<String, List<Map<String, String>>> messageRoomMapping = {};
+      // Format is messageRoomid: List<Map<userid:username>>
+      for (String messageRoomID in messageRoomIdList) {
+        DatabaseReference messageRef =
+            _databaseInstance.ref().child("messageRooms/$messageRoomID/users");
+        DatabaseEvent event = await messageRef.once();
+
         if (event.snapshot.value != null) {
           // event.snapshot.value is a list of the users in this specific msg room
           //[EZ5ZkiFsVZMySudqICUIhmskgXw1, RoomeoId]
@@ -443,9 +444,9 @@ class DatabaseManager {
           }
           messageRoomMapping[messageRoomID] = userNameIdMapping;
         }
-        CurrentUser.userMessageRoomValueListener.value = messageRoomMapping;
-      });
-    }
+      }
+      CurrentUser.userMessageRoomValueListener.value = messageRoomMapping;
+    });
   }
 
   static Future<bool> doesMessageRoomExist(String messageRoomID) async {
