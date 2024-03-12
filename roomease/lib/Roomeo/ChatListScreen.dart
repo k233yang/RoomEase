@@ -81,9 +81,11 @@ class _ChatListScreen extends State<ChatListScreen> {
               userNames.remove(CurrentUser.getCurrentUserName());
 
               // Need to remove names that already have a chat room
-              List userIdsToRemove =
+              List<String> userIdsToRemove =
                   await getExistingUserIdsAndRemoveNames(userIds, userNames);
-              userIds.remove(userIdsToRemove);
+              if (userIds.isNotEmpty && userIdsToRemove.isNotEmpty) {
+                userIds.remove(userIdsToRemove);
+              }
 
               Navigator.push(
                 context,

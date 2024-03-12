@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/widgets.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
-import 'package:roomease/Roomeo/Roomeo.dart';
-import 'package:roomease/HomeScreen.dart';
 import 'Roomeo/ChatScreen.dart';
 import 'Message.dart';
 import 'MessageRoom.dart';
@@ -14,7 +11,6 @@ import 'User.dart';
 import 'calendar/Event.dart';
 import 'chores/Chore.dart';
 import 'chores/ChoreStatus.dart';
-import 'package:roomease/chores/Chore.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
 import 'package:intl/intl.dart';
 
