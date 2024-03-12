@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/colors/ColorConstants.dart';
@@ -41,7 +42,8 @@ class _EditProfileState extends State<EditProfile> {
           title: Text("Edit Profile"),
           backgroundColor: ColorConstants.lightPurple,
         ),
-        body: SingleChildScrollView(child: Form(
+        body: SingleChildScrollView(
+            child: Form(
           key: _formKey,
           child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),

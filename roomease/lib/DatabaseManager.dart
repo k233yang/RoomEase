@@ -579,7 +579,7 @@ class DatabaseManager {
       String userId, String newName) async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
     DatabaseReference householdUserRef =
-        _databaseInstance.ref("households/$householdCode/$userId");
+        _databaseInstance.ref("households/$householdCode/users/$userId");
     await householdUserRef.update({"name": newName});
     householdUserIdSubscription(CurrentHousehold.getCurrentHouseholdId());
   }
