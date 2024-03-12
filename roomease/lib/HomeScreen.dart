@@ -111,65 +111,84 @@ class HomeScreen extends StatelessWidget {
         ),
         body: SingleChildScrollView(
             child: Column(children: [
-          HomeCards(updateIndex),
+          welcomeSection(),
           Divider(indent: 20, endIndent: 20),
-          statusList()
+          statusList(updateIndex),
+          Divider(indent: 20, endIndent: 20),
+          quickActions(updateIndex)
         ])));
   }
 }
 
-class HomeCards extends StatelessWidget {
-  final Function(int) updateIndex;
-  HomeCards(this.updateIndex);
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-        child: Column(
-      children: [
-        Padding(
-            padding: EdgeInsets.only(top: 20),
-            child: Image(
-              image: AssetImage(
-                  iconNumberMapping(CurrentUser.getCurrentUserIconNumber())),
-              height: 150,
-              width: 150,
-            )),
-        Padding(
-            padding: EdgeInsets.only(top: 20),
-            child: DatabaseManager.userNameStreamBuilder(
-                CurrentUser.getCurrentUserId())),
-        Padding(
-            padding: EdgeInsets.only(top: 20, bottom: 20),
-            child: ChatCard(updateIndex))
-      ],
-    ));
-  }
+Widget welcomeSection() {
+  return Center(
+      child: Column(
+    children: [
+      Padding(
+          padding: EdgeInsets.only(top: 20),
+          child: Image(
+            image: AssetImage(
+                iconNumberMapping(CurrentUser.getCurrentUserIconNumber())),
+            height: 150,
+            width: 150,
+          )),
+      Padding(
+          padding: EdgeInsets.only(top: 20, bottom: 20),
+          child: DatabaseManager.userNameStreamBuilder(
+              CurrentUser.getCurrentUserId())),
+    ],
+  ));
 }
 
-class ChatCard extends StatelessWidget {
-  final Function(int) updateIndex;
-  ChatCard(this.updateIndex);
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
+Widget quickActions(Function(int) updateIndex) {
+  return Padding(
+      padding: EdgeInsets.only(top: 20, bottom: 40),
+      child: Column(
+        children: [
+          Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Text("Quick Actions",
+                  style:
+                      TextStyle(fontWeight: FontWeight.normal, fontSize: 20))),
+          actionCard(updateIndex, "Chat With Roomeo", "assets/roomeo_icon.png"),
+          actionCard(updateIndex, "View Chores", "assets/chores_icon.png"),
+          actionCard(updateIndex, "View Calendar", "assets/schedule_icon.png")
+        ],
+      ));
+}
+
+Widget actionCard(Function(int) updateIndex, String text, String assetUrl) {
+  return GestureDetector(
       onTap: () {
         updateIndex(1);
       },
-      child: Card(
-        child: Padding(
-          padding: EdgeInsets.all(15.0),
-          child: Column(
-            children: [Text("Chat with Roomeo")],
+      child: SizedBox(
+        width: 300,
+        child: Card(
+          color: ColorConstants.lightPurple,
+          child: Padding(
+            padding: EdgeInsets.all(15.0),
+            child: Row(
+              children: [
+                Text(text),
+                Spacer(),
+                Padding(
+                    padding: EdgeInsets.only(left: 10),
+                    child: Image(
+                      width: 20,
+                      height: 20,
+                      image: AssetImage(assetUrl),
+                    ))
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      ));
 }
 
-Widget statusList() {
+Widget statusList(updateIndex) {
   return Padding(
-      padding: EdgeInsets.only(top: 30),
+      padding: EdgeInsets.only(top: 30, bottom: 30),
       child: Column(children: [
         ValueListenableBuilder(
             valueListenable: CurrentHousehold.householdStatusValueListener,
@@ -250,6 +269,13 @@ Widget statusList() {
                   ),
                 ]);
               }
-            })
+            }),
+        Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: OutlinedButton(
+                child: Text("Update Your Status"),
+                onPressed: () {
+                  updateIndex(4);
+                }))
       ]));
 }
