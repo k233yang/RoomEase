@@ -41,7 +41,7 @@ class _EditProfileState extends State<EditProfile> {
           title: Text("Edit Profile"),
           backgroundColor: ColorConstants.lightPurple,
         ),
-        body: Form(
+        body: SingleChildScrollView(child: Form(
           key: _formKey,
           child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
@@ -141,7 +141,7 @@ class _EditProfileState extends State<EditProfile> {
                               }
                             }))
                   ])),
-        ));
+        )));
   }
 
   Widget smallIcon(String imagePath, int iconNumber) {
