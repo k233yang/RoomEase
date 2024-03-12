@@ -84,7 +84,9 @@ class _ChatListScreen extends State<ChatListScreen> {
               List<String> userIdsToRemove =
                   await getExistingUserIdsAndRemoveNames(userIds, userNames);
               if (userIds.isNotEmpty && userIdsToRemove.isNotEmpty) {
-                userIds.remove(userIdsToRemove);
+                for (var i = 0; i < userIdsToRemove.length; i++) {
+                  userIds.remove(userIdsToRemove[i]);
+                }
               }
 
               Navigator.push(
@@ -106,6 +108,7 @@ class _ChatListScreen extends State<ChatListScreen> {
   Future<List<String>> getExistingUserIdsAndRemoveNames(
       List<String> userIds, List<String> userNames) async {
     List<String> userIdsToRemove = [];
+    List<String> userNamesToRemove = [];
     for (var i = 0; i < userIds.length; i++) {
       bool cond1 = await DatabaseManager.doesMessageRoomExist(
           CurrentUser.getCurrentUserId() + userIds[i]);
@@ -113,8 +116,11 @@ class _ChatListScreen extends State<ChatListScreen> {
           userIds[i] + CurrentUser.getCurrentUserId());
       if (cond1 || cond2) {
         userIdsToRemove.add(userIds[i]);
-        userNames.removeAt(i);
+        userNamesToRemove.add(userNames[i]);
       }
+    }
+    for (var i = 0; i < userNamesToRemove.length; i++) {
+      userNames.remove(userNamesToRemove[i]);
     }
     return userIdsToRemove;
   }

@@ -110,17 +110,18 @@ class DatabaseManager {
         List<String> newMessageRoomIds = [messageRoomId];
         CurrentUser.setCurrentMessageRoomIds(newMessageRoomIds);
         return Transaction.success(newMessageRoomIds);
-      }
-
-      List<String> _messageRoomIds = List<String>.from(messageRoomIds as List);
-      if (_messageRoomIds.contains(messageRoomId)) {
-        return Transaction.success(_messageRoomIds);
       } else {
-        _messageRoomIds.add(messageRoomId);
+        List<String> _messageRoomIds =
+            List<String>.from(messageRoomIds as List);
+        if (_messageRoomIds.contains(messageRoomId)) {
+          return Transaction.success(_messageRoomIds);
+        } else {
+          _messageRoomIds.add(messageRoomId);
+        }
+        CurrentUser.setCurrentMessageRoomIds(_messageRoomIds);
+        // Return the new data.
+        return Transaction.success(_messageRoomIds);
       }
-      CurrentUser.setCurrentMessageRoomIds(_messageRoomIds);
-      // Return the new data.
-      return Transaction.success(_messageRoomIds);
     });
   }
 
@@ -248,6 +249,7 @@ class DatabaseManager {
   static Future<void> addMessageRoomWithList(List<String> userIds) async {
     DatabaseReference messageRoomsRef =
         _databaseInstance.ref("messageRooms/${userIds.join()}");
+    print(userIds.join());
     messageRoomsRef.update({"users": userIds, "messages": <String>[]});
   }
 
@@ -425,23 +427,25 @@ class DatabaseManager {
     for (String messageRoomID in messageRoomIdList) {
       DatabaseReference messageRef =
           _databaseInstance.ref().child("messageRooms/$messageRoomID/users");
-      DatabaseEvent event = await messageRef.once();
-      if (event.snapshot.value != null) {
-        // event.snapshot.value is a list of the users in this specific msg room
-        //[EZ5ZkiFsVZMySudqICUIhmskgXw1, RoomeoId]
-        List<Map<String, String>> userNameIdMapping = [];
-        for (DataSnapshot d in event.snapshot.children) {
-          String userid = d.value as String;
-          if (CurrentUser.getCurrentUserId() != userid) {
-            String username = await DatabaseManager.getUserName(userid);
-            if (userid == "RoomeoId") username = "Roomeo";
-            userNameIdMapping.add({"id": userid, "name": username});
+      //DatabaseEvent event = await messageRef.once();
+      messageRef.onValue.listen((DatabaseEvent event) async {
+        if (event.snapshot.value != null) {
+          // event.snapshot.value is a list of the users in this specific msg room
+          //[EZ5ZkiFsVZMySudqICUIhmskgXw1, RoomeoId]
+          List<Map<String, String>> userNameIdMapping = [];
+          for (DataSnapshot d in event.snapshot.children) {
+            String userid = d.value as String;
+            if (CurrentUser.getCurrentUserId() != userid) {
+              String username = await DatabaseManager.getUserName(userid);
+              if (userid == "RoomeoId") username = "Roomeo";
+              userNameIdMapping.add({"id": userid, "name": username});
+            }
           }
+          messageRoomMapping[messageRoomID] = userNameIdMapping;
         }
-        messageRoomMapping[messageRoomID] = userNameIdMapping;
-      }
+        CurrentUser.userMessageRoomValueListener.value = messageRoomMapping;
+      });
     }
-    CurrentUser.userMessageRoomValueListener.value = messageRoomMapping;
   }
 
   static Future<bool> doesMessageRoomExist(String messageRoomID) async {
@@ -527,13 +531,13 @@ class DatabaseManager {
   static Future<List<String>> getUserNamesFromHousehold(
       String householdId) async {
     List<String> householdUserIds = await getUserIdsFromHousehold(householdId);
-    List<Future<String>> userNameFutures = [];
+    List<String> userNameFutures = [];
     for (String userId in householdUserIds) {
-      Future<String> userNameFuture = getUserName(userId);
+      String userNameFuture = await getUserName(userId);
       userNameFutures.add(userNameFuture);
     }
     // make concurrent requests for all user names
-    return await Future.wait(userNameFutures);
+    return userNameFutures;
   }
 
   static void householdUserIdSubscription(String householdId) {

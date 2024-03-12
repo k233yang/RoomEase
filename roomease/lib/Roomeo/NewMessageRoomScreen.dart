@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
-import 'package:roomease/MessageRoom.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 
 class NewMessageRoomScreen extends StatefulWidget {
