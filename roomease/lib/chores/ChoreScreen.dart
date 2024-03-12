@@ -109,7 +109,7 @@ class _ChoreScreen extends State<ChoreScreen> {
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         List<Widget> children;
         if (snapshot.hasData) {
-          children = getChoreTile(context, currHousehold, status);
+          children = <Widget>[getChoreTile(context, currHousehold, status)];
         } else if (snapshot.hasError) {
           children = <Widget>[
             const Icon(
@@ -136,17 +136,28 @@ class _ChoreScreen extends State<ChoreScreen> {
             ),
           ];
         }
-        return ListView.builder(
-          physics: NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: children.length,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          itemBuilder: (BuildContext context, int index) {
-            return Dismissible(
-              background: Container(
-                  color: ColorConstants.lightRed,
-                  child: Align(
-                      child: Row(
+        return Center(
+            child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: children,
+        ),
+        );
+      },
+    );
+  }
+
+  ListView getDismissible(List<Widget> children, ChoreStatus status) {
+    return ListView.builder(
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: children.length,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      itemBuilder: (BuildContext context, int index) {
+        return Dismissible(
+          background: Container(
+              color: ColorConstants.lightRed,
+              child: Align(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       SizedBox(
@@ -181,10 +192,10 @@ class _ChoreScreen extends State<ChoreScreen> {
                         ),
                     ],
                   ))),
-              secondaryBackground: Container(
-                  color: ColorConstants.lightGreen,
-                  child: Align(
-                      child: Row(
+          secondaryBackground: Container(
+              color: ColorConstants.lightGreen,
+              child: Align(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
                       if (status == ChoreStatus.toDo)
@@ -219,130 +230,128 @@ class _ChoreScreen extends State<ChoreScreen> {
                       ),
                     ],
                   ))),
-              key: ValueKey<Widget>(children[index]),
-              onDismissed: (DismissDirection direction) {
-                if (direction == DismissDirection.endToStart) {
-                  if (status == ChoreStatus.toDo) {
-                    try {
-                      DatabaseManager.updateChoreStatus(
-                              CurrentUser.getCurrentUserId(),
-                              currHousehold.choresToDo[index].id,
-                              status,
-                              ChoreStatus.inProgress)
-                          .then((value) {
-                        setState(() {
-                          children.removeAt(index);
-                          refreshTiles();
-                        });
-                      });
-                    } catch (e) {
-                      print('Failed to move chore: $e');
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        duration: const Duration(seconds: 1),
-                        content: Text('Chore assigned!')));
-                  } else if (status == ChoreStatus.inProgress) {
-                    try {
-                      DatabaseManager.updateChoreStatus(
-                              currHousehold
-                                  .choresInProgress[index].assignedUserId,
-                              currHousehold.choresInProgress[index].id,
-                              status,
-                              ChoreStatus.completed)
-                          .then((value) {
-                        setState(() {
-                          children.removeAt(index);
-                          refreshTiles();
-                        });
-                      });
-                    } catch (e) {
-                      print('Failed to move chore: $e');
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        duration: const Duration(seconds: 1),
-                        content: Text('Chore completed!')));
-                  } else if (status == ChoreStatus.completed) {
-                    try {
-                      DatabaseManager.deleteChore(
-                              currHousehold.choresCompleted[index].id,
-                              ChoreStatus.completed)
-                          .then((value) {
-                        setState(() {
-                          children.removeAt(index);
-                          refreshTiles();
-                        });
-                      });
-                    } catch (e) {
-                      print('Failed to move chore: $e');
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        duration: const Duration(seconds: 1),
-                        content: Text('Chore removed!')));
-                  }
-                } else if (direction == DismissDirection.startToEnd) {
-                  if (status == ChoreStatus.toDo) {
-                    try {
-                      DatabaseManager.deleteChore(
-                              currHousehold.choresToDo[index].id,
-                              ChoreStatus.toDo)
-                          .then((value) {
-                        setState(() {
-                          children.removeAt(index);
-                          refreshTiles();
-                        });
-                      });
-                    } catch (e) {
-                      print('Failed to move chore: $e');
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        duration: const Duration(seconds: 1),
-                        content: Text('Chore removed!')));
-                  } else if (status == ChoreStatus.inProgress) {
-                    try {
-                      DatabaseManager.updateChoreStatus(
-                              currHousehold
-                                  .choresInProgress[index].assignedUserId,
-                              currHousehold.choresInProgress[index].id,
-                              status,
-                              ChoreStatus.toDo)
-                          .then((value) {
-                        setState(() {
-                          children.removeAt(index);
-                          refreshTiles();
-                        });
-                      });
-                    } catch (e) {
-                      print('Failed to move chore: $e');
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        duration: const Duration(seconds: 1),
-                        content: Text('Chore unassigned!')));
-                  } else if (status == ChoreStatus.completed) {
-                    try {
-                      DatabaseManager.updateChoreStatus(
-                              currHousehold
-                              .choresCompleted[index].assignedUserId,
-                              currHousehold.choresCompleted[index].id,
-                              status,
-                              ChoreStatus.inProgress)
-                          .then((value) {
-                        setState(() {
-                          children.removeAt(index);
-                          refreshTiles();
-                        });
-                      });
-                    } catch (e) {
-                      print('Failed to move chore: $e');
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        duration: const Duration(seconds: 1),
-                        content: Text('Chore back in progress!')));
-                  }
+          key: ValueKey<Widget>(children[index]),
+          onDismissed: (DismissDirection direction) {
+            if (direction == DismissDirection.endToStart) {
+              if (status == ChoreStatus.toDo) {
+                try {
+                  DatabaseManager.updateChoreStatus(
+                      CurrentUser.getCurrentUserId(),
+                      currHousehold.choresToDo[index].id,
+                      status,
+                      ChoreStatus.inProgress)
+                      .then((value) {
+                    setState(() {
+                      children.removeAt(index);
+                      refreshTiles();
+                    });
+                  });
+                } catch (e) {
+                  print('Failed to move chore: $e');
                 }
-              },
-              child: children[index],
-            );
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    duration: const Duration(seconds: 1),
+                    content: Text('Chore assigned!')));
+              } else if (status == ChoreStatus.inProgress) {
+                try {
+                  DatabaseManager.updateChoreStatus(
+                      currHousehold
+                          .choresInProgress[index].assignedUserId,
+                      currHousehold.choresInProgress[index].id,
+                      status,
+                      ChoreStatus.completed)
+                      .then((value) {
+                    setState(() {
+                      children.removeAt(index);
+                      refreshTiles();
+                    });
+                  });
+                } catch (e) {
+                  print('Failed to move chore: $e');
+                }
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    duration: const Duration(seconds: 1),
+                    content: Text('Chore completed!')));
+              } else if (status == ChoreStatus.completed) {
+                try {
+                  DatabaseManager.deleteChore(
+                      currHousehold.choresCompleted[index].id,
+                      ChoreStatus.completed)
+                      .then((value) {
+                    setState(() {
+                      children.removeAt(index);
+                      refreshTiles();
+                    });
+                  });
+                } catch (e) {
+                  print('Failed to move chore: $e');
+                }
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    duration: const Duration(seconds: 1),
+                    content: Text('Chore removed!')));
+              }
+            } else if (direction == DismissDirection.startToEnd) {
+              if (status == ChoreStatus.toDo) {
+                try {
+                  DatabaseManager.deleteChore(
+                      currHousehold.choresToDo[index].id,
+                      ChoreStatus.toDo)
+                      .then((value) {
+                    setState(() {
+                      children.removeAt(index);
+                      refreshTiles();
+                    });
+                  });
+                } catch (e) {
+                  print('Failed to move chore: $e');
+                }
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    duration: const Duration(seconds: 1),
+                    content: Text('Chore removed!')));
+              } else if (status == ChoreStatus.inProgress) {
+                try {
+                  DatabaseManager.updateChoreStatus(
+                      currHousehold
+                          .choresInProgress[index].assignedUserId,
+                      currHousehold.choresInProgress[index].id,
+                      status,
+                      ChoreStatus.toDo)
+                      .then((value) {
+                    setState(() {
+                      children.removeAt(index);
+                      refreshTiles();
+                    });
+                  });
+                } catch (e) {
+                  print('Failed to move chore: $e');
+                }
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    duration: const Duration(seconds: 1),
+                    content: Text('Chore unassigned!')));
+              } else if (status == ChoreStatus.completed) {
+                try {
+                  DatabaseManager.updateChoreStatus(
+                      currHousehold
+                          .choresCompleted[index].assignedUserId,
+                      currHousehold.choresCompleted[index].id,
+                      status,
+                      ChoreStatus.inProgress)
+                      .then((value) {
+                    setState(() {
+                      children.removeAt(index);
+                      refreshTiles();
+                    });
+                  });
+                } catch (e) {
+                  print('Failed to move chore: $e');
+                }
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    duration: const Duration(seconds: 1),
+                    content: Text('Chore back in progress!')));
+              }
+            }
           },
+          child: children[index],
         );
       },
     );
@@ -356,7 +365,7 @@ class _ChoreScreen extends State<ChoreScreen> {
     completedListLoaded = currHousehold.updateChoresList(ChoreStatus.completed);
   }
 
-  List<Widget> getChoreTile(
+  ListView getChoreTile(
   BuildContext context,
   Household currHousehold,
   ChoreStatus status,
@@ -392,14 +401,20 @@ class _ChoreScreen extends State<ChoreScreen> {
   }
 
   if (list.isEmpty) {
-    return <Widget>[
-      Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: Center(child: Text("No chores in category!")),
-          ))
-    ];
+    return ListView.builder(
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: 1,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      itemBuilder: (BuildContext context, int index) {
+        return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Center(child: Text("No chores in category!")),
+              ));
+      }
+    );
   }
 
   for (final choreItem in list) {
@@ -672,8 +687,8 @@ class _ChoreScreen extends State<ChoreScreen> {
         )));
   }
 
-  return choreTileList;
-}
+  return getDismissible(choreTileList, status);
+  }
 }
 
 class CreateAddChoreButton extends StatelessWidget {
