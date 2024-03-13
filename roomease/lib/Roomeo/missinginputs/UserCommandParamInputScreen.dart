@@ -26,7 +26,6 @@ class UserCommandParamInputScreen extends StatefulWidget {
 
 class _UserCommandParamInputScreenState
     extends State<UserCommandParamInputScreen> {
-  late List<String> missingParams;
   int currentIndex = 0;
 
   bool hasMissingMandatoryParameters() {
@@ -35,9 +34,7 @@ class _UserCommandParamInputScreenState
         List<String> requiredKeys = [
           "ChoreTitle",
           "ChoreDate",
-          "ChorePerson",
           "ChorePoints",
-          "ChorePointsThreshold"
         ];
         for (String key in requiredKeys) {
           if (!widget.commandParams.containsKey(key) ||
@@ -95,18 +92,6 @@ class _UserCommandParamInputScreenState
     return false;
   }
 
-  List<String> generateMissingParamList(Map<String, String> currentParams) {
-    List<String> missingParams = [];
-    currentParams.forEach((key, value) {
-      if (value == 'Missing' ||
-          key.contains("Person") ||
-          key.contains("Message")) {
-        missingParams.add(key);
-      }
-    });
-    return missingParams;
-  }
-
   void updateCommandParams(String key, String value) {
     setState(() {
       widget.commandParams[key] = value;
@@ -115,20 +100,23 @@ class _UserCommandParamInputScreenState
 
   Widget generateMissingInputWidgets(
       String missingParameter, String commandCategory,
-      {String? chorePerson, String? message}) {
+      {String? chorePerson, String? data}) {
     switch (commandCategory) {
       case "Add Chore":
         return handleAddChoreMissingParams(
-            missingParameter, updateCommandParams,
-            searchPerson: chorePerson);
+          missingParameter,
+          updateCommandParams,
+          searchPerson: chorePerson,
+          data: data,
+        );
       case "Update Chore":
         return handleUpdateChoreMissingParams(
             missingParameter, updateCommandParams,
-            searchPerson: chorePerson);
+            searchPerson: chorePerson, data: data);
       case "Remove Chore":
         return handleRemoveChoreMissingParams(
             missingParameter, updateCommandParams,
-            searchPerson: chorePerson);
+            searchPerson: chorePerson, data: data);
       case "View Status":
         return handleViewStatusMissingParams(
             missingParameter, updateCommandParams,
@@ -141,7 +129,7 @@ class _UserCommandParamInputScreenState
       case "Send a Message":
         return handleSendMessageMissingParams(
             missingParameter, updateCommandParams,
-            searchPerson: chorePerson, message: message);
+            searchPerson: chorePerson, message: data);
       default:
         return SizedBox.shrink();
     }
@@ -188,7 +176,6 @@ class _UserCommandParamInputScreenState
   @override
   void initState() {
     super.initState();
-    missingParams = generateMissingParamList(widget.commandParams);
   }
 
   @override
@@ -224,30 +211,32 @@ class _UserCommandParamInputScreenState
             Flexible(
               child: ListView.builder(
                 shrinkWrap: true, // Make ListView as tall as its children
-                itemCount: missingParams.length,
+                itemCount: widget.commandParams.length,
                 itemBuilder: (context, index) {
-                  if (missingParams[index].contains("Person")) {
+                  String key = widget.commandParams.keys.elementAt(index);
+                  if (key.contains("Person")) {
                     return generateMissingInputWidgets(
-                      missingParams[index],
+                      key,
                       widget.category,
-                      chorePerson: widget.commandParams[missingParams[index]] ==
-                              'Missing'
+                      chorePerson: widget.commandParams[key] == 'Missing'
                           ? null
-                          : widget.commandParams[missingParams[index]],
+                          : widget.commandParams[key],
                     );
-                  } else if (missingParams[index].contains("Message")) {
+                  } else if (key.contains("Message")) {
                     return generateMissingInputWidgets(
-                      missingParams[index],
+                      key,
                       widget.category,
-                      message: widget.commandParams[missingParams[index]] ==
-                              'Missing'
+                      data: widget.commandParams[key] == 'Missing'
                           ? null
-                          : widget.commandParams[missingParams[index]],
+                          : widget.commandParams[key],
                     );
                   } else {
                     return generateMissingInputWidgets(
-                      missingParams[index],
+                      key,
                       widget.category,
+                      data: widget.commandParams[key] == 'Missing'
+                          ? null
+                          : widget.commandParams[key],
                     );
                   }
                 },

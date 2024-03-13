@@ -42,6 +42,7 @@ Future<void> createRoomIndex(String roomID,
 Future<void> insertVector(List<double> vector, String roomID, String vectorID,
     {Map<String, dynamic> metadata = const {}}) async {
   // get the index of the room
+  print("ROOM ID IS: ${roomID.toLowerCase()}");
   var fetchIndexUrl =
       Uri.parse('https://api.pinecone.io/indexes/${roomID.toLowerCase()}');
   var fetchIndexRes = await http.get(fetchIndexUrl, headers: <String, String>{
@@ -78,7 +79,7 @@ Future<void> insertVector(List<double> vector, String roomID, String vectorID,
       throw Exception(
           'Failed to insert vector into index: ${insertVectorRes.statusCode}');
     }
-    print('THis is good so far 2');
+    print("VECTOR HAS BEEN INSERTED");
     return;
   } else {
     throw Exception(
@@ -227,6 +228,46 @@ Future<String> searchUserFromChat(
       throw Exception(
           'Failed to query vector into index: ${queryVectorRes.statusCode}');
     }
+  } else {
+    throw Exception(
+        'Failed to fetch index info. Status code: ${fetchIndexRes.statusCode}');
+  }
+}
+
+Future<void> updateVectorMetadata(
+    String indexID, String vectorID, Map<String, dynamic> metadata) async {
+  // get the index of the room
+  var fetchIndexUrl =
+      Uri.parse('https://api.pinecone.io/indexes/${indexID.toLowerCase()}');
+  var fetchIndexRes = await http.get(fetchIndexUrl, headers: <String, String>{
+    'Accept': 'application/json',
+    'Api-Key': PineConeAPIKey
+  });
+
+  if (fetchIndexRes.statusCode == 200) {
+    final decodedFetchIndexRes = jsonDecode(fetchIndexRes.body);
+    final String indexEndpoint = decodedFetchIndexRes['host'];
+    //print("INDEX ENDPOINT: $indexEndpoint");
+    var insertVectorUrl = Uri.parse('https://${indexEndpoint}/vectors/update');
+
+    Map<String, dynamic> requestBody = {
+      'id': vectorID,
+      'setMetadata': metadata
+    };
+    var insertVectorRes = await http.post(
+      insertVectorUrl,
+      headers: <String, String>{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Api-Key': PineConeAPIKey
+      },
+      body: jsonEncode(requestBody),
+    );
+    if (insertVectorRes.statusCode != 200) {
+      throw Exception(
+          'Failed to insert vector into index: ${insertVectorRes.statusCode}');
+    }
+    return;
   } else {
     throw Exception(
         'Failed to fetch index info. Status code: ${fetchIndexRes.statusCode}');

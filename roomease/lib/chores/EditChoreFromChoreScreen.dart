@@ -12,10 +12,11 @@ class EditChoreFromChoreScreen extends StatefulWidget {
   const EditChoreFromChoreScreen(
       {super.key, required this.choreId, required this.onChoreUpdate});
   final String choreId;
-  final Function() onChoreUpdate;
+  final Function(Map<String, String>, Map<String, String>) onChoreUpdate;
 
   @override
-  State<EditChoreFromChoreScreen> createState() => _EditChoreFromChoreScreenState();
+  State<EditChoreFromChoreScreen> createState() =>
+      _EditChoreFromChoreScreenState();
 }
 
 class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
@@ -67,8 +68,8 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
               deadlineTime.hour,
               deadlineTime.minute,
             );
-            String formattedDateTime = DateFormat('yyyy-MM-dd hh:mm a')
-                .format(deadlineDateTime);
+            String formattedDateTime =
+                DateFormat('yyyy-MM-dd hh:mm a').format(deadlineDateTime);
             setState(() {
               _deadlineController.text =
                   formattedDateTime; //set output date to TextField value.
@@ -100,16 +101,14 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
           final Chore? chore = snapshot.data;
           if (_nameController.text == '') {
             _nameController.text = chore?.name ?? '';
-          } 
+          }
           if (_descriptionController.text == '') {
             _descriptionController.text = chore?.details ?? '';
-          } 
+          }
           if (_deadlineController.text == '') {
             _deadlineController.text = chore?.deadline ?? '';
-          } 
-          else {
-
-          }; // Assume deadline is a String in 'yyyy-MM-dd' format
+          } else {}
+          ; // Assume deadline is a String in 'yyyy-MM-dd' format
           //print("CHORE DETAILS: ${chore?.status}");
 
           return SingleChildScrollView(
@@ -141,7 +140,7 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                     border: OutlineInputBorder(),
                   ),
                   readOnly: true,
-                  onTap: () async { 
+                  onTap: () async {
                     await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
@@ -161,8 +160,9 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                               deadlineTime.hour,
                               deadlineTime.minute,
                             );
-                            String formattedDateTime = DateFormat('yyyy-MM-dd hh:mm a')
-                                .format(deadlineDateTime);
+                            String formattedDateTime =
+                                DateFormat('yyyy-MM-dd hh:mm a')
+                                    .format(deadlineDateTime);
                             setState(() {
                               _deadlineController.text =
                                   formattedDateTime; //set output date to TextField value.
@@ -177,6 +177,9 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
+                      Chore? oldChore = await DatabaseManager.getChoreFromId(
+                          widget.choreId,
+                          CurrentHousehold.getCurrentHouseholdId());
                       // update the chore in FB
                       await DatabaseManager.updateChore(
                         householdCode: CurrentHousehold.getCurrentHouseholdId(),
@@ -186,7 +189,33 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                         deadline: _deadlineController.text,
                         status: chore!.status,
                       );
-                      widget.onChoreUpdate();
+                      Map<String, String> newChoreParams = {
+                        'category': 'Add Chore',
+                        'ChoreTitle': _nameController.text,
+                        'ChoreDescription': _descriptionController.text,
+                        'ChorePoints': chore.points.toString(),
+                        'ChoreDate': _deadlineController.text
+                      };
+                      String newAddChoreMessage =
+                          generateFullCommandInput(newChoreParams);
+                      List<double> newAddChoreMessageVector =
+                          await getVectorEmbeddingArray(newAddChoreMessage);
+                      await updateVector(
+                        newAddChoreMessageVector,
+                        CurrentHousehold.getCurrentHouseholdId(),
+                        widget.choreId,
+                      );
+                      widget.onChoreUpdate({
+                        // new chore
+                        'ChoreTitle': _nameController.text,
+                        'ChoreDescription': _descriptionController.text,
+                        'ChoreDate': _deadlineController.text
+                      }, {
+                        // old chore
+                        'ChoreTitle': oldChore!.name,
+                        'ChoreDescription': oldChore.details,
+                        'ChoreDate': oldChore.deadline
+                      });
                     },
                     child: const Text('Update Chore'),
                   ),
