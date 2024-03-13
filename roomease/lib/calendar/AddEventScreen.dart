@@ -156,8 +156,8 @@ class _AddEventScreen extends State<AddEventScreen> {
                                   );
                                   String formattedDateTime =
                                   DateFormat('yyyy-MM-dd')
-                                    .add_jm()
-                                    .format(endTimeInput);
+                                      .add_jm()
+                                      .format(endTimeInput);
                                   setState(() {
                                     endTimeController.text =
                                         formattedDateTime; //set output date to TextField value.
