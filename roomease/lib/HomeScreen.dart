@@ -109,115 +109,142 @@ class HomeScreen extends StatelessWidget {
           title: const Text('Home'),
           backgroundColor: ColorConstants.lightPurple,
         ),
-        body: Column(children: [
-          HomeCards(updateIndex),
+        body: SingleChildScrollView(
+            child: Column(children: [
+          welcomeSection(),
           Divider(indent: 20, endIndent: 20),
-          statusList()
-        ]));
+          statusList(updateIndex),
+          Divider(indent: 20, endIndent: 20),
+          quickActions(updateIndex)
+        ])));
   }
 }
 
-class HomeCards extends StatelessWidget {
-  final Function(int) updateIndex;
-  HomeCards(this.updateIndex);
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-        child: Column(
-      children: [
-        Padding(
-            padding: EdgeInsets.only(top: 20),
-            child: Image(
-              image: AssetImage(iconNumberMapping(
-                  CurrentUser.getCurrentUserIconNumber())),
-              height: 150,
-              width: 150,
-            )),
-        Padding(
-            padding: EdgeInsets.only(top: 20),
-            child: DatabaseManager.userNameStreamBuilder(
-                CurrentUser.getCurrentUserId())),
-        Padding(
-            padding: EdgeInsets.only(top: 20, bottom: 20),
-            child: ChatCard(updateIndex))
-      ],
-    ));
-  }
+Widget welcomeSection() {
+  return Center(
+      child: Column(
+    children: [
+      Padding(
+          padding: EdgeInsets.only(top: 20),
+          child: Image(
+            image: AssetImage(
+                iconNumberMapping(CurrentUser.getCurrentUserIconNumber())),
+            height: 150,
+            width: 150,
+          )),
+      Padding(
+          padding: EdgeInsets.only(top: 20, bottom: 20),
+          child: DatabaseManager.userNameStreamBuilder(
+              CurrentUser.getCurrentUserId())),
+    ],
+  ));
 }
 
-class ChatCard extends StatelessWidget {
-  final Function(int) updateIndex;
-  ChatCard(this.updateIndex);
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        updateIndex(1);
-      },
-      child: Card(
-        child: Padding(
-          padding: EdgeInsets.all(15.0),
-          child: Column(
-            children: [Text("Chat with Roomeo")],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-Widget statusList() {
+Widget quickActions(Function(int) updateIndex) {
   return Padding(
-      padding: EdgeInsets.only(top: 30),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(
-            padding: EdgeInsets.only(left: 50),
-            child: Row(children: [
-              SizedBox(
-                width: 100,
-                child: Text(style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 'Roommates')
-              ),
-              SizedBox(
-                width: 90,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 30),
-                  child: Text(style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 'Points')
-                )                        ),
-              SizedBox(
-                width: 120,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 50),
-                  child: Text(style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 'Status')
-                )
-              ),
-            ]
-          ),
+      padding: EdgeInsets.only(top: 20, bottom: 40),
+      child: Column(
+        children: [
+          Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Text("Quick Actions",
+                  style:
+                      TextStyle(fontWeight: FontWeight.normal, fontSize: 20))),
+          actionCard(
+              updateIndex, 1, "Chat With Roomeo", "assets/roomeo_icon.png"),
+          actionCard(
+              updateIndex, 2, "View Calendar", "assets/schedule_icon.png"),
+          actionCard(updateIndex, 3, "View Chores", "assets/chores_icon.png")
+        ],
+      ));
+}
+
+Widget actionCard(
+    Function(int) updateIndex, int index, String text, String assetUrl) {
+  return TextButton(
+      onPressed: () {
+        updateIndex(index);
+      },
+      style: TextButton.styleFrom(backgroundColor: ColorConstants.lightPurple),
+      child: SizedBox(
+        width: 300,
+        child: Row(
+          children: [
+            Text(text),
+            Spacer(),
+            Padding(
+                padding: EdgeInsets.only(left: 10),
+                child: Image(
+                  width: 20,
+                  height: 20,
+                  image: AssetImage(assetUrl),
+                ))
+          ],
         ),
+      ));
+}
+
+Widget statusList(updateIndex) {
+  return Padding(
+      padding: EdgeInsets.only(top: 30, bottom: 30),
+      child: Column(children: [
         ValueListenableBuilder(
             valueListenable: CurrentHousehold.householdStatusValueListener,
             builder: (context, value, child) {
               if (value.entries.isNotEmpty) {
                 List<Widget> statusList = value.values
-                    .map((entry) => Row(children: [
-                        SizedBox(
+                    .map((entry) => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                      style: TextStyle(fontSize: 15),
+                                      entry["name"]!)),
+                              SizedBox(
+                                  width: 90,
+                                  child: Padding(
+                                      padding: EdgeInsets.only(left: 20),
+                                      child: Text(
+                                          style: TextStyle(fontSize: 15),
+                                          '${entry["totalPoints"]!} points'))),
+                              SizedBox(
+                                  width: 100,
+                                  child: Padding(
+                                      padding: EdgeInsets.only(left: 20),
+                                      child: Text(
+                                          style: TextStyle(fontSize: 15),
+                                          entry["status"]!))),
+                            ]))
+                    .toList();
+                statusList.insert(
+                    0,
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      SizedBox(
                           width: 100,
-                          child: Text(style: TextStyle(fontSize: 15), entry["name"]!)
-                        ),
-                        SizedBox(
+                          child: Text(
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold),
+                              'Roommates')),
+                      SizedBox(
                           width: 90,
                           child: Padding(
-                            padding: EdgeInsets.only(left: 30),
-                            child: Text(style: TextStyle(fontSize: 15), '${entry["totalPoints"]!} points')
-                          )                        ),
-                        SizedBox(
+                              padding: EdgeInsets.only(left: 20),
+                              child: Text(
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                  'Points'))),
+                      SizedBox(
                           width: 100,
                           child: Padding(
-                            padding: EdgeInsets.only(left: 50),
-                            child: Text(style: TextStyle(fontSize: 15), entry["status"]!)
-                          )
-                        ),
-                      ]))
-                    .toList();
+                              padding: EdgeInsets.only(left: 20),
+                              child: Text(
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                  'Status')))
+                    ]));
                 return Padding(
                   padding: EdgeInsets.only(left: 50, right: 50, top: 10),
                   child: Column(
@@ -226,18 +253,27 @@ Widget statusList() {
                 );
               } else {
                 return Column(children: [
-                  SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: CircularProgressIndicator(
-                        color: ColorConstants.lightPurple),
-                  ),
+                  Padding(
+                      padding: EdgeInsets.only(top: 30),
+                      child: SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: CircularProgressIndicator(
+                            color: ColorConstants.lightPurple),
+                      )),
                   Padding(
                     padding: EdgeInsets.only(top: 16),
                     child: Text('Loading Roommate Statuses...'),
                   ),
                 ]);
               }
-            })
+            }),
+        Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: OutlinedButton(
+                child: Text("Update Your Status"),
+                onPressed: () {
+                  updateIndex(4);
+                }))
       ]));
 }

@@ -5,6 +5,7 @@ import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 import 'package:roomease/colors/ColorConstants.dart';
 import 'package:roomease/profile/EditProfileScreen.dart';
+import 'package:flutter/services.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -33,18 +34,19 @@ class _ProfileState extends State<Profile> {
         ),
         body: Padding(
             padding: EdgeInsets.only(top: 40, bottom: 20),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(
-                  child: Column(children: [
-                profileSection(context),
-                Divider(indent: 20, endIndent: 20),
-                userStatusSection(context),
-                Divider(indent: 20, endIndent: 20)
-              ])),
-              logOutButton(context),
-              deleteHouseholdButton(context)
-            ])));
+            child: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Column(children: [
+                    profileSection(context),
+                    Divider(indent: 20, endIndent: 20),
+                    userStatusSection(context),
+                    Divider(indent: 20, endIndent: 20)
+                  ]),
+                  logOutButton(context),
+                  deleteHouseholdButton(context)
+                ]))));
   }
 
   Widget profileSection(BuildContext context) {
@@ -53,25 +55,28 @@ class _ProfileState extends State<Profile> {
         child: Column(children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                  padding: EdgeInsets.only(left: 50),
+                  padding: EdgeInsets.only(left: 20),
                   child: Image(
                     image: AssetImage(iconNumberMapping(
                         CurrentUser.getCurrentUserIconNumber())),
                     height: 100,
                     width: 100,
                   )),
-              Spacer(),
               Padding(
-                  padding: EdgeInsets.only(right: 50), child: profileDetails())
+                  padding: EdgeInsets.only(left: 20), child: profileDetails())
             ],
           ),
-          Row(children: [
-            Padding(
-                padding: EdgeInsets.only(left: 40, top: 30),
-                child: editProfileButton(context))
-          ])
+          Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                    padding: EdgeInsets.only(top: 30),
+                    child: editProfileButton(context))
+              ])
         ]));
   }
 
@@ -93,13 +98,28 @@ class _ProfileState extends State<Profile> {
 
   Widget profileDetails() {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(CurrentUser.getCurrentUserName(),
             style: TextStyle(fontWeight: FontWeight.bold)),
         Text("Member of: ${CurrentHousehold.getCurrentHouseholdName()}"),
         Text(
             "Total points: ${CurrentUser.getCurrentUserTotalPoints().toString()}"),
-        Text("Household Code: ${CurrentHousehold.getCurrentHouseholdId()}"),
+        Row(children: [
+          Text("Household Code: ${CurrentHousehold.getCurrentHouseholdId()}"),
+          SizedBox(
+              width: 25,
+              height: 20,
+              child: IconButton(
+                  padding: EdgeInsets.zero,
+                  icon: Image.asset('assets/copy_icon.png',
+                      width: 20, height: 20),
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(
+                        text: CurrentHousehold.getCurrentHouseholdId()));
+                  }))
+        ])
       ],
     );
   }
@@ -114,13 +134,16 @@ class _ProfileState extends State<Profile> {
 
   Widget logOutButton(BuildContext context) {
     return Center(
-        child: TextButton(
-            onPressed: () {
-              SharedPreferencesUtility.clear();
-              Navigator.pushNamedAndRemoveUntil(
-                  context, "/welcome", (_) => false);
-            },
-            child: Text("Log Out")));
+        child: Padding(
+            padding: EdgeInsets.only(top: 30),
+            child: TextButton(
+                onPressed: () {
+                  SharedPreferencesUtility.clear();
+                  CurrentUser.userMessageRoomValueListener.value = {};
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, "/welcome", (_) => false);
+                },
+                child: Text("Log Out"))));
   }
 
   Widget deleteHouseholdButton(BuildContext context) {

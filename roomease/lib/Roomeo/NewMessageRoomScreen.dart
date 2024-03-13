@@ -34,7 +34,8 @@ class _NewMessageRoomScreen extends State<NewMessageRoomScreen> {
         ),
         body: Padding(
             padding: EdgeInsets.only(top: 20, bottom: 20, left: 20, right: 20),
-            child: Column(
+            child: SingleChildScrollView(
+                child: Column(
               children: [
                 Padding(
                     padding: EdgeInsets.only(bottom: 20),
@@ -66,7 +67,7 @@ class _NewMessageRoomScreen extends State<NewMessageRoomScreen> {
                       },
                       child: Text("Continue"))
               ],
-            )));
+            ))));
   }
 
   Widget roommateRow(String name, int index) {
