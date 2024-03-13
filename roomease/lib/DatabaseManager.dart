@@ -866,7 +866,6 @@ class DatabaseManager {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
     DatabaseReference choreRef =
         _databaseInstance.ref("households/$householdCode/$status/$choreId");
-    print("REMOVE CHORE PATH: households/$householdCode/$status/$choreId");
     await choreRef.remove();
   }
 
@@ -874,50 +873,43 @@ class DatabaseManager {
       ChoreStatus choreStatus, ChoreStatus newChoreStatus) async {
     String householdCode = CurrentHousehold.getCurrentHouseholdId();
 
-    // Reference to the original chore
     DatabaseReference choreRef = _databaseInstance
         .ref("households/$householdCode/${choreStatus.value}/$choreId");
 
-    // Fetch the original chore data
     DatabaseEvent event = await choreRef.once();
 
-    // Check if the chore exists
-    if (event.snapshot.exists) {
-      // Extract the chore data
-      Map<String, dynamic> choreData =
-          Map<String, dynamic>.from(event.snapshot.value as Map);
+    final choreJson = event.snapshot.child;
 
-      // Optionally modify the assignedUserId based on the new status
-      if (newChoreStatus == ChoreStatus.toDo) {
-        assignedUserId = null;
-      }
-      choreData['assignedUserId'] =
-          assignedUserId; // Update the assigned user ID in the chore data
-
-      choreData['status'] = newChoreStatus.value;
-
-      // Reference to the new location based on newChoreStatus
-      DatabaseReference newChoreRef = _databaseInstance
-          .ref("households/$householdCode/${newChoreStatus.value}/$choreId");
-
-      // Create the chore at the new location
-      await newChoreRef.set(choreData);
-
-      // Update user points if necessary
-      if (newChoreStatus == ChoreStatus.completed) {
-        updateUserPoints(
-            int.parse(choreData["points"].toString()), assignedUserId!, true);
-      } else if (choreStatus == ChoreStatus.completed &&
-          newChoreStatus == ChoreStatus.inProgress) {
-        updateUserPoints(
-            int.parse(choreData["points"].toString()), assignedUserId!, false);
-      }
-
-      // Remove the original chore
-      await choreRef.remove();
-    } else {
-      print("Update chore status: Chore does not exist");
+    if (newChoreStatus == ChoreStatus.toDo) {
+      assignedUserId = null;
     }
+
+    addChore(
+      householdCode,
+      choreJson("name").value.toString(),
+      choreJson("details").value.toString(),
+      choreJson("deadline").value.toString(),
+      choreJson("dateCreated").value.toString(),
+      choreJson("dateLastIncremented").value.toString(),
+      int.parse(choreJson("points").value.toString()),
+      int.parse(choreJson("threshold").value.toString()),
+      int.parse(choreJson("timesIncremented").value.toString()),
+      int.parse(choreJson("daysSinceLastIncremented").value.toString()),
+      choreJson("createdByUserId").value.toString(),
+      assignedUserId,
+      newChoreStatus.value,
+    );
+
+    if (newChoreStatus == ChoreStatus.completed) {
+      updateUserPoints(int.parse(choreJson("points").value.toString()),
+          assignedUserId!, true);
+    } else if (choreStatus == ChoreStatus.completed &&
+        newChoreStatus == ChoreStatus.inProgress) {
+      updateUserPoints(int.parse(choreJson("points").value.toString()),
+          assignedUserId!, false);
+    }
+
+    await choreRef.remove();
   }
   // ------------------------ END CHORE OPERATIONS ------------------------
 

@@ -101,9 +101,8 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                               deadlineTime.hour,
                               deadlineTime.minute,
                             );
-                            String formattedDateTime =
-                                DateFormat('yyyy-MM-dd hh:mm a')
-                                    .format(deadlineDateTime);
+                            String formattedDateTime = DateFormat('yyyy-MM-dd hh:mm a')
+                                .format(deadlineDateTime);
                             setState(() {
                               deadlineController.text =
                                   formattedDateTime; //set output date to TextField value.
@@ -157,10 +156,8 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                   value: threshold,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText:
-                        "How often should the points automatically increase?",
-                    labelText:
-                        "How often should the points automatically increase?",
+                    hintText: "How often should the points automatically increase?",
+                    labelText: "How often should the points automatically increase?",
                   ),
                   onChanged: (int? thresholdValue) {
                     setState(() {
@@ -168,7 +165,7 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                     });
                   },
                   items: thresholdList.map((val) {
-                    if (val == 1) {
+                    if (val == 1){
                       return DropdownMenuItem(
                         value: val,
                         child: Text("${val.toString()} day"),
@@ -218,7 +215,7 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                           'ChoreTitle': nameController.text,
                           'ChoreDescription': detailsController.text,
                           'ChoreDate': deadlineController.text,
-                          'ChorePoints': points.toString()
+                          'ChorePerson': CurrentUser.getCurrentUserName()
                         };
                         String addChoreCommandInput =
                             generateFullCommandInput(addChoreParams);
@@ -227,10 +224,7 @@ class _AddChoreScreen extends State<AddChoreScreen> {
                             await getVectorEmbeddingArray(addChoreCommandInput);
                         await insertVector(choreInputVector,
                             CurrentHousehold.getCurrentHouseholdId(), choreKey,
-                            metadata: {
-                              'isChore': true,
-                              'choreStatus': 'choresToDo'
-                            });
+                            metadata: {'isChore': true});
                       } catch (e) {
                         print('Failed to add chore: $e');
                       }

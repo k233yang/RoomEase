@@ -5,20 +5,17 @@ class MissingPointInput extends StatefulWidget {
     super.key,
     required this.onPointInput,
     required this.placeholder,
-    this.points = "",
   });
 
   final Function(int) onPointInput;
   final String placeholder;
-  final String points;
 
   @override
   MissingPointInputState createState() => MissingPointInputState();
 }
 
 class MissingPointInputState extends State<MissingPointInput> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.points);
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {

@@ -3,38 +3,24 @@ import 'package:intl/intl.dart';
 
 class MissingDateInput extends StatefulWidget {
   const MissingDateInput(
-      {super.key,
-      required this.onDateSelect,
-      required this.placeHolder,
-      this.date});
+      {super.key, required this.onDateSelect, required this.placeHolder});
 
   final Function(String) onDateSelect;
   final String placeHolder;
-  final String? date;
 
   @override
   State<MissingDateInput> createState() => _MissingDateInputState();
 }
 
 class _MissingDateInputState extends State<MissingDateInput> {
-  late DateTime selectedDate;
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    if (widget.date != null) {
-      try {
-        DateFormat format = DateFormat("yyyy-MM-dd hh:mm a");
-        DateTime parsedDate = format.parse(widget.date!);
-        selectedDate = parsedDate;
-      } catch (e) {
-        print("Error parsing date: $e");
-      }
-    } else {
-      selectedDate = DateTime.now();
-    }
     // Pass the default selectedDate back to the parent widget
-    //widget.onDateSelect(selectedDate.toString());
+    // widget.onDateSelect(DateTime(selectedDate.year, selectedDate.month,
+    //     selectedDate.day, selectedDate.hour, selectedDate.minute));
   }
 
   Future<void> _selectDate(BuildContext context) async {

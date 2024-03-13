@@ -2,88 +2,76 @@ import 'package:flutter/material.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingDateInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingStatusInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingUserInput.dart';
-import 'package:roomease/Roomeo/missinginputs/CommandTextInput.dart';
+import 'package:roomease/Roomeo/missinginputs/MissingTextInput.dart';
 import 'package:roomease/Roomeo/missinginputs/MissingPointInput.dart';
+import '../../colors/ColorConstants.dart';
 
 // Search person is used to find another household member, if the user
 // specified one in their message
 Widget handleAddChoreMissingParams(
     String missingParameter, Function(String, String) updateCallback,
-    {String? searchPerson, String? data}) {
+    {String? searchPerson}) {
   switch (missingParameter) {
     case "ChoreTitle":
-      if (data != null) {
-        return CommandTextInput(
-          onTextInput: (String userInput) {
-            // just update widget.
-            updateCallback("ChoreTitle", userInput);
-          },
-          placeHolder: "Chore name",
-          message: data,
-        );
-      } else {
-        return CommandTextInput(
-          onTextInput: (String userInput) {
-            // just update widget.
-            updateCallback("ChoreTitle", userInput);
-          },
-          placeHolder: "Chore name",
-        );
-      }
+      return MissingTextInput(
+        onTextInput: (String userInput) {
+          // just update widget.
+          updateCallback("ChoreTitle", userInput);
+        },
+        placeHolder: "Chore name",
+      );
     case "ChoreDate":
-      if (data != null) {
-        return MissingDateInput(
-          onDateSelect: (String userInput) {
-            updateCallback("ChoreDate", userInput);
-          },
-          placeHolder: "When should the chore be completed by?",
-          date: data,
-        );
-      } else {
-        return MissingDateInput(
-          onDateSelect: (String userInput) {
-            updateCallback("ChoreDate", userInput);
-          },
-          placeHolder: "When should the chore be completed by?",
-        );
-      }
+      return MissingDateInput(
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
+        },
+        placeHolder: "When should the chore be completed by?",
+      );
     case "ChoreDescription":
-      if (data != null) {
-        return CommandTextInput(
-          onTextInput: (String userInput) {
-            // just update widget.
-            updateCallback("ChoreDescription", userInput);
+      return MissingTextInput(
+        onTextInput: (String userInput) {
+          // just update widget.
+          updateCallback("ChoreDescription", userInput);
+        },
+        placeHolder: "Chore Description (Optional)",
+        isInputSingleLine: false,
+      );
+    // return Text("Hello");
+    case "ChorePerson":
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
           },
-          placeHolder: "Chore Description (Optional)",
-          message: data,
+          placeholder: "Who is responsible for the chore?",
         );
       } else {
-        return CommandTextInput(
-          onTextInput: (String userInput) {
-            // just update widget.
-            updateCallback("ChoreTitle", userInput);
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
           },
-          placeHolder: "Chore Description (Optional)",
+          placeholder: "Who is responsible for the chore?",
+          searchPerson: searchPerson,
         );
       }
     // return Text("Hello");
     case "ChorePoints":
-      if (data != null) {
-        return MissingPointInput(
-          onPointInput: (int userInput) {
-            updateCallback("ChorePoints", userInput.toString());
-          },
-          placeholder: "Chore points",
-          points: data,
-        );
-      } else {
-        return MissingPointInput(
-          onPointInput: (int userInput) {
-            updateCallback("ChorePoints", userInput.toString());
-          },
-          placeholder: "Chore points",
-        );
-      }
+      return MissingPointInput(
+        onPointInput: (int userInput) {
+          updateCallback("ChorePoints", userInput.toString());
+        },
+        placeholder: "Chore points",
+      );
+    // return Text("Hello");
+    case "ChorePointsThreshold":
+      return MissingPointInput(
+        onPointInput: (int userInput) {
+          updateCallback("ChorePointsThreshold", userInput.toString());
+        },
+        placeholder: "Chore points threshold",
+      );
+    // return Text("Hello");
     default:
       return SizedBox.shrink();
   }
@@ -91,27 +79,48 @@ Widget handleAddChoreMissingParams(
 
 Widget handleUpdateChoreMissingParams(
     String missingParameter, Function(String, String) updateCallback,
-    {String? searchPerson, String? data}) {
+    {String? searchPerson}) {
   switch (missingParameter) {
     case "ChoreTitle":
-      if (data != null) {
-        return CommandTextInput(
-          onTextInput: (String userInput) {
-            // just update widget.
-            updateCallback("ChoreTitle", userInput);
+      return MissingTextInput(
+        onTextInput: (String userInput) {
+          updateCallback("ChoreTitle", userInput);
+        },
+        placeHolder: "Name of the chore to update",
+      );
+    case "ChoreDate":
+      return MissingDateInput(
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
+        },
+        placeHolder: "Search by date (optional)",
+      );
+    case "ChorePerson":
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
           },
-          placeHolder: "Name of the Chore to Update",
-          message: data,
+          placeholder: "Who is responsible for the chore?",
         );
       } else {
-        return CommandTextInput(
-          onTextInput: (String userInput) {
-            // just update widget.
-            updateCallback("ChoreTitle", userInput);
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
           },
-          placeHolder: "Name of the Chore to Update",
+          placeholder: "Who is responsible for the chore?",
+          searchPerson: searchPerson,
         );
       }
+    case "ChoreDescription":
+      return MissingTextInput(
+        onTextInput: (String userInput) {
+          updateCallback("ChoreTitle", userInput);
+        },
+        placeHolder: "Description of the chore to be updated (optional)",
+        isInputSingleLine: false,
+      );
     default:
       return SizedBox.shrink();
   }
@@ -157,14 +166,14 @@ Widget handleSendMessageMissingParams(
       }
     case "Message":
       if (message == null) {
-        return CommandTextInput(
+        return MissingTextInput(
           onTextInput: (String userInput) {
             updateCallback("Message", userInput);
           },
           placeHolder: "What do you want to send?",
         );
       } else {
-        return CommandTextInput(
+        return MissingTextInput(
           onTextInput: (String userInput) {
             updateCallback("Message", userInput);
           },
@@ -206,27 +215,48 @@ Widget handleViewStatusMissingParams(
 
 Widget handleRemoveChoreMissingParams(
     String missingParameter, Function(String, String) updateCallback,
-    {String? searchPerson, String? data}) {
+    {String? searchPerson}) {
   switch (missingParameter) {
     case "ChoreTitle":
-      if (data != null) {
-        return CommandTextInput(
-          onTextInput: (String userInput) {
-            // just update widget.
-            updateCallback("ChoreTitle", userInput);
+      return MissingTextInput(
+        onTextInput: (String userInput) {
+          updateCallback("ChoreTitle", userInput);
+        },
+        placeHolder: "Name of the chore to remove",
+      );
+    case "ChorePerson":
+      if (searchPerson == null) {
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
           },
-          placeHolder: "Name of the Chore to Remove",
-          message: data,
+          placeholder: "Who is responsible for the chore?",
         );
       } else {
-        return CommandTextInput(
-          onTextInput: (String userInput) {
-            // just update widget.
-            updateCallback("ChoreTitle", userInput);
+        print("Got in here. SearchPerson is: $searchPerson");
+        return MissingUserInput(
+          onUserSelect: (String userInput) {
+            updateCallback("ChorePerson", userInput);
           },
-          placeHolder: "Name of the Chore to Remove",
+          placeholder: "Who is responsible for the chore?",
+          searchPerson: searchPerson,
         );
       }
+    case "ChoreDescription":
+      return MissingTextInput(
+        onTextInput: (String userInput) {
+          updateCallback("ChoreDescription", userInput);
+        },
+        placeHolder: "Description of the chore to remove (optional)",
+        isInputSingleLine: false,
+      );
+    case "ChoreDate":
+      return MissingDateInput(
+        onDateSelect: (String userInput) {
+          updateCallback("ChoreDate", userInput);
+        },
+        placeHolder: "Search by date (optional)",
+      );
     default:
       return SizedBox.shrink();
   }

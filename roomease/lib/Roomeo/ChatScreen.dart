@@ -8,6 +8,7 @@ import 'package:roomease/Roomeo/PineconeAPI.dart';
 import 'package:roomease/Roomeo/RoomeoUser.dart';
 import 'package:roomease/Roomeo/ChooseChoreScreen.dart';
 import 'package:roomease/chores/ChoreStatus.dart';
+import 'package:roomease/chores/EditChoreScreen.dart';
 import '../Message.dart';
 import '../colors/ColorConstants.dart';
 import 'package:roomease/Roomeo/Roomeo.dart';
@@ -139,30 +140,37 @@ class _ChatScreen extends State<ChatScreen> {
             Map<String, String> commandParams =
                 await getCommandParameters(category, message);
             print("PARAMETERS ARE: $commandParams");
-            // Navigate to the command paramater input screen
-            if (mounted) {
-              // Check if the widget is still in the tree
-              final result = await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => UserCommandParamInputScreen(
-                    category: category,
-                    commandParams: commandParams,
-                    onParamsUpdated: (updatedParams) {
-                      setState(() {
-                        commandParams = updatedParams;
-                      });
-                    },
+            // if there are missing params, navigate to UserCommandParamInputScreen
+            // to prompt the user for the missing params
+            if (commandParams.containsValue("Missing") ||
+                commandParams.containsKey("ViewPerson") ||
+                commandParams.containsKey("Status") ||
+                commandParams.containsKey("SendPerson")) {
+              if (mounted) {
+                // Check if the widget is still in the tree
+                final result = await Navigator.of(context).push(
+                  // Directly use context if it's valid
+                  MaterialPageRoute(
+                    builder: (context) => UserCommandParamInputScreen(
+                      category: category,
+                      commandParams: commandParams,
+                      onParamsUpdated: (updatedParams) {
+                        setState(() {
+                          commandParams = updatedParams;
+                        });
+                      },
+                    ),
                   ),
-                ),
-              );
-              // if the user exited the UserCommandParamInputScreen, delete
-              // the most recent message, and we are done. It is no longer useful
-              if (result != null && result['exited'] == true) {
-                await DatabaseManager.removeMessageFromID(
-                  CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
-                  userMessageKey,
                 );
-                return;
+                // if the user exited the UserCommandParamInputScreen, delete
+                // the most recent message, and we are done. It is no longer useful
+                if (result != null && result['exited'] == true) {
+                  await DatabaseManager.removeMessageFromID(
+                    CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
+                    userMessageKey,
+                  );
+                  return;
+                }
               }
             }
 
@@ -186,11 +194,12 @@ class _ChatScreen extends State<ChatScreen> {
                   DateFormat('yyyy-MM-dd hh:mm:ss a').format(dateTime),
                   DateFormat('yyyy-MM-dd hh:mm:ss a').format(dateTime),
                   int.parse(commandParams['ChorePoints']!),
-                  1,
+                  int.parse(commandParams['ChorePointsThreshold']!),
                   0,
                   0,
                   CurrentUser.getCurrentUserId(),
-                  null,
+                  await DatabaseManager.getUserIdByName(
+                      commandParams['ChorePerson']!),
                   ChoreStatus.toDo.value);
               // add the chore message to the chatroom in FB, as well as the
               // chatroom and chore indices in the VDB

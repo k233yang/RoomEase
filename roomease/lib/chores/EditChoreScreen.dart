@@ -47,8 +47,8 @@ class _EditChoreScreenState extends State<EditChoreScreen> {
     Chore? choreDetails = await DatabaseManager.getChoreFromId(
         widget.choreId, CurrentHousehold.getCurrentHouseholdId());
     if (choreDetails != null) {
-      String selectedMember = await DatabaseManager.getUserName(
-          choreDetails.assignedUserId ?? 'Unassigned');
+      String selectedMember =
+          await DatabaseManager.getUserName(choreDetails.assignedUserId ?? 'Unassigned');
       setState(() {
         _selectedMember =
             selectedMember; // Assuming Chore has an 'assignedTo' field with the member's name
