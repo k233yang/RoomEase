@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roomease/CurrentUser.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/SharedPreferencesUtility.dart';
 
 class Register extends StatefulWidget {
@@ -120,6 +121,9 @@ class _RegisterState extends State<Register> {
                                 "isLoggedIn", true);
                             SharedPreferencesUtility.setValue(
                                 "isDoneOnboarding", false);
+                            DatabaseManager.addUser(
+                                CurrentUser.getCurrentUserId(),
+                                CurrentUser.getCurrentUserName());
                             Navigator.pushNamedAndRemoveUntil(
                                 context, "/createJoinHousehold", (_) => false);
                           }

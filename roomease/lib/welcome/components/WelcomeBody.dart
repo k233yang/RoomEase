@@ -40,7 +40,7 @@ class WelcomeBody extends StatelessWidget {
                     buttonText: "Debug Login",
                     onButtonPress: () async {
                       final user = await _auth.signInWithEmailAndPassword(
-                          email: "testing@testing.com", password: "123456");
+                          email: "kenneth@roomease.com", password: "123456");
                       if (user != null) {
                         await debugLogin(user);
                         Navigator.pushNamedAndRemoveUntil(
@@ -61,8 +61,8 @@ class WelcomeBody extends StatelessWidget {
     CurrentUser.setCurrentUserId(
       user.user!.uid,
     );
-    CurrentHousehold.setCurrentHouseholdId("uYjY33");
-    DatabaseManager.updateHouseholdName("uYjY33");
+    CurrentHousehold.setCurrentHouseholdId("QkaNV1");
+    DatabaseManager.updateHouseholdName("QkaNV1");
     String userStatus =
         await DatabaseManager.getUserCurrentStatus(user.user!.uid);
     CurrentUser.setCurrentUserStatus(userStatus);

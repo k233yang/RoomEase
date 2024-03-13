@@ -96,7 +96,6 @@ class _CreateHousehold extends State<CreateHousehold> {
   Future<void> updateUserInformation() async {
     String userId = CurrentUser.getCurrentUserId();
 
-    DatabaseManager.addUser(userId, CurrentUser.getCurrentUserName());
     DatabaseManager.getAndStoreUserName(userId);
 
     // Update user message rooms
