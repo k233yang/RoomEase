@@ -108,21 +108,17 @@ Map<String, dynamic> generateGetCommandParameterRequestObject(
   String parameterJSONFormat = "";
   switch (category) {
     case 'Remove Chore':
-      DateTime now = DateTime.now();
-      parameterJSONFormat =
-          "1. ChoreTitle \n 2. ChorePerson \n 3. ChoreDescription \n 4. ChoreDate";
-      parametersToFindAddendum =
-          "1. The title of the chore to remove \n 2. The name of the person assigned to the chore \n 3. The description of the chore to remove \n 4. The date of the chore that is to be removed, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing'";
+      parameterJSONFormat = "1. ChoreTitle";
+      parametersToFindAddendum = "1. The title of the chore to remove";
       break;
     case 'Add Chore':
       DateTime now = DateTime.now();
       parameterJSONFormat =
-          "1. ChoreTitle \n 2. ChoreDate \n 3. ChoreDescription \n 4. ChorePerson \n 5. ChorePoints \n 6. ChorePointsThreshold";
+          "1. ChoreTitle \n 2. ChoreDate \n 3. ChoreDescription \n 4. ChorePoints";
       parametersToFindAddendum =
-          "1. The title of the chore \n 2. The date and time the chore is to be completed by, in the format 'YYYY-MM-DD HH:MM'. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user didn't provide a date, use the value 'Missing' \n 3. The description of the chore to be added \n 4. The name of the person assigned to the chore \n 5. How many points the chore is worth when completed \n 6. The threshold of points needed to complete the chore";
+          "1. The title of the chore \n 2. The date and time the chore is to be completed by, in the format 'yyyy-MM-dd hh:mm a', in 12 hour time with an AM/PM indicator. Use today's date (${now.month} ${now.day}, ${now.year} ${now.hour}:${now.minute}) as reference. If the user did not provide a date, use the current time. \n 3. The description of the chore to be added \n 4. How many points the chore is worth when completed";
       break;
     case 'Update Chore':
-      DateTime now = DateTime.now();
       parameterJSONFormat = "1. ChoreTitle";
       parametersToFindAddendum = "1. The title of the chore to be updated";
       break;
@@ -208,9 +204,9 @@ String generateFullCommandInput(Map<String, String> parameters) {
       return 'Remove the chore "${parameters['ChoreTitle']}"';
     case 'Add Chore':
       if (parameters['ChoreDescription'] != 'Missing') {
-        return 'Add the chore "${parameters['ChoreTitle']}" with the details "${parameters['ChoreDescription']}" to the schedule. The chore is due on ${parameters['ChoreDate']}, and assigned to ${parameters['ChorePerson']}.';
+        return 'Add the chore "${parameters['ChoreTitle']}" with the details "${parameters['ChoreDescription']}" to the schedule. The chore is due on ${parameters['ChoreDate']}. It is worth ${parameters['ChorePoints']} points.';
       }
-      return 'Add the chore "${parameters['ChoreTitle']}" to the schedule. The chore is due on ${parameters['ChoreDate']}, and assigned to ${parameters['ChorePerson']}.';
+      return 'Add the chore "${parameters['ChoreTitle']}" to the schedule. The chore is due on ${parameters['ChoreDate']}. It is worth ${parameters['ChorePoints']} points.';
     case 'Update Chore':
       return "";
     case 'Set Status':
@@ -264,13 +260,13 @@ Future<void> getRoomeoResponse(String message, String messageKey,
       userResVector,
       CurrentHousehold.getCurrentHouseholdId(),
       choreId,
-      metadata: {'isChore': isChore},
+      metadata: {'isChore': isChore, 'choreStatus': 'choresToDo'},
     );
     await insertVector(
       userResVector,
       CurrentUser.getCurrentUserId() + RoomeoUser.user.userId,
       choreId,
-      metadata: {'isChore': isChore},
+      metadata: {'isChore': isChore, 'choreStatus': 'choresToDo'},
     );
   } else {
     await insertVector(
@@ -321,20 +317,8 @@ Future<void> getRoomeoResponse(String message, String messageKey,
 }
 
 Future<List<String>> queryChores(String choreTitle,
-    {DateTime? choreDate,
-    String? chorePerson,
-    String? choreDescription,
-    int choresToFind = 5}) async {
+    {int choresToFind = 5}) async {
   String queryString = "Find the $choreTitle chore.";
-  if (chorePerson != null) {
-    queryString += " It is assigned to $chorePerson.";
-  }
-  if (choreDate != null) {
-    queryString += " It is due on ${choreDate.toString()}.";
-  }
-  if (choreDescription != null) {
-    queryString += " It has the description '$choreDescription'.";
-  }
   // vectorize the query string
   List<double> queryStringVector = await getVectorEmbeddingArray(queryString);
   // use the query vector to find most similar chores
@@ -352,20 +336,11 @@ String generateUpdateCommandInput(
     if (key == "ChoreTitle") {
       res +=
           "\n - Change the name of the chore from ${oldParameters['ChoreTitle']} to ${newParameters['ChoreTitle']}";
-    } else if (key == "ChorePerson") {
-      res +=
-          "\n - The chore is now assigned to ${newParameters['ChorePerson']}";
     } else if (key == "ChoreDescription") {
       res +=
           "\n - Change the description of the chore to ${newParameters['ChoreDescription']}";
     } else if (key == "ChoreDate") {
       res += "\n - The chore is now due on ${newParameters['ChoreDate']}";
-    } else if (key == "ChorePoints") {
-      res +=
-          "\n - Change the chore points from ${oldParameters['ChorePoints']} to ${newParameters['ChorePoints']}";
-    } else if (key == "ChorePointsThreshold") {
-      res +=
-          "\n - Change the chore points threshold from ${oldParameters['ChorePointsThreshold']} to ${newParameters['ChorePointsThreshold']}";
     }
   });
   return res;

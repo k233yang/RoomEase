@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class MissingTextInput extends StatefulWidget {
-  const MissingTextInput(
+class CommandTextInput extends StatefulWidget {
+  const CommandTextInput(
       {super.key,
       this.isInputSingleLine = true,
       required this.onTextInput,
@@ -14,10 +14,10 @@ class MissingTextInput extends StatefulWidget {
   final String message;
 
   @override
-  MissingTextInputState createState() => MissingTextInputState();
+  CommandTextInputState createState() => CommandTextInputState();
 }
 
-class MissingTextInputState extends State<MissingTextInput> {
+class CommandTextInputState extends State<CommandTextInput> {
   late final TextEditingController _controller;
 
   @override

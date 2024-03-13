@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:roomease/CurrentHousehold.dart';
 import 'package:roomease/DatabaseManager.dart';
+import 'package:roomease/Roomeo/EmbedVector.dart';
+import 'package:roomease/Roomeo/PineconeAPI.dart';
+import 'package:roomease/Roomeo/Roomeo.dart';
 import 'package:roomease/chores/Chore.dart';
 
 class EditChoreFromChoreScreen extends StatefulWidget {
   const EditChoreFromChoreScreen(
       {super.key, required this.choreId, required this.onChoreUpdate});
   final String choreId;
-  final Function() onChoreUpdate;
+  final Function(Map<String, String>, Map<String, String>) onChoreUpdate;
 
   @override
   State<EditChoreFromChoreScreen> createState() =>
@@ -173,6 +176,9 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
+                      Chore? oldChore = await DatabaseManager.getChoreFromId(
+                          widget.choreId,
+                          CurrentHousehold.getCurrentHouseholdId());
                       // update the chore in FB
                       await DatabaseManager.updateChore(
                         householdCode: CurrentHousehold.getCurrentHouseholdId(),
@@ -182,7 +188,33 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                         deadline: _deadlineController.text,
                         status: chore!.status,
                       );
-                      widget.onChoreUpdate();
+                      Map<String, String> newChoreParams = {
+                        'category': 'Add Chore',
+                        'ChoreTitle': _nameController.text,
+                        'ChoreDescription': _descriptionController.text,
+                        'ChorePoints': chore.points.toString(),
+                        'ChoreDate': _deadlineController.text
+                      };
+                      String newAddChoreMessage =
+                          generateFullCommandInput(newChoreParams);
+                      List<double> newAddChoreMessageVector =
+                          await getVectorEmbeddingArray(newAddChoreMessage);
+                      await updateVector(
+                        newAddChoreMessageVector,
+                        CurrentHousehold.getCurrentHouseholdId(),
+                        widget.choreId,
+                      );
+                      widget.onChoreUpdate({
+                        // new chore
+                        'ChoreTitle': _nameController.text,
+                        'ChoreDescription': _descriptionController.text,
+                        'ChoreDate': _deadlineController.text
+                      }, {
+                        // old chore
+                        'ChoreTitle': oldChore!.name,
+                        'ChoreDescription': oldChore.details,
+                        'ChoreDate': oldChore.deadline
+                      });
                     },
                     child: const Text('Update Chore'),
                   ),
