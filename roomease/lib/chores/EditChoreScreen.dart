@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:roomease/CurrentHousehold.dart';
-import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
 import 'package:roomease/Roomeo/EmbedVector.dart';
 import 'package:roomease/Roomeo/PineconeAPI.dart';
@@ -48,8 +47,8 @@ class _EditChoreScreenState extends State<EditChoreScreen> {
     Chore? choreDetails = await DatabaseManager.getChoreFromId(
         widget.choreId, CurrentHousehold.getCurrentHouseholdId());
     if (choreDetails != null) {
-      String selectedMember =
-          await DatabaseManager.getUserName(choreDetails.assignedUserId ?? 'Unassigned');
+      String selectedMember = await DatabaseManager.getUserName(
+          choreDetails.assignedUserId ?? 'Unassigned');
       setState(() {
         _selectedMember =
             selectedMember; // Assuming Chore has an 'assignedTo' field with the member's name

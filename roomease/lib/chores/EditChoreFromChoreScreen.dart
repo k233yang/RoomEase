@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:roomease/CurrentHousehold.dart';
-import 'package:roomease/CurrentUser.dart';
 import 'package:roomease/DatabaseManager.dart';
-import 'package:roomease/Roomeo/EmbedVector.dart';
-import 'package:roomease/Roomeo/PineconeAPI.dart';
-import 'package:roomease/Roomeo/Roomeo.dart';
 import 'package:roomease/chores/Chore.dart';
 
 class EditChoreFromChoreScreen extends StatefulWidget {
@@ -15,7 +11,8 @@ class EditChoreFromChoreScreen extends StatefulWidget {
   final Function() onChoreUpdate;
 
   @override
-  State<EditChoreFromChoreScreen> createState() => _EditChoreFromChoreScreenState();
+  State<EditChoreFromChoreScreen> createState() =>
+      _EditChoreFromChoreScreenState();
 }
 
 class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
@@ -67,8 +64,8 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
               deadlineTime.hour,
               deadlineTime.minute,
             );
-            String formattedDateTime = DateFormat('yyyy-MM-dd hh:mm a')
-                .format(deadlineDateTime);
+            String formattedDateTime =
+                DateFormat('yyyy-MM-dd hh:mm a').format(deadlineDateTime);
             setState(() {
               _deadlineController.text =
                   formattedDateTime; //set output date to TextField value.
@@ -100,16 +97,14 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
           final Chore? chore = snapshot.data;
           if (_nameController.text == '') {
             _nameController.text = chore?.name ?? '';
-          } 
+          }
           if (_descriptionController.text == '') {
             _descriptionController.text = chore?.details ?? '';
-          } 
+          }
           if (_deadlineController.text == '') {
             _deadlineController.text = chore?.deadline ?? '';
-          } 
-          else {
-
-          }; // Assume deadline is a String in 'yyyy-MM-dd' format
+          } else {}
+          ; // Assume deadline is a String in 'yyyy-MM-dd' format
           //print("CHORE DETAILS: ${chore?.status}");
 
           return SingleChildScrollView(
@@ -141,7 +136,7 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                     border: OutlineInputBorder(),
                   ),
                   readOnly: true,
-                  onTap: () async { 
+                  onTap: () async {
                     await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
@@ -161,8 +156,9 @@ class _EditChoreFromChoreScreenState extends State<EditChoreFromChoreScreen> {
                               deadlineTime.hour,
                               deadlineTime.minute,
                             );
-                            String formattedDateTime = DateFormat('yyyy-MM-dd hh:mm a')
-                                .format(deadlineDateTime);
+                            String formattedDateTime =
+                                DateFormat('yyyy-MM-dd hh:mm a')
+                                    .format(deadlineDateTime);
                             setState(() {
                               _deadlineController.text =
                                   formattedDateTime; //set output date to TextField value.
