@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:roomease/CurrentUser.dart';
-import 'package:roomease/DatabaseManager.dart';
-import 'package:roomease/HomeScreen.dart';
-import 'package:roomease/Roomeo/ChatListScreen.dart';
-import 'package:roomease/Roomeo/ChatScreen.dart';
-import 'package:roomease/SharedPreferencesUtility.dart';
-import 'package:roomease/calendar/CalendarScreen.dart';
-import 'package:roomease/chores/ChoreScreen.dart';
-import 'package:roomease/chores/AddChoreScreen.dart';
-import 'package:roomease/profile/AddCustomStatusScreen.dart';
-import 'package:roomease/profile/EditProfileScreen.dart';
-import 'package:roomease/profile/ProfileScreen.dart';
-import 'package:roomease/welcome/CreateHousehold.dart';
-import 'package:roomease/welcome/CreateJoinHouseholdScreen.dart';
-import 'package:roomease/welcome/JoinHousehold.dart';
-import 'package:roomease/welcome/LoginScreen.dart';
-import 'package:roomease/colors/ColorConstants.dart';
+import 'package:roomease/shared/repository/user_repository.dart';
+import 'package:roomease/shared/data/database_manager.dart';
+import 'package:roomease/features/home/HomeScreen.dart';
+import 'package:roomease/features/roomeo/ChatListScreen.dart';
+import 'package:roomease/features/roomeo/ChatScreen.dart';
+import 'package:roomease/shared/utils/shared_prefs_util.dart';
+import 'package:roomease/features/calendar/view/calendar_screen.dart';
+import 'package:roomease/features/chores/ChoreScreen.dart';
+import 'package:roomease/features/chores/AddChoreScreen.dart';
+import 'package:roomease/features/profile/AddCustomStatusScreen.dart';
+import 'package:roomease/features/profile/EditProfileScreen.dart';
+import 'package:roomease/features/profile/ProfileScreen.dart';
+import 'package:roomease/features/auth/CreateHousehold.dart';
+import 'package:roomease/features/auth/CreateJoinHouseholdScreen.dart';
+import 'package:roomease/features/auth/JoinHousehold.dart';
+import 'package:roomease/features/auth/LoginScreen.dart';
+import 'package:roomease/shared/color_constants.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:roomease/welcome/WelcomeScreen.dart';
-import 'calendar/AddEventScreen.dart';
-import 'firebase_options.dart';
-import 'welcome/RegisterScreen.dart';
+import 'package:roomease/features/auth/WelcomeScreen.dart';
+import 'package:roomease/features/calendar/view/add_event_screen.dart';
+import 'config/firebase_options.dart';
+import 'package:roomease/features/auth/RegisterScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: initialScreen(noHousehold),
       routes: {
-        '/welcome': (_) => WelcomeScreen(),
+        '/auth': (_) => WelcomeScreen(),
         '/login': (_) => Login(),
         '/register': (_) => Register(),
         '/home': (_) => Home(),
@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
         return '/home';
       }
     } else {
-      return '/welcome';
+      return '/auth';
     }
   }
 }
