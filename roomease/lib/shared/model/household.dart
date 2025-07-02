@@ -1,3 +1,5 @@
+import 'package:firebase_database/firebase_database.dart';
+import 'package:roomease/features/calendar/data/calendar_repository.dart';
 import 'package:roomease/shared/model/user.dart';
 import 'package:roomease/features/chores/Chore.dart';
 
@@ -31,7 +33,7 @@ class Household {
   }
 
   Future<String> updateCalendarEventsList() async {
-    calendarEvents = await DatabaseManager.getCalendarEventsFromDB(id);
+    calendarEvents = await CalendarRepository(FirebaseDatabase.instance, id).fetchEvents();
     return "completed";
   }
 }

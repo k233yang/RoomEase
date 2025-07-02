@@ -18,4 +18,15 @@ class Event {
     this.dateCreated,
     this.type,
     this.createdByUserId);
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "details": details,
+    "startTime": startTime,
+    "endTime": endTime,
+    "dateCreated": dateCreated,
+    "type": type,
+    "createdByUserId": createdByUserId,
+  };
 }

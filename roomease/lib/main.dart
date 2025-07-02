@@ -1,4 +1,8 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:roomease/features/calendar/viewmodel/calendar_notifier.dart';
+import 'package:roomease/shared/repository/household_repository.dart';
 import 'package:roomease/shared/repository/user_repository.dart';
 import 'package:roomease/shared/data/database_manager.dart';
 import 'package:roomease/features/home/HomeScreen.dart';
@@ -22,6 +26,8 @@ import 'package:roomease/features/calendar/view/add_event_screen.dart';
 import 'config/firebase_options.dart';
 import 'package:roomease/features/auth/RegisterScreen.dart';
 
+import 'features/calendar/data/calendar_repository.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -37,7 +43,25 @@ void main() async {
       noHousehold = true;
     }
   }
-  runApp(MyApp(noHousehold: noHousehold));
+
+  final householdId = CurrentHousehold.getCurrentHouseholdId();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<CalendarNotifier>(
+          create: (_) {
+            final repository = CalendarRepository(
+              FirebaseDatabase.instance,
+              householdId
+            );
+            return CalendarNotifier(repository);
+          },
+        ),
+      ],
+      child: MyApp(noHousehold: noHousehold)
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

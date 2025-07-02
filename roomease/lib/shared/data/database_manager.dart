@@ -915,71 +915,71 @@ class DatabaseManager {
 
   // ------------------------ CALENDAR OPERATIONS ------------------------
 
-  static void addEvent(
-    String householdCode,
-    String name,
-    String details,
-    String startTime,
-    String endTime,
-    String dateCreated,
-    String type,
-    String createdByUserId,
-  ) async {
-    DatabaseReference eventsRef =
-        _databaseInstance.ref("households/$householdCode/events");
-
-    final eventKey = eventsRef.push().key;
-    if (eventKey == null) {
-      throw Exception('Event key is null');
-    }
-
-    DatabaseReference eventRef =
-        _databaseInstance.ref("households/$householdCode/events/$eventKey");
-
-    eventRef.update({
-      "id": eventKey,
-      "name": name,
-      "details": details,
-      "startTime": startTime,
-      "endTime": endTime,
-      "dateCreated": dateCreated,
-      "type": type,
-      "createdByUserId": createdByUserId,
-    }).then((value) {
-      print("Successfully added event!");
-    }).catchError((value) {
-      print(value);
-      throw Exception('Could not add event');
-    });
-  }
-
-  static Future<List<Event>> getCalendarEventsFromDB(String householdId) async {
-    final eventListRef =
-        _databaseInstance.ref("households/$householdId/events");
-    DatabaseEvent event = await eventListRef.once();
-    final eventsJson = event.snapshot.children;
-
-    List<Event> eventsList = <Event>[];
-
-    for (final event in eventsJson) {
-      eventsList.add(Event(
-          event.child("id").value.toString(),
-          event.child("name").value.toString(),
-          event.child("details").value.toString(),
-          event.child("startTime").value.toString(),
-          event.child("endTime").value.toString(),
-          event.child("dateCreated").value.toString(),
-          event.child("type").value.toString(),
-          event.child("createdByUserId").value.toString()));
-    }
-    return eventsList;
-  }
-
-  static Future<void> deleteCalendarEvent(String eventId) async {
-    String householdCode = CurrentHousehold.getCurrentHouseholdId();
-    DatabaseReference choreRef =
-        _databaseInstance.ref("households/$householdCode/events/$eventId");
-    await choreRef.remove();
-  }
+  // static void addEvent(
+  //   String householdCode,
+  //   String name,
+  //   String details,
+  //   String startTime,
+  //   String endTime,
+  //   String dateCreated,
+  //   String type,
+  //   String createdByUserId,
+  // ) async {
+  //   DatabaseReference eventsRef =
+  //       _databaseInstance.ref("households/$householdCode/events");
+  //
+  //   final eventKey = eventsRef.push().key;
+  //   if (eventKey == null) {
+  //     throw Exception('Event key is null');
+  //   }
+  //
+  //   DatabaseReference eventRef =
+  //       _databaseInstance.ref("households/$householdCode/events/$eventKey");
+  //
+  //   eventRef.update({
+  //     "id": eventKey,
+  //     "name": name,
+  //     "details": details,
+  //     "startTime": startTime,
+  //     "endTime": endTime,
+  //     "dateCreated": dateCreated,
+  //     "type": type,
+  //     "createdByUserId": createdByUserId,
+  //   }).then((value) {
+  //     print("Successfully added event!");
+  //   }).catchError((value) {
+  //     print(value);
+  //     throw Exception('Could not add event');
+  //   });
+  // }
+  //
+  // static Future<List<Event>> getCalendarEventsFromDB(String householdId) async {
+  //   final eventListRef =
+  //       _databaseInstance.ref("households/$householdId/events");
+  //   DatabaseEvent event = await eventListRef.once();
+  //   final eventsJson = event.snapshot.children;
+  //
+  //   List<Event> eventsList = <Event>[];
+  //
+  //   for (final event in eventsJson) {
+  //     eventsList.add(Event(
+  //         event.child("id").value.toString(),
+  //         event.child("name").value.toString(),
+  //         event.child("details").value.toString(),
+  //         event.child("startTime").value.toString(),
+  //         event.child("endTime").value.toString(),
+  //         event.child("dateCreated").value.toString(),
+  //         event.child("type").value.toString(),
+  //         event.child("createdByUserId").value.toString()));
+  //   }
+  //   return eventsList;
+  // }
+  //
+  // static Future<void> deleteCalendarEvent(String eventId) async {
+  //   String householdCode = CurrentHousehold.getCurrentHouseholdId();
+  //   DatabaseReference choreRef =
+  //       _databaseInstance.ref("households/$householdCode/events/$eventId");
+  //   await choreRef.remove();
+  // }
   // ------------------------ END CALENDAR OPERATIONS ------------------------
 }
