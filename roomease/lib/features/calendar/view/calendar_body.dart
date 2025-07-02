@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:roomease/features/calendar/viewmodel/calendar_notifier.dart';
-import 'package:roomease/shared/data/database_manager.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:provider/provider.dart';
 
-import '../../../shared/color_constants.dart';
-import '../model/event.dart';
-import 'event_data_source.dart';
+import 'package:roomease/features/calendar/model/event.dart';
+import 'package:roomease/features/calendar/view/event_data_source.dart';
+import 'package:roomease/features/calendar/viewmodel/calendar_notifier.dart';
+import 'package:roomease/shared/color_constants.dart';
+import 'package:roomease/shared/data/database_manager.dart';
+import 'package:roomease/shared/widgets/labeled_text.dart';
+
 
 class CalendarBody extends StatelessWidget {
   CalendarBody({super.key});
@@ -52,8 +54,6 @@ class CalendarBody extends StatelessWidget {
       );
 
   Widget _buildCalendar(List<Event> events, BuildContext context) {
-    // final events = repository.fetchEvents();
-
     return SfCalendar(
       view: CalendarView.month,
       allowedViews: [CalendarView.day, CalendarView.week, CalendarView.month],
@@ -94,16 +94,15 @@ class CalendarBody extends StatelessWidget {
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("Details ${appointment.details}"),
-                      const SizedBox(height: 8),
-                      Text("Type: ${appointment.type}"),
-                      const SizedBox(height: 8),
-                      Text('Starts: ${DateFormat('yyyy-MM-dd hh:mm a').format(
-                          DateTime.parse(appointment.startTime))}'),
-                      Text('Ends: ${DateFormat('yyyy-MM-dd hh:mm a').format(
-                          DateTime.parse(appointment.endTime))}'),
-                      const SizedBox(height: 8),
-                      Text('Created by: $userName'),
+                      LabeledText("Details", appointment.details),
+                      LabeledText("Event Type", appointment.type),
+                      LabeledText("Begins",
+                          DateFormat('yyyy-MM-dd hh:mm a')
+                              .format(DateTime.parse(appointment.startTime))),
+                      LabeledText("Ends",
+                          DateFormat('yyyy-MM-dd hh:mm a')
+                              .format(DateTime.parse(appointment.endTime))),
+                      LabeledText("Created By", userName),
                     ],
                   ),
                   actions: [
@@ -116,7 +115,6 @@ class CalendarBody extends StatelessWidget {
                         calendarVm.deleteEvent(appointment.id).then((_) {
                           Navigator.pop(dialogContext);
                           calendarVm.reload();
-                          // Navigator.pop(context);
                         }).catchError((error) {
                           ScaffoldMessenger.of(dialogContext).showSnackBar(
                             SnackBar(content: Text("Delete failed: $error"))

@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
+
 import 'package:roomease/features/calendar/data/calendar_repository.dart';
 import 'package:roomease/features/calendar/model/event.dart';
-
-import '../data/create_event_request.dart';
 
 enum ViewState { loading, ready, error }
 
@@ -31,15 +30,6 @@ class CalendarNotifier extends ChangeNotifier {
   }
 
   Future<void> reload() => _load();
-  //
-  // Future<void> addEvent(CreateEventRequest request) async {
-  //   try {
-  //     await repository.addEvent(request);
-  //     await _load();
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
 
   Future<void> deleteEvent(String eventId) async {
     try {

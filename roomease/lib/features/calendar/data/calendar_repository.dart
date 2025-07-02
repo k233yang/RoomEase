@@ -1,5 +1,5 @@
-
 import 'package:firebase_database/firebase_database.dart';
+
 import 'package:roomease/features/calendar/data/create_event_request.dart';
 import 'package:roomease/features/calendar/model/event.dart';
 
@@ -51,22 +51,6 @@ class CalendarRepository {
       request.createdByUserId);
 
     await newRef.set(newEvent.toJson());
-
-    // eventsRef.update({
-    //   "id": event.id,
-    //   "name": event.name,
-    //   "details": event.details,
-    //   "startTime": event.startTime,
-    //   "endTime": event.endTime,
-    //   "dateCreated": event.dateCreated,
-    //   "type": event.type,
-    //   "createdByUserId": event.createdByUserId,
-    // }).then((value) {
-    //   print("Successfully added event!");
-    // }).catchError((value) {
-    //   print(value);
-    //   throw Exception('Could not add event');
-    // });
   }
 
   Future<void> deleteCalendarEvent(String eventId) async {

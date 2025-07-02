@@ -1,10 +1,10 @@
 class CreateEventRequest {
-  final String name; // eventName
+  final String name;
   final String details;
-  final String startTime; // from
-  final String endTime; // to
+  final String startTime;
+  final String endTime;
   final String dateCreated;
-  final String type; // decides background colour
+  final String type;
   final String createdByUserId;
 
   CreateEventRequest({
@@ -15,5 +15,5 @@ class CreateEventRequest {
     required this.dateCreated,
     required this.type,
     required this.createdByUserId,
-});
+  });
 }

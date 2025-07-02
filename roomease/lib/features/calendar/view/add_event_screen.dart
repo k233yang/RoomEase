@@ -1,16 +1,12 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+
 import 'package:roomease/features/calendar/data/calendar_repository.dart';
 import 'package:roomease/features/calendar/data/create_event_request.dart';
-
-import 'package:roomease/shared/repository/household_repository.dart';
 import 'package:roomease/shared/color_constants.dart';
+import 'package:roomease/shared/repository/household_repository.dart';
 import 'package:roomease/shared/repository/user_repository.dart';
-
-import '../model/event.dart';
-import '../viewmodel/calendar_notifier.dart';
 
 class AddEventScreen extends StatefulWidget {
   const AddEventScreen({super.key});
@@ -19,7 +15,12 @@ class AddEventScreen extends StatefulWidget {
   State<AddEventScreen> createState() => _AddEventScreen();
 }
 
-const List<String> typeList = <String>["Common Area Reservation", "Location Status", "Quiet Time Request", "Other"];
+const List<String> typeList = <String>[
+  "Common Area Reservation",
+  "Location Status",
+  "Quiet Time Request",
+  "Other"
+];
 
 class _AddEventScreen extends State<AddEventScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -67,8 +68,6 @@ class _AddEventScreen extends State<AddEventScreen> {
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: "Add details",
-                          //fillColor: ColorConstants.lighterGray,
-                          //filled: true,
                         ),
                         keyboardType: TextInputType.multiline,
                         minLines: 5,
@@ -239,27 +238,6 @@ class _AddEventScreen extends State<AddEventScreen> {
                             );
                             Navigator.pop(context, false);
                           });
-                          // if (_formKey.currentState!.validate()) {
-                          //   try {
-                          //     calendarVm.addEvent(
-                          //       CreateEventRequest(
-                          //           name: nameController.text,
-                          //           details: detailsController.text,
-                          //           startTime: startTimeInput.toString(),
-                          //           endTime: endTimeInput.toString(),
-                          //           dateCreated: DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
-                          //           type: type,
-                          //           createdByUserId: CurrentUser.getCurrentUserId()
-                          //       )
-                          //     );
-                          //     // Navigator.pop(context);
-                          //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          //         content: Text('Event successfully added!')));
-                          //   } catch (e) {
-                          //     print('Failed to add event: $e');
-                          //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add event.')));
-                          //   }
-                          // }
                         },
                         child: const Text('Submit'),
                       )
