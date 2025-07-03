@@ -17,11 +17,13 @@ class CalendarScreen extends StatelessWidget {
       ),
       body: CalendarBody(),
       floatingActionButton: _buildAddEventButton( () {
-        Navigator.pushNamed(context, "/addEvent").then((addSuccessful) {
-          if (addSuccessful == true) {
-            context.read<CalendarNotifier>().reload();
-          }
-        });
+        Navigator.pushNamed(context, "/addEvent"
+        // Navigator.pushNamed(context, "/addEvent").then((addSuccessful) {
+        //   if (addSuccessful == true) {
+        //     context.read<CalendarNotifier>().reload();
+        //   }
+        // }
+        );
       }),
     );
   }

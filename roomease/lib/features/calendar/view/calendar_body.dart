@@ -19,11 +19,11 @@ class CalendarBody extends StatelessWidget {
     final viewModel = context.watch<CalendarNotifier>();
 
     switch (viewModel.state) {
-      case ViewState.loading:
+      case CalendarViewState.loading:
         return _buildLoading();
-      case ViewState.ready:
+      case CalendarViewState.ready:
         return _buildCalendar(viewModel.events, context);
-      case ViewState.error:
+      case CalendarViewState.error:
         return _buildError(viewModel.error);
     }
   }
@@ -70,8 +70,6 @@ class CalendarBody extends StatelessWidget {
   }
 
   void _showEventDialog(BuildContext context, Event appointment) {
-    final calendarVm = context.read<CalendarNotifier>();
-
     showDialog(
       context: context,
       builder: (_) =>
@@ -112,17 +110,18 @@ class CalendarBody extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        calendarVm.deleteEvent(appointment.id).then((_) {
+                        context.read<CalendarNotifier>().deleteCalendarEvent(appointment.id).then((_) {
+                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                              SnackBar(content: Text("Event successfully deleted!"))
+                          );
                           Navigator.pop(dialogContext);
-                          calendarVm.reload();
                         }).catchError((error) {
                           ScaffoldMessenger.of(dialogContext).showSnackBar(
-                            SnackBar(content: Text("Delete failed: $error"))
+                            SnackBar(content: Text("Failed to delete event: $error"))
                           );
                         });
                       },
-                      child: const Text(
-                          "DELETE", style: TextStyle(color: Colors.red)),
+                      child: const Text("DELETE", style: TextStyle(color: Colors.red)),
                     ),
                   ],
                 );

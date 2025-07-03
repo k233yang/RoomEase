@@ -10,10 +10,9 @@ class CalendarRepository {
   CalendarRepository(this._databaseInstance, this._householdId);
 
   Future<List<Event>> fetchEvents() async {
-    final eventsListRef =
-    _databaseInstance.ref("households/$_householdId/events");
-    final event = await eventsListRef.once();
-    final eventsJson = event.snapshot.children;
+    final eventsRef = _databaseInstance.ref("households/$_householdId/events");
+    final snapshot = await eventsRef.get();
+    final eventsJson = snapshot.children;
 
     List<Event> eventsList = <Event>[];
 
@@ -32,12 +31,10 @@ class CalendarRepository {
   }
 
   Future<void> addEvent(CreateEventRequest request) async {
-    final eventsRef = _databaseInstance.ref(
-        "households/$_householdId/events");
-    final newRef = eventsRef.push();
+    final newRef = _databaseInstance.ref("households/$_householdId/events").push();
     final newId = newRef.key;
     if (newId == null) {
-      throw Exception('Could not generate event key');
+      throw Exception("Could not generate new event key");
     }
 
     final newEvent = Event(
@@ -53,8 +50,8 @@ class CalendarRepository {
     await newRef.set(newEvent.toJson());
   }
 
-  Future<void> deleteCalendarEvent(String eventId) async {
-    await _databaseInstance.ref("households/$_householdId/events/$eventId")
-        .remove();
+  Future<void> deleteEvent(String eventId) async {
+    final eventsRef = _databaseInstance.ref("households/$_householdId/events/$eventId");
+    await eventsRef.remove();
   }
 }

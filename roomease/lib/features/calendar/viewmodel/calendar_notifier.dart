@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:roomease/features/calendar/data/calendar_repository.dart';
+import 'package:roomease/features/calendar/data/create_event_request.dart';
 import 'package:roomease/features/calendar/model/event.dart';
 
-enum ViewState { loading, ready, error }
+enum CalendarViewState { loading, ready, error }
 
 class CalendarNotifier extends ChangeNotifier {
   final CalendarRepository repository;
-  ViewState state = ViewState.loading;
+  CalendarViewState state = CalendarViewState.loading;
   List<Event> events = [];
   Object? error;
 
@@ -16,24 +17,33 @@ class CalendarNotifier extends ChangeNotifier {
   }
 
   Future<void> _load() async {
-    state = ViewState.loading;
+    state = CalendarViewState.loading;
     notifyListeners();
 
     try {
       events = await repository.fetchEvents();
-      state = ViewState.ready;
+      state = CalendarViewState.ready;
     } catch (e) {
       error = e;
-      state = ViewState.error;
+      state = CalendarViewState.error;
     }
     notifyListeners();
   }
 
   Future<void> reload() => _load();
 
-  Future<void> deleteEvent(String eventId) async {
+  Future<void> addCalendarEvent(CreateEventRequest request) async {
     try {
-      await repository.deleteCalendarEvent(eventId);
+      await repository.addEvent(request);
+      await _load();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteCalendarEvent(String eventId) async {
+    try {
+      await repository.deleteEvent(eventId);
       await _load();
     } catch (e) {
       rethrow;

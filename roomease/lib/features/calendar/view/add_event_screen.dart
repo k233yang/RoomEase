@@ -1,19 +1,11 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import 'package:roomease/features/calendar/data/calendar_repository.dart';
-import 'package:roomease/features/calendar/data/create_event_request.dart';
+import 'package:roomease/features/calendar/viewmodel/add_event_notifier.dart';
 import 'package:roomease/shared/color_constants.dart';
 import 'package:roomease/shared/repository/household_repository.dart';
-import 'package:roomease/shared/repository/user_repository.dart';
-
-class AddEventScreen extends StatefulWidget {
-  const AddEventScreen({super.key});
-
-  @override
-  State<AddEventScreen> createState() => _AddEventScreen();
-}
 
 const List<String> typeList = <String>[
   "Common Area Reservation",
@@ -22,229 +14,120 @@ const List<String> typeList = <String>[
   "Other"
 ];
 
-class _AddEventScreen extends State<AddEventScreen> {
-  final _formKey = GlobalKey<FormState>();
-  TextEditingController nameController = TextEditingController();
-  TextEditingController detailsController = TextEditingController();
-  TextEditingController startTimeController = TextEditingController();
-  TextEditingController endTimeController = TextEditingController();
-  late DateTime startTimeInput;
-  late DateTime endTimeInput;
-
-  String type = typeList.first;
+class AddEventScreen extends StatelessWidget {
+  const AddEventScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final householdId = CurrentHousehold.getCurrentHouseholdId();
+    final repository = CalendarRepository(FirebaseDatabase.instance, householdId);
+
+    return ChangeNotifierProvider(
+      create: (_) => AddEventNotifier(repository),
+      child: _AddEventForm(),
+    );
+  }
+}
+
+class _AddEventForm extends StatelessWidget {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<AddEventNotifier>();
+
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Add an Event'),
+          title: const Text("Add an Event"),
           backgroundColor: ColorConstants.lightPurple,
         ),
         resizeToAvoidBottomInset: true,
         body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
             child: Form(
                 key: _formKey,
                 child: Column(children: [
-                  Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 16),
-                      child: TextFormField(
-                        controller: nameController,
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Add title"),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a title for the event';
-                          }
-                          return null;
-                        },
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 16),
-                      child: TextFormField(
-                        controller: detailsController,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: "Add details",
-                        ),
-                        keyboardType: TextInputType.multiline,
-                        minLines: 5,
-                        maxLines: 5,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter details for the event';
-                          }
-                          return null;
-                        },
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 16),
-                      child: TextFormField(
-                        controller: startTimeController,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: "Start time",
-                        ),
-                        readOnly: true,
-                        onTap: () async {
-                          await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(3000))
-                              .then((startDate) {
-                            if (startDate != null) {
-                              showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay.now(),
-                              ).then((startTime) {
-                                if (startTime != null) {
-                                  startTimeInput = DateTime(
-                                  startDate.year,
-                                    startDate.month,
-                                    startDate.day,
-                                    startTime.hour,
-                                    startTime.minute,
-                                  );
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: "Title"),
+                    onChanged: viewModel.setTitle,
+                    validator: (v) => (v?.isEmpty ?? true) ? "Enter title" : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: "Details"),
+                    onChanged: viewModel.setDetails,
+                    validator: (v) => (v?.isEmpty ?? true) ? "Enter details" : null,
+                  ),
+                  const SizedBox(height: 12),
 
-                                  String formattedDateTime =
-                                  DateFormat('yyyy-MM-dd')
-                                      .add_jm()
-                                      .format(startTimeInput);
-                                  setState(() {
-                                    startTimeController.text =
-                                        formattedDateTime; //set output date to TextField value.
-                                  });
-                                }
-                              });
-                            }
-                          });
+                  TextFormField(
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: "Start Time",
+                      hintText: viewModel.startTime != null ? viewModel.format(viewModel.startTime!) : "",
+                    ),
+                    onTap: () => viewModel.pickStartTime(context),
+                    validator: (_) => viewModel.startTime == null ? "Please select a start time" : null,
+                  ),
+                  const SizedBox(height: 12),
+
+                  TextFormField(
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: "End Time",
+                      hintText: viewModel.endTime != null ? viewModel.format(viewModel.endTime!) : "",
+                    ),
+                    onTap: () => viewModel.pickEndTime(context),
+                    validator: (_) => viewModel.endTime == null ? "Please select an end time" : null,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                      value: viewModel.type,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: "Event Type",
+                        hintText: "Select an event type",
+                      ),
+                      items: typeList
+                          .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                          .toList(),
+                    onChanged: (value) {
+                        if (value != null) viewModel.setType(value);
                         },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a start time for the event';
-                          }
-                          return null;
-                        },
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 16),
-                      child: TextFormField(
-                        controller: endTimeController,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: "End time",
-                        ),
-                        readOnly: true,
-                        onTap: () async {
-                          await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(3000))
-                              .then((endDate) {
-                            if (endDate != null) {
-                              showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay.now(),
-                              ).then((endTime) {
-                                if (endTime != null) {
-                                  endTimeInput = DateTime(
-                                    endDate.year,
-                                    endDate.month,
-                                    endDate.day,
-                                    endTime.hour,
-                                    endTime.minute,
-                                  );
-                                  String formattedDateTime =
-                                  DateFormat('yyyy-MM-dd')
-                                      .add_jm()
-                                      .format(endTimeInput);
-                                  setState(() {
-                                    endTimeController.text =
-                                        formattedDateTime; //set output date to TextField value.
-                                  });
-                                }
-                              });
-                            }
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter an end time for the event';
-                          } else if (endTimeInput.isBefore(startTimeInput)) {
-                            return "End time must be later than the start time";
-                          }
-                          return null;
-                        },
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 16),
-                      child: DropdownButtonFormField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: "Select an event type",
-                          labelText: "Event type",
-                        ),
-                        onChanged: (String? typeValue) {
-                          setState(() {
-                            type = typeValue!;
-                          });
-                        },
-                        items: typeList.map((String val) {
-                          return DropdownMenuItem(
-                            value: val,
-                            child: Text(val.toString()),
-                          );
-                        }).toList(),
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Please select an event type';
-                          }
-                          return null;
-                        },
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 16),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final repository = CalendarRepository(
-                              FirebaseDatabase.instance,
-                              CurrentHousehold.getCurrentHouseholdId()
-                          );
-                          final request = CreateEventRequest(
-                              name: nameController.text,
-                              details: detailsController.text,
-                              startTime: startTimeInput.toString(),
-                              endTime: endTimeInput.toString(),
-                              dateCreated: DateFormat('yyyy-MM-dd hh:mm:ss a').format(DateTime.now()),
-                              type: type,
-                              createdByUserId: CurrentUser.getCurrentUserId()
-                          );
-                          repository.addEvent(request).then((_) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Event successfully added!")),
-                            );
+                        validator: (_) => viewModel.type.isEmpty ? "Please select a type" : null,
+                  ),
+                  const SizedBox(height: 24),
+
+                  if (viewModel.state == AddEventState.error && viewModel.errorMessage != null) ... [
+                    Text(
+                      viewModel.errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  ElevatedButton(
+                    onPressed: viewModel.state == AddEventState.submitting ? null: () {
+                      if (_formKey.currentState!.validate()) {
+                        viewModel.submit(context).then((success) {
+                          if (success) {
                             Navigator.pop(context, true);
-                          }).catchError((e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Failed to add event: $e")),
-                            );
-                            Navigator.pop(context, false);
-                          });
-                        },
-                        child: const Text('Submit'),
-                      )
-                  )
-                ])
-            )
-        )
+                          }
+                        });
+                      }
+                    },
+                    child: viewModel.state == AddEventState.submitting ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    ) : const Text('Submit'),
+                  ),
+                ],
+                ),
+            ),
+        ),
     );
   }
 }
