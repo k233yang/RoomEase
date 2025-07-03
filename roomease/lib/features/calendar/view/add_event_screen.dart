@@ -60,12 +60,14 @@ class _AddEventForm extends StatelessWidget {
         child: Form(
           key: _formKey,
           child: Column(children: [
+
             TextFormField(
               decoration: const InputDecoration(labelText: "Title"),
               onChanged: viewModel.setTitle,
               validator: (v) => (v?.isEmpty ?? true) ? "Please enter a title" : null,
             ),
             const SizedBox(height: 12),
+
             TextFormField(
               decoration: const InputDecoration(labelText: "Details"),
               onChanged: viewModel.setDetails,
@@ -118,6 +120,7 @@ class _AddEventForm extends StatelessWidget {
               ),
               const SizedBox(height: 12),
             ],
+
             ElevatedButton(
               onPressed: viewModel.state == AddEventState.submitting ? null: () {
                 if (_formKey.currentState!.validate()) {
