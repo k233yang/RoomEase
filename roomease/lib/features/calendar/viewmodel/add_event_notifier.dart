@@ -33,7 +33,6 @@ class AddEventNotifier extends ChangeNotifier {
 
   void setType(String t) {
     type = t;
-    notifyListeners();
   }
 
   Future<void> pickStartTime(BuildContext context) async {
@@ -51,13 +50,7 @@ class AddEventNotifier extends ChangeNotifier {
       ).then((time) {
         if (time == null) return;
 
-        startTime = DateTime(
-            date.year,
-            date.month,
-            date.day,
-            time.hour,
-            time.minute
-        );
+        startTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
         notifyListeners();
       });
     });
@@ -89,12 +82,14 @@ class AddEventNotifier extends ChangeNotifier {
   Future<bool> submit(BuildContext context) async {
     if (title.isEmpty || details.isEmpty || startTime == null ||
         endTime == null) {
+      state = AddEventState.error;
       errorMessage = "Please fill out all fields";
       notifyListeners();
       return false;
     }
     if (endTime!.isBefore(startTime!)) {
-      errorMessage = "End must be after start";
+      state = AddEventState.error;
+      errorMessage = "The event's start time must be before the end time";
       notifyListeners();
       return false;
     }
@@ -112,16 +107,18 @@ class AddEventNotifier extends ChangeNotifier {
       createdByUserId: CurrentUser.getCurrentUserId(),
     );
 
-    final future = context.read<CalendarNotifier>().addCalendarEvent(request).then((_) {
-      state = AddEventState.success;
-      notifyListeners();
-      return true;
-    }).catchError((error) {
-      state = AddEventState.error;
-      errorMessage = error.toString();
-      notifyListeners();
-      return false;
-    });
+    final future = context.read<CalendarNotifier>().addCalendarEvent(request)
+        .then((_) {
+          state = AddEventState.success;
+          notifyListeners();
+          return true;
+        })
+        .catchError((error) {
+          state = AddEventState.error;
+          errorMessage = error.toString();
+          notifyListeners();
+          return false;
+        });
 
     return future;
   }
