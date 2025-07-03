@@ -80,13 +80,13 @@ class AddEventNotifier extends ChangeNotifier {
   String format(DateTime dt) => DateFormat("yyyy-MM-dd hh:mm a").format(dt);
 
   Future<bool> submit(BuildContext context) async {
-    if (title.isEmpty || details.isEmpty || startTime == null ||
-        endTime == null) {
-      state = AddEventState.error;
-      errorMessage = "Please fill out all fields";
-      notifyListeners();
-      return false;
-    }
+    // if (title.isEmpty || details.isEmpty || startTime == null ||
+    //     endTime == null) {
+    //   state = AddEventState.error;
+    //   errorMessage = "Please fill out all fields";
+    //   notifyListeners();
+    //   return false;
+    // }
     if (endTime!.isBefore(startTime!)) {
       state = AddEventState.error;
       errorMessage = "The event's start time must be before the end time";

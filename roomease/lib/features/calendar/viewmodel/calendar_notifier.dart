@@ -30,8 +30,6 @@ class CalendarNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> reload() => _load();
-
   Future<void> addCalendarEvent(CreateEventRequest request) async {
     try {
       await repository.addEvent(request);

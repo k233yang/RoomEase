@@ -28,7 +28,6 @@ class CalendarBody extends StatelessWidget {
     }
   }
 
-
   Widget _buildLoading() =>
       Center(
         child: Column(

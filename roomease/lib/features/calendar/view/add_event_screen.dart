@@ -6,7 +6,7 @@ import 'package:roomease/features/calendar/data/calendar_repository.dart';
 import 'package:roomease/features/calendar/viewmodel/add_event_notifier.dart';
 import 'package:roomease/shared/color_constants.dart';
 import 'package:roomease/shared/repository/household_repository.dart';
-// TODO: When i add an event and put in a start time, if i select an end time the preview for the start time disappears. works fine though.
+
 const List<String> typeList = <String>[
   "Common Area Reservation",
   "Location Status",

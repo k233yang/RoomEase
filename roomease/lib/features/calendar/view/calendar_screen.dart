@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'package:roomease/features/calendar/view/calendar_body.dart';
-import 'package:roomease/features/calendar/viewmodel/calendar_notifier.dart';
 import 'package:roomease/shared/color_constants.dart';
 
 class CalendarScreen extends StatelessWidget {
@@ -17,13 +15,7 @@ class CalendarScreen extends StatelessWidget {
       ),
       body: CalendarBody(),
       floatingActionButton: _buildAddEventButton( () {
-        Navigator.pushNamed(context, "/addEvent"
-        // Navigator.pushNamed(context, "/addEvent").then((addSuccessful) {
-        //   if (addSuccessful == true) {
-        //     context.read<CalendarNotifier>().reload();
-        //   }
-        // }
-        );
+        Navigator.pushNamed(context, "/addEvent");
       }),
     );
   }
